@@ -1,391 +1,188 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import IssueForm from "./components/IssueForm";
+import IssueTable from "./components/IssueTable";
+import SimpleMap from "./components/SimpleMap";
+import { categories, statuses } from "./data";
 import "./App.css";
 
-const categories = ["road", "water", "electricity", "traffic", "environment", "other"];
-const statuses = ["pending", "open", "in_progress", "resolved", "rejected"];
+const emptyForm = {
+  title: "",
+  description: "",
+  category: "Road",
+  status: "Pending",
+  reporter: "",
+  lat: 39.9255,
+  lng: 32.8663,
+};
 
-const initialIssues = [
+const exampleIssues = [
   {
-    id: crypto.randomUUID(),
-    title: "Broken road surface",
-    description: "Deep pothole near the bus stop needs urgent repair.",
-    category: "road",
-    status: "open",
+    id: 1,
+    title: "Broken road",
+    description: "There is a large hole near the bus stop.",
+    category: "Road",
+    status: "Pending",
+    reporter: "Ali",
     lat: 39.9321,
     lng: 32.8597,
-    reporter: "Ayse Demir",
-    createdAt: new Date().toISOString(),
   },
   {
-    id: crypto.randomUUID(),
-    title: "Street light outage",
-    description: "Three lights are not working on the main pedestrian route.",
-    category: "electricity",
-    status: "pending",
+    id: 2,
+    title: "Street light problem",
+    description: "The street light has not worked for two days.",
+    category: "Electricity",
+    status: "In Progress",
+    reporter: "Zeynep",
     lat: 39.9182,
     lng: 32.8368,
-    reporter: "Mert Kaya",
-    createdAt: new Date().toISOString(),
   },
 ];
 
-const blankForm = {
-  title: "",
-  description: "",
-  category: "road",
-  status: "pending",
-  lat: 39.9255,
-  lng: 32.8663,
-  reporter: "",
-};
+function loadIssues() {
+  const savedIssues = localStorage.getItem("geoissue_student_issues");
 
-function formatLabel(value) {
-  return value.replace("_", " ");
-}
-
-function getStoredIssues() {
   try {
-    const saved = localStorage.getItem("geoissue_issues");
-    return saved ? JSON.parse(saved) : initialIssues;
+    return savedIssues ? JSON.parse(savedIssues) : exampleIssues;
   } catch {
-    return initialIssues;
+    return exampleIssues;
   }
 }
 
 function App() {
-  const [issues, setIssues] = useState(getStoredIssues);
-  const [form, setForm] = useState(blankForm);
+  const [issues, setIssues] = useState(loadIssues);
+  const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
-  const [filters, setFilters] = useState({
-    category: "all",
-    status: "all",
-    search: "",
-  });
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All");
 
-  const visibleIssues = useMemo(() => {
-    const query = filters.search.trim().toLowerCase();
+  useEffect(() => {
+    localStorage.setItem("geoissue_student_issues", JSON.stringify(issues));
+  }, [issues]);
 
+  const filteredIssues = useMemo(() => {
     return issues.filter((issue) => {
-      const matchesCategory = filters.category === "all" || issue.category === filters.category;
-      const matchesStatus = filters.status === "all" || issue.status === filters.status;
-      const matchesSearch =
-        !query ||
-        issue.title.toLowerCase().includes(query) ||
-        issue.description.toLowerCase().includes(query) ||
-        issue.reporter.toLowerCase().includes(query);
+      const text = `${issue.title} ${issue.description} ${issue.reporter}`.toLowerCase();
+      const matchesSearch = text.includes(search.toLowerCase());
+      const matchesCategory = categoryFilter === "All" || issue.category === categoryFilter;
 
-      return matchesCategory && matchesStatus && matchesSearch;
+      return matchesSearch && matchesCategory;
     });
-  }, [filters, issues]);
+  }, [issues, search, categoryFilter]);
 
-  function saveIssues(nextIssues) {
-    setIssues(nextIssues);
-    localStorage.setItem("geoissue_issues", JSON.stringify(nextIssues));
+  function updateForm(name, value) {
+    setForm({ ...form, [name]: value });
   }
 
-  function updateForm(field, value) {
-    setForm((current) => ({ ...current, [field]: value }));
+  function selectLocation(event) {
+    const map = event.currentTarget.getBoundingClientRect();
+    const horizontalPosition = (event.clientX - map.left) / map.width;
+    const verticalPosition = (event.clientY - map.top) / map.height;
+
+    setForm({
+      ...form,
+      lng: Number((32.72 + horizontalPosition * 0.32).toFixed(5)),
+      lat: Number((40.02 - verticalPosition * 0.2).toFixed(5)),
+    });
   }
 
-  function handleMapPick(event) {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) / bounds.width;
-    const y = (event.clientY - bounds.top) / bounds.height;
-
-    updateForm("lng", Number((32.72 + x * 0.32).toFixed(5)));
-    updateForm("lat", Number((40.02 - y * 0.2).toFixed(5)));
-  }
-
-  function handleSubmit(event) {
+  function saveIssue(event) {
     event.preventDefault();
 
-    const payload = {
-      ...form,
-      title: form.title.trim(),
-      description: form.description.trim(),
-      reporter: form.reporter.trim() || "Anonymous reporter",
-      updatedAt: new Date().toISOString(),
-    };
-
-    if (!payload.title) {
+    if (!form.title.trim() || !form.description.trim()) {
+      alert("Please enter a title and description.");
       return;
     }
 
-    if (editingId) {
-      saveIssues(issues.map((issue) => (issue.id === editingId ? { ...issue, ...payload } : issue)));
+    if (editingId !== null) {
+      setIssues(
+        issues.map((issue) =>
+          issue.id === editingId ? { ...form, id: editingId } : issue,
+        ),
+      );
     } else {
-      saveIssues([
-        {
-          ...payload,
-          id: crypto.randomUUID(),
-          createdAt: new Date().toISOString(),
-        },
-        ...issues,
-      ]);
+      setIssues([...issues, { ...form, id: Date.now() }]);
     }
 
-    setEditingId(null);
-    setForm(blankForm);
+    cancelEdit();
   }
 
-  function editIssue(issue) {
+  function startEdit(issue) {
+    setForm(issue);
     setEditingId(issue.id);
-    setForm({
-      title: issue.title,
-      description: issue.description,
-      category: issue.category,
-      status: issue.status,
-      lat: issue.lat,
-      lng: issue.lng,
-      reporter: issue.reporter,
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function removeIssue(id) {
-    saveIssues(issues.filter((issue) => issue.id !== id));
-    if (editingId === id) {
-      setEditingId(null);
-      setForm(blankForm);
+    const shouldRemove = window.confirm("Are you sure you want to remove this issue?");
+
+    if (shouldRemove) {
+      setIssues(issues.filter((issue) => issue.id !== id));
+
+      if (editingId === id) {
+        cancelEdit();
+      }
     }
   }
 
-  function updateStatus(id, status) {
-    saveIssues(
-      issues.map((issue) =>
-        issue.id === id ? { ...issue, status, updatedAt: new Date().toISOString() } : issue,
-      ),
-    );
-  }
-
   function cancelEdit() {
+    setForm(emptyForm);
     setEditingId(null);
-    setForm(blankForm);
   }
 
   return (
-    <div className="app-shell">
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">ANKAGEO</p>
-          <h1>GeoIssue Management</h1>
-        </div>
-        <div className="summary-strip" aria-label="Issue summary">
-          <span>{issues.length} total</span>
-          <span>{issues.filter((issue) => issue.status === "pending").length} pending</span>
-          <span>{issues.filter((issue) => issue.status === "resolved").length} resolved</span>
+    <div className="page">
+      <header className="site-header">
+        <div className="container">
+          <h1>GeoIssue</h1>
+          <p>City problem reporting system</p>
         </div>
       </header>
 
-      <main className="workspace">
-        <section className="map-panel" aria-label="Issue map and coordinate picker">
-          <div className="panel-heading">
-            <div>
-              <h2>Map</h2>
-              <p>Click the map area to place the selected issue pin.</p>
-            </div>
-            <span className="coordinate-pill">
-              {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
-            </span>
+      <main className="container">
+        <div className="top-section">
+          <IssueForm
+            form={form}
+            editingId={editingId}
+            categories={categories}
+            statuses={statuses}
+            onChange={updateForm}
+            onSubmit={saveIssue}
+            onCancel={cancelEdit}
+          />
+          <SimpleMap issues={filteredIssues} form={form} onSelect={selectLocation} />
+        </div>
+
+        <section className="issues-section">
+          <div className="section-title">
+            <h2>Reported Issues</h2>
+            <span>Total: {filteredIssues.length}</span>
           </div>
 
-          <button className="map-canvas" type="button" onClick={handleMapPick}>
-            <span className="district-label center">Cankaya</span>
-            <span className="district-label north">Altindag</span>
-            <span className="district-label west">Yenimahalle</span>
-            {visibleIssues.map((issue) => {
-              const left = ((issue.lng - 32.72) / 0.32) * 100;
-              const top = ((40.02 - issue.lat) / 0.2) * 100;
-
-              return (
-                <span
-                  className={`map-marker status-${issue.status}`}
-                  key={issue.id}
-                  style={{ left: `${left}%`, top: `${top}%` }}
-                  title={issue.title}
-                />
-              );
-            })}
-            <span
-              className="map-marker draft"
-              style={{
-                left: `${((form.lng - 32.72) / 0.32) * 100}%`,
-                top: `${((40.02 - form.lat) / 0.2) * 100}%`,
-              }}
-              title="Selected location"
-            />
-          </button>
-        </section>
-
-        <section className="form-panel" aria-label="Issue form">
-          <div className="panel-heading">
-            <div>
-              <h2>{editingId ? "Edit Issue" : "Add Issue"}</h2>
-              <p>{editingId ? "Update the selected report." : "Create a new geo-located report."}</p>
-            </div>
-          </div>
-
-          <form className="issue-form" onSubmit={handleSubmit}>
-            <label>
-              Title
-              <input
-                value={form.title}
-                onChange={(event) => updateForm("title", event.target.value)}
-                placeholder="Example: Flooded underpass"
-                required
-              />
-            </label>
-
-            <label>
-              Description
-              <textarea
-                value={form.description}
-                onChange={(event) => updateForm("description", event.target.value)}
-                placeholder="Add the details people need to understand the issue."
-                rows="4"
-              />
-            </label>
-
-            <div className="field-grid">
-              <label>
-                Category
-                <select value={form.category} onChange={(event) => updateForm("category", event.target.value)}>
-                  {categories.map((category) => (
-                    <option value={category} key={category}>
-                      {formatLabel(category)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                Status
-                <select value={form.status} onChange={(event) => updateForm("status", event.target.value)}>
-                  {statuses.map((status) => (
-                    <option value={status} key={status}>
-                      {formatLabel(status)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-
-            <label>
-              Reporter
-              <input
-                value={form.reporter}
-                onChange={(event) => updateForm("reporter", event.target.value)}
-                placeholder="Name or department"
-              />
-            </label>
-
-            <div className="form-actions">
-              <button type="submit" className="primary-action">
-                {editingId ? "Save Changes" : "Add Issue"}
-              </button>
-              {editingId && (
-                <button type="button" className="secondary-action" onClick={cancelEdit}>
-                  Cancel
-                </button>
-              )}
-            </div>
-          </form>
-        </section>
-
-        <section className="list-panel" aria-label="Issue list">
           <div className="filters">
-            <select
-              aria-label="Filter by category"
-              value={filters.category}
-              onChange={(event) => setFilters((current) => ({ ...current, category: event.target.value }))}
-            >
-              <option value="all">All categories</option>
-              {categories.map((category) => (
-                <option value={category} key={category}>
-                  {formatLabel(category)}
-                </option>
-              ))}
-            </select>
-
-            <select
-              aria-label="Filter by status"
-              value={filters.status}
-              onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
-            >
-              <option value="all">All status</option>
-              {statuses.map((status) => (
-                <option value={status} key={status}>
-                  {formatLabel(status)}
-                </option>
-              ))}
-            </select>
-
             <input
-              aria-label="Search issues"
-              value={filters.search}
-              onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
-              placeholder="Search issues"
+              type="search"
+              placeholder="Search issue..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
             />
+            <select
+              value={categoryFilter}
+              onChange={(event) => setCategoryFilter(event.target.value)}
+            >
+              <option value="All">All categories</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
           </div>
 
-          <div className="issue-list">
-            {visibleIssues.map((issue) => (
-              <article className="issue-card" key={issue.id}>
-                <div className="issue-card-head">
-                  <div>
-                    <h3>{issue.title}</h3>
-                    <p>{issue.description || "No description added."}</p>
-                  </div>
-                  <span className={`status-badge status-${issue.status}`}>{formatLabel(issue.status)}</span>
-                </div>
-
-                <dl className="issue-meta">
-                  <div>
-                    <dt>Category</dt>
-                    <dd>{formatLabel(issue.category)}</dd>
-                  </div>
-                  <div>
-                    <dt>Location</dt>
-                    <dd>
-                      {issue.lat.toFixed(4)}, {issue.lng.toFixed(4)}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Reporter</dt>
-                    <dd>{issue.reporter}</dd>
-                  </div>
-                </dl>
-
-                <div className="card-actions">
-                  <select
-                    aria-label={`Update status for ${issue.title}`}
-                    value={issue.status}
-                    onChange={(event) => updateStatus(issue.id, event.target.value)}
-                  >
-                    {statuses.map((status) => (
-                      <option value={status} key={status}>
-                        {formatLabel(status)}
-                      </option>
-                    ))}
-                  </select>
-                  <button type="button" className="secondary-action" onClick={() => editIssue(issue)}>
-                    Edit
-                  </button>
-                  <button type="button" className="danger-action" onClick={() => removeIssue(issue.id)}>
-                    Remove
-                  </button>
-                </div>
-              </article>
-            ))}
-
-            {visibleIssues.length === 0 && (
-              <div className="empty-state">
-                <h3>No issues found</h3>
-                <p>Adjust filters or add a new issue from the form.</p>
-              </div>
-            )}
-          </div>
+          <IssueTable issues={filteredIssues} onEdit={startEdit} onRemove={removeIssue} />
         </section>
       </main>
+
+      <footer>GeoIssue Internship Project</footer>
     </div>
   );
 }
