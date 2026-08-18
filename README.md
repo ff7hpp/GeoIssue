@@ -1,2 +1,0 @@
-# ANKAGEO GeoIssue System
-
