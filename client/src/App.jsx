@@ -1,106 +1,158 @@
 import { useEffect, useMemo, useState } from "react";
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  updateProfile,
+} from "firebase/auth";
+import { LogOut, Moon, Plus, Sun } from "lucide-react";
+import { issueApi } from "./api";
+import AuthPage from "./components/AuthPage";
+import IssueMap from "./components/IssueMap";
+import IssueTable from "./components/IssueTable";
+import { auth } from "./firebase";
 import "./App.css";
 
-const API_URL = "http://localhost:5000/api/issues";
 const categories = ["Road", "Water", "Electricity", "Traffic", "Environment", "Other"];
 const statuses = ["Pending", "In Progress", "Resolved"];
-
 const emptyForm = {
   title: "",
   description: "",
   category: "Road",
-  reporter: "",
   latitude: 39.9207,
   longitude: 32.8541,
 };
 
-async function request(url, options = {}) {
-  const response = await fetch(url, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
-
-  if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new Error(data.message || "Something went wrong.");
-  }
-
-  return response.status === 204 ? null : response.json();
+function authMessage(error) {
+  const messages = {
+    "auth/email-already-in-use": "This email already has an account.",
+    "auth/invalid-credential": "Email or password is incorrect.",
+    "auth/operation-not-allowed": "Enable Email/Password in the Firebase Authentication console.",
+    "auth/too-many-requests": "Too many attempts. Please wait and try again.",
+  };
+  return messages[error.code] || error.message || "Authentication failed.";
 }
 
 function App() {
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem("geoissue-theme");
+    if (savedTheme) return savedTheme;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
   const [page, setPage] = useState("sign-in");
   const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState("");
   const [issues, setIssues] = useState([]);
+  const [issuesLoading, setIssuesLoading] = useState(true);
+  const [message, setMessage] = useState("");
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("geoissue-theme", theme);
+  }, [theme]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (account) => {
+      setUser(account);
+      setAuthLoading(false);
+      setPage((currentPage) => {
+        if (!account) return "sign-in";
+        return currentPage === "sign-in" || currentPage === "register" ? "reports" : currentPage;
+      });
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    async function loadIssues() {
+      try {
+        const data = await issueApi.list();
+        setIssues(data.issues);
+      } catch (error) {
+        setMessage(error.message);
+      } finally {
+        setIssuesLoading(false);
+      }
+    }
+
     loadIssues();
   }, []);
 
   const filteredIssues = useMemo(() => {
     return issues.filter((issue) => {
       const text = `${issue.title} ${issue.description} ${issue.reporter}`.toLowerCase();
-      const matchesSearch = text.includes(search.toLowerCase());
-      const matchesCategory = categoryFilter === "All" || issue.category === categoryFilter;
-      const matchesStatus = statusFilter === "All" || issue.status === statusFilter;
-
-      return matchesSearch && matchesCategory && matchesStatus;
+      return (
+        text.includes(search.toLowerCase()) &&
+        (categoryFilter === "All" || issue.category === categoryFilter) &&
+        (statusFilter === "All" || issue.status === statusFilter)
+      );
     });
   }, [issues, search, categoryFilter, statusFilter]);
 
-  async function loadIssues() {
+  async function handleAuthentication(account, mode) {
     try {
-      setLoading(true);
-      const data = await request(API_URL);
-      setIssues(data.issues);
+      setAuthBusy(true);
+      setAuthError("");
+
+      if (mode === "register") {
+        const credential = await createUserWithEmailAndPassword(auth, account.email, account.password);
+        await updateProfile(credential.user, { displayName: account.name });
+        await credential.user.reload();
+        setUser(auth.currentUser);
+      } else {
+        await signInWithEmailAndPassword(auth, account.email, account.password);
+      }
     } catch (error) {
-      setMessage(error.message);
+      setAuthError(authMessage(error));
     } finally {
-      setLoading(false);
+      setAuthBusy(false);
     }
   }
 
-  function updateForm(field, value) {
-    setForm({ ...form, [field]: value });
+  async function signOut() {
+    await firebaseSignOut(auth);
+    setForm(emptyForm);
+    setEditingId(null);
   }
 
-  function chooseLocation(event) {
-    const mapBounds = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - mapBounds.left) / mapBounds.width;
-    const y = (event.clientY - mapBounds.top) / mapBounds.height;
+  function updateForm(field, value) {
+    setForm((current) => ({ ...current, [field]: value }));
+  }
 
-    setForm({
-      ...form,
-      latitude: Number((40.01 - y * 0.16).toFixed(4)),
-      longitude: Number((32.78 + x * 0.16).toFixed(4)),
-    });
+  function chooseLocation(latitude, longitude) {
+    setForm((current) => ({
+      ...current,
+      latitude: Number(latitude.toFixed(5)),
+      longitude: Number(longitude.toFixed(5)),
+    }));
   }
 
   async function saveIssue(event) {
     event.preventDefault();
     setMessage("");
 
+    if (!form.title.trim() || !form.description.trim()) {
+      setMessage("Please enter a title and description.");
+      return;
+    }
+
     try {
-      const isEditing = editingId !== null;
-      const data = await request(isEditing ? `${API_URL}/${editingId}` : API_URL, {
-        method: isEditing ? "PUT" : "POST",
-        body: JSON.stringify({ ...form, reporter: form.reporter || user.name }),
-      });
+      const data = editingId === null
+        ? await issueApi.create(form)
+        : await issueApi.update(editingId, form);
 
-      setIssues((currentIssues) => {
-        if (isEditing) {
-          return currentIssues.map((issue) => (issue.id === data.issue.id ? data.issue : issue));
-        }
-
-        return [data.issue, ...currentIssues];
-      });
+      setIssues((current) => editingId === null
+        ? [data.issue, ...current]
+        : current.map((issue) => (issue.id === data.issue.id ? data.issue : issue)));
       cancelEdit();
     } catch (error) {
       setMessage(error.message);
@@ -112,7 +164,6 @@ function App() {
       title: issue.title,
       description: issue.description,
       category: issue.category,
-      reporter: issue.reporter,
       latitude: issue.latitude,
       longitude: issue.longitude,
     });
@@ -130,9 +181,8 @@ function App() {
     if (!window.confirm("Remove this report?")) return;
 
     try {
-      await request(`${API_URL}/${id}`, { method: "DELETE" });
-      setIssues((currentIssues) => currentIssues.filter((issue) => issue.id !== id));
-
+      await issueApi.remove(id);
+      setIssues((current) => current.filter((issue) => issue.id !== id));
       if (editingId === id) cancelEdit();
     } catch (error) {
       setMessage(error.message);
@@ -141,76 +191,48 @@ function App() {
 
   async function updateStatus(id, status) {
     try {
-      const data = await request(`${API_URL}/${id}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status }),
-      });
-      setIssues((currentIssues) =>
-        currentIssues.map((issue) => (issue.id === data.issue.id ? data.issue : issue)),
-      );
+      const data = await issueApi.updateStatus(id, status);
+      setIssues((current) => current.map((issue) => (issue.id === id ? data.issue : issue)));
     } catch (error) {
       setMessage(error.message);
     }
   }
 
-  function signIn(account) {
-    // Firebase Authentication will replace this temporary frontend-only session.
-    setUser(account);
-    setPage("reports");
-    setMessage("");
-  }
-
-  function signOut() {
-    setUser(null);
-    setPage("sign-in");
-    cancelEdit();
-  }
-
+  const userName = user?.displayName || user?.email?.split("@")[0] || "User";
   const totalIssues = issues.length;
   const pendingIssues = issues.filter((issue) => issue.status === "Pending").length;
   const resolvedIssues = issues.filter((issue) => issue.status === "Resolved").length;
+  const themeLabel = theme === "dark" ? "Use light mode" : "Use dark mode";
+
+  const themeButton = (
+    <button className="icon-button theme-toggle" type="button" onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")} aria-label={themeLabel} title={themeLabel}>
+      {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+    </button>
+  );
+
+  if (authLoading) {
+    return <div className="app-loading">Loading GeoIssue...</div>;
+  }
 
   return (
     <div className="app">
       <header className="topbar">
         <div className="topbar-inner">
-          <button className="brand" type="button" onClick={() => setPage(user ? "reports" : "sign-in")}>
-            GeoIssue
-          </button>
+          <button className="brand" type="button" onClick={() => setPage(user ? "reports" : "sign-in")}>GeoIssue</button>
 
           {user ? (
             <>
               <nav className="main-nav" aria-label="Main navigation">
-                <button
-                  className={page === "dashboard" ? "nav-link active" : "nav-link"}
-                  type="button"
-                  onClick={() => setPage("dashboard")}
-                >
-                  Dashboard
-                </button>
-                <button
-                  className={page === "reports" ? "nav-link active" : "nav-link"}
-                  type="button"
-                  onClick={() => setPage("reports")}
-                >
-                  Reports
-                </button>
+                <button className={page === "dashboard" ? "nav-link active" : "nav-link"} type="button" onClick={() => setPage("dashboard")}>Dashboard</button>
+                <button className={page === "reports" ? "nav-link active" : "nav-link"} type="button" onClick={() => setPage("reports")}>Reports</button>
               </nav>
-              <div className="account-area">
-                <span>{user.name}</span>
-                <button className="sign-out-button" type="button" onClick={signOut}>
-                  Sign out
-                </button>
-              </div>
+              <div className="account-area"><span>{userName}</span>{themeButton}<button className="sign-out-button" type="button" onClick={signOut}><LogOut size={16} />Sign out</button></div>
             </>
           ) : (
             <nav className="auth-nav">
-              <button className="nav-link" type="button" onClick={() => setPage("sign-in")}>
-                Sign in
-              </button>
-              <button className="header-register" type="button" onClick={() => setPage("register")}>
-                Create account
-              </button>
+              {themeButton}
+              <button className="nav-link" type="button" onClick={() => { setAuthError(""); setPage("sign-in"); }}>Sign in</button>
+              <button className="header-register" type="button" onClick={() => { setAuthError(""); setPage("register"); }}>Create account</button>
             </nav>
           )}
         </div>
@@ -219,15 +241,17 @@ function App() {
       <main className="page-content">
         {message && <p className="message" role="alert">{message}</p>}
 
-        {page === "sign-in" || page === "register" ? (
-          <AuthPage mode={page} onSubmit={signIn} onSwitch={setPage} />
+        {!user ? (
+          <AuthPage mode={page} onSubmit={handleAuthentication} onSwitch={(nextPage) => { setAuthError(""); setPage(nextPage); }} busy={authBusy} serverError={authError} />
         ) : page === "reports" ? (
           <ReportsPage
             form={form}
             editingId={editingId}
             issues={filteredIssues}
+            allIssues={issues}
             search={search}
             categoryFilter={categoryFilter}
+            currentUserId={user.uid}
             onChange={updateForm}
             onChooseLocation={chooseLocation}
             onSubmit={saveIssue}
@@ -236,7 +260,7 @@ function App() {
             onCategoryFilter={setCategoryFilter}
             onEdit={startEdit}
             onRemove={removeIssue}
-            loading={loading}
+            loading={issuesLoading}
           />
         ) : (
           <DashboardPage
@@ -247,6 +271,7 @@ function App() {
             search={search}
             categoryFilter={categoryFilter}
             statusFilter={statusFilter}
+            currentUserId={user.uid}
             onSearch={setSearch}
             onCategoryFilter={setCategoryFilter}
             onStatusFilter={setStatusFilter}
@@ -254,7 +279,7 @@ function App() {
             onEdit={startEdit}
             onRemove={removeIssue}
             onStatusChange={updateStatus}
-            loading={loading}
+            loading={issuesLoading}
           />
         )}
       </main>
@@ -264,184 +289,44 @@ function App() {
   );
 }
 
-function AuthPage({ mode, onSubmit, onSwitch }) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const isRegister = mode === "register";
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    const displayName = name.trim() || email.split("@")[0];
-
-    if ((isRegister && !name.trim()) || !email.includes("@") || password.length < 6) {
-      setError("Enter a valid email and a password with at least 6 characters.");
-      return;
-    }
-
-    onSubmit({ name: displayName, email });
-  }
-
-  return (
-    <section className="auth-layout">
-      <div className="auth-intro">
-        <p className="eyebrow">CITY ISSUE REPORTING</p>
-        <h1>Keep your city moving.</h1>
-        <p>Report local problems and follow their progress in one place.</p>
-      </div>
-      <form className="auth-card" onSubmit={handleSubmit}>
-        <h2>{isRegister ? "Create account" : "Welcome back"}</h2>
-        <p>{isRegister ? "Create an account to submit reports." : "Sign in to continue to GeoIssue."}</p>
-
-        {isRegister && (
-          <>
-            <label htmlFor="name">Full name</label>
-            <input id="name" value={name} onChange={(event) => setName(event.target.value)} />
-          </>
-        )}
-
-        <label htmlFor="email">Email</label>
-        <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
-
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-        />
-
-        {error && <p className="form-error">{error}</p>}
-        <button className="primary-button auth-submit" type="submit">
-          {isRegister ? "Create account" : "Sign in"}
-        </button>
-        <button className="auth-switch" type="button" onClick={() => onSwitch(isRegister ? "sign-in" : "register")}>
-          {isRegister ? "Already have an account? Sign in" : "Need an account? Create one"}
-        </button>
-      </form>
-    </section>
-  );
-}
-
-function ReportsPage({
-  form,
-  editingId,
-  issues,
-  search,
-  categoryFilter,
-  onChange,
-  onChooseLocation,
-  onSubmit,
-  onCancel,
-  onSearch,
-  onCategoryFilter,
-  onEdit,
-  onRemove,
-  loading,
-}) {
+function ReportsPage({ form, editingId, issues, allIssues, search, categoryFilter, currentUserId, onChange, onChooseLocation, onSubmit, onCancel, onSearch, onCategoryFilter, onEdit, onRemove, loading }) {
   return (
     <section>
-      <div className="page-heading">
-        <h1>Report a City Issue</h1>
-        <p>Log a civic problem for review.</p>
-      </div>
-
+      <div className="page-heading"><h1>Report a City Issue</h1><p>Log a civic problem for review.</p></div>
       <div className="report-layout">
         <section className="panel report-form-panel">
           <h2>{editingId !== null ? "Edit Report" : "Add New Issue"}</h2>
           <form onSubmit={onSubmit}>
             <label htmlFor="title">Title</label>
             <input id="title" value={form.title} onChange={(event) => onChange("title", event.target.value)} placeholder="E.g., Pothole on Main St" />
-
             <label htmlFor="description">Description</label>
             <textarea id="description" rows="5" value={form.description} onChange={(event) => onChange("description", event.target.value)} placeholder="Provide details about the issue..." />
-
-            <div className="two-fields">
-              <div>
-                <label htmlFor="category">Category</label>
-                <select id="category" value={form.category} onChange={(event) => onChange("category", event.target.value)}>
-                  {categories.map((category) => <option key={category} value={category}>{category}</option>)}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="reporter">Reporter Name</label>
-                <input id="reporter" value={form.reporter} onChange={(event) => onChange("reporter", event.target.value)} placeholder="Your name" />
-              </div>
-            </div>
-
+            <label htmlFor="category">Category</label>
+            <select id="category" value={form.category} onChange={(event) => onChange("category", event.target.value)}>{categories.map((category) => <option key={category} value={category}>{category}</option>)}</select>
             <label>Location Coordinates</label>
-            <div className="two-fields coordinates">
-              <input readOnly value={`Lat: ${form.latitude.toFixed(4)}`} />
-              <input readOnly value={`Lng: ${form.longitude.toFixed(4)}`} />
-            </div>
-
-            <div className="form-actions">
-              {editingId !== null && <button className="secondary-button" type="button" onClick={onCancel}>Cancel</button>}
-              <button className="primary-button" type="submit">{editingId !== null ? "Update Report" : "Submit Report"}</button>
-            </div>
+            <div className="two-fields coordinates"><input readOnly value={`Lat: ${form.latitude.toFixed(5)}`} /><input readOnly value={`Lng: ${form.longitude.toFixed(5)}`} /></div>
+            <div className="form-actions">{editingId !== null && <button className="secondary-button" type="button" onClick={onCancel}>Cancel</button>}<button className="primary-button" type="submit">{editingId !== null ? "Update Report" : "Submit Report"}</button></div>
           </form>
         </section>
-
-        <section className="panel location-panel">
-          <div className="panel-title-row"><h2>Select Location</h2><span>Click map to pin</span></div>
-          <button className="map" type="button" onClick={onChooseLocation}>
-            <span className="map-road road-one" />
-            <span className="map-road road-two" />
-            <span className="map-label">ANKARA</span>
-            <span className="map-pin" />
-            <span className="map-help">Click on the map to select a location.</span>
-          </button>
-        </section>
+        <IssueMap latitude={form.latitude} longitude={form.longitude} issues={allIssues} onPick={onChooseLocation} />
       </div>
 
       <section className="panel reports-panel">
-        <div className="panel-title-row table-title-row">
-          <h2>My Reports</h2>
-          <div className="filters">
-            <input type="search" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Search reports..." />
-            <select value={categoryFilter} onChange={(event) => onCategoryFilter(event.target.value)}>
-              <option value="All">All Categories</option>
-              {categories.map((category) => <option key={category} value={category}>{category}</option>)}
-            </select>
-          </div>
-        </div>
-        <IssueTable issues={issues} onEdit={onEdit} onRemove={onRemove} loading={loading} />
+        <div className="panel-title-row table-title-row"><h2>Community Reports</h2><div className="filters"><input type="search" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Search reports..." /><select value={categoryFilter} onChange={(event) => onCategoryFilter(event.target.value)}><option value="All">All Categories</option>{categories.map((category) => <option key={category} value={category}>{category}</option>)}</select></div></div>
+        <IssueTable issues={issues} currentUserId={currentUserId} onEdit={onEdit} onRemove={onRemove} loading={loading} />
       </section>
     </section>
   );
 }
 
-function DashboardPage({ total, pending, resolved, issues, search, categoryFilter, statusFilter, onSearch, onCategoryFilter, onStatusFilter, onCreate, onEdit, onRemove, onStatusChange, loading }) {
+function DashboardPage({ total, pending, resolved, issues, search, categoryFilter, statusFilter, currentUserId, onSearch, onCategoryFilter, onStatusFilter, onCreate, onEdit, onRemove, onStatusChange, loading }) {
   return (
     <section>
-      <div className="page-heading dashboard-heading">
-        <div><h1>System Overview</h1><p>Real-time status of reported civic issues.</p></div>
-        <button className="primary-button" type="button" onClick={onCreate}>Create Report</button>
-      </div>
-
-      <div className="stat-grid">
-        <StatCard label="Total Reports" value={total} type="total" />
-        <StatCard label="Pending" value={pending} type="pending" />
-        <StatCard label="Resolved" value={resolved} type="resolved" />
-      </div>
-
+      <div className="page-heading dashboard-heading"><div><h1>System Overview</h1><p>Real-time status of reported civic issues.</p></div><button className="primary-button" type="button" onClick={onCreate}><Plus size={17} />Create Report</button></div>
+      <div className="stat-grid"><StatCard label="Total Reports" value={total} type="total" /><StatCard label="Pending" value={pending} type="pending" /><StatCard label="Resolved" value={resolved} type="resolved" /></div>
       <section className="panel admin-panel">
-        <div className="panel-title-row table-title-row">
-          <h2>Recent Reports</h2>
-          <div className="filters admin-filters">
-            <input type="search" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Search issues..." />
-            <select value={categoryFilter} onChange={(event) => onCategoryFilter(event.target.value)}>
-              <option value="All">All Categories</option>
-              {categories.map((category) => <option key={category} value={category}>{category}</option>)}
-            </select>
-            <select value={statusFilter} onChange={(event) => onStatusFilter(event.target.value)}>
-              <option value="All">All Statuses</option>
-              {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
-            </select>
-          </div>
-        </div>
-        <IssueTable admin issues={issues} onEdit={onEdit} onRemove={onRemove} onStatusChange={onStatusChange} loading={loading} />
+        <div className="panel-title-row table-title-row"><h2>Recent Reports</h2><div className="filters admin-filters"><input type="search" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Search issues..." /><select value={categoryFilter} onChange={(event) => onCategoryFilter(event.target.value)}><option value="All">All Categories</option>{categories.map((category) => <option key={category} value={category}>{category}</option>)}</select><select value={statusFilter} onChange={(event) => onStatusFilter(event.target.value)}><option value="All">All Statuses</option>{statuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></div></div>
+        <IssueTable admin issues={issues} currentUserId={currentUserId} onEdit={onEdit} onRemove={onRemove} onStatusChange={onStatusChange} loading={loading} />
       </section>
     </section>
   );
@@ -449,33 +334,6 @@ function DashboardPage({ total, pending, resolved, issues, search, categoryFilte
 
 function StatCard({ label, value, type }) {
   return <section className={`stat-card ${type}`}><span>{label}</span><strong>{value}</strong></section>;
-}
-
-function IssueTable({ admin = false, issues, onEdit, onRemove, onStatusChange, loading }) {
-  if (loading) return <p className="empty-state">Loading reports...</p>;
-  if (issues.length === 0) return <p className="empty-state">No reports found.</p>;
-
-  return (
-    <div className="table-wrap">
-      <table>
-        <thead><tr><th>Title</th>{admin && <th>Description</th>}<th>Category</th><th>Status</th>{admin && <th>Reporter</th>}<th>Location</th>{admin && <th>Date</th>}<th>Actions</th></tr></thead>
-        <tbody>
-          {issues.map((issue) => (
-            <tr key={issue.id}>
-              <td>{issue.title}</td>
-              {admin && <td className="description-cell">{issue.description}</td>}
-              <td>{issue.category}</td>
-              <td>{admin ? <select className={`status-select ${issue.status.toLowerCase().replace(" ", "-")}`} value={issue.status} onChange={(event) => onStatusChange(issue.id, event.target.value)}>{statuses.map((status) => <option key={status} value={status}>{status}</option>)}</select> : <span className={`status ${issue.status.toLowerCase().replace(" ", "-")}`}>{issue.status}</span>}</td>
-              {admin && <td>{issue.reporter || "Anonymous"}</td>}
-              <td>{issue.latitude.toFixed(4)}, {issue.longitude.toFixed(4)}</td>
-              {admin && <td>{issue.createdAt}</td>}
-              <td><div className="row-actions"><button className="text-button" type="button" onClick={() => onEdit(issue)}>Edit</button><button className="remove-button" type="button" onClick={() => onRemove(issue.id)}>Remove</button></div></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
 }
 
 export default App;

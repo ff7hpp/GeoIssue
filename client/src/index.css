@@ -8,11 +8,20 @@ body,
   min-height: 100%;
 }
 
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 body {
   margin: 0;
-  background: #f7f6f8;
-  color: #1b1b1e;
-  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f5f7;
+  color: #181a1f;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+}
+
+html[data-theme="dark"] body {
+  background: #101215;
+  color: #f3f4f6;
 }
 
 button,
@@ -24,4 +33,13 @@ textarea {
 
 button {
   cursor: pointer;
+}
+
+button, a, input, select, textarea {
+  transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+}
+
+button:focus-visible, a:focus-visible {
+  outline: 2px solid #ef334e;
+  outline-offset: 2px;
 }
