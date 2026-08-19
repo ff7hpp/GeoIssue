@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Report Issue - GeoIssue</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#1a2b45",
+                    "on-tertiary-fixed": "#012108",
+                    "on-background": "#1b1b1e",
+                    "tertiary-container": "#113116",
+                    "error": "#ba1a1a",
+                    "surface-dim": "#dbd9dc",
+                    "inverse-primary": "#b6c7e8",
+                    "primary-fixed-dim": "#b6c7e8",
+                    "surface-container": "#efedf0",
+                    "surface-container-low": "#f5f3f5",
+                    "primary": "#04162f",
+                    "on-tertiary-fixed-variant": "#2e4e30",
+                    "on-surface": "#1b1b1e",
+                    "tertiary": "#001b05",
+                    "secondary-fixed-dim": "#c4c7ca",
+                    "outline-variant": "#c5c6ce",
+                    "tertiary-fixed-dim": "#abd0a9",
+                    "surface-tint": "#4e5f7c",
+                    "primary-fixed": "#d6e3ff",
+                    "inverse-surface": "#303032",
+                    "secondary-fixed": "#e0e3e6",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-fixed-variant": "#44474a",
+                    "on-primary-fixed": "#091c35",
+                    "inverse-on-surface": "#f2f0f3",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#374763",
+                    "on-primary-container": "#8293b2",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-high": "#e9e7ea",
+                    "on-error-container": "#93000a",
+                    "surface": "#fbf9fb",
+                    "on-secondary-container": "#626567",
+                    "tertiary-fixed": "#c6edc4",
+                    "on-secondary-fixed": "#191c1e",
+                    "surface-variant": "#e4e2e4",
+                    "on-surface-variant": "#44474d",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#fbf9fb",
+                    "on-tertiary-container": "#779b77",
+                    "background": "#fbf9fb",
+                    "outline": "#75777e",
+                    "on-primary": "#ffffff",
+                    "secondary": "#5c5f61",
+                    "on-error": "#ffffff",
+                    "secondary-container": "#e0e3e6",
+                    "surface-container-highest": "#e4e2e4"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "stack-md": "16px",
+                    "container-padding": "24px",
+                    "gutter": "16px",
+                    "stack-lg": "32px",
+                    "stack-sm": "8px"
+            },
+            "fontFamily": {
+                    "label-bold": ["Work Sans"],
+                    "body-lg": ["Work Sans"],
+                    "label-sm": ["Work Sans"],
+                    "data-table": ["Work Sans"],
+                    "body-md": ["Work Sans"],
+                    "headline-lg": ["Work Sans"],
+                    "headline-md": ["Work Sans"],
+                    "headline-sm": ["Work Sans"]
+            },
+            "fontSize": {
+                    "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "data-table": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md h-full flex flex-col antialiased">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-gutter h-16 bg-primary dark:bg-primary border-b-[1px] border-tertiary-fixed flex-shrink-0 relative z-10">
+<div class="flex items-center gap-stack-md">
+<span class="font-headline-lg text-headline-lg text-on-primary tracking-tight">GeoIssue</span>
+<nav class="hidden md:flex gap-stack-md ml-stack-lg">
+<a class="text-on-primary-container dark:text-primary-fixed-dim hover:text-on-primary font-label-bold text-label-bold hover:bg-primary-container/50 dark:hover:bg-primary-container transition-colors px-3 py-2 rounded-DEFAULT opacity-90 transition-opacity" href="#">Dashboard</a>
+<a class="text-on-primary border-b-2 border-tertiary-fixed pb-1 font-label-bold text-label-bold opacity-90 transition-opacity px-3 py-2" href="#">Reports</a>
+<a class="text-on-primary-container dark:text-primary-fixed-dim hover:text-on-primary font-label-bold text-label-bold hover:bg-primary-container/50 dark:hover:bg-primary-container transition-colors px-3 py-2 rounded-DEFAULT opacity-90 transition-opacity" href="#">Map View</a>
+<a class="text-on-primary-container dark:text-primary-fixed-dim hover:text-on-primary font-label-bold text-label-bold hover:bg-primary-container/50 dark:hover:bg-primary-container transition-colors px-3 py-2 rounded-DEFAULT opacity-90 transition-opacity" href="#">Analytics</a>
+</nav>
+</div>
+<div class="flex items-center gap-stack-sm">
+<button class="p-2 text-on-primary rounded-full hover:bg-primary-container/50 transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-on-primary rounded-full hover:bg-primary-container/50 transition-colors">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center py-stack-lg px-container-padding overflow-y-auto">
+<div class="max-w-[1280px] w-full mb-stack-lg">
+<h1 class="font-headline-lg text-headline-lg text-primary mb-2">Submit New Report</h1>
+<p class="font-body-lg text-body-lg text-secondary">Provide details to log a new civic issue in the system.</p>
+</div>
+<div class="max-w-[1280px] w-full grid grid-cols-1 lg:grid-cols-2 gap-stack-lg">
+<!-- Left Column: Form -->
+<div class="bg-surface-container-lowest border border-outline-variant p-container-padding flex flex-col gap-stack-md rounded-DEFAULT">
+<h2 class="font-headline-md text-headline-md text-primary border-b border-outline-variant pb-2 mb-stack-sm">Report Details</h2>
+<div>
+<label class="block font-label-bold text-label-bold text-on-surface mb-1" for="title">Title</label>
+<input class="w-full border border-outline-variant rounded-DEFAULT px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-body-md text-body-md bg-surface-container-lowest" id="title" placeholder="Brief description of the issue" type="text"/>
+</div>
+<div>
+<label class="block font-label-bold text-label-bold text-on-surface mb-1" for="category">Category</label>
+<select class="w-full border border-outline-variant rounded-DEFAULT px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-body-md text-body-md bg-surface-container-lowest" id="category">
+<option value="">Select a category...</option>
+<option value="road">Broken Road / Pothole</option>
+<option value="water">Water Leak / Plumbing</option>
+<option value="light">Streetlight Outage</option>
+<option value="park">Park Maintenance</option>
+<option value="other">Other</option>
+</select>
+</div>
+<div>
+<label class="block font-label-bold text-label-bold text-on-surface mb-1" for="description">Detailed Description</label>
+<textarea class="w-full border border-outline-variant rounded-DEFAULT px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-body-md text-body-md bg-surface-container-lowest resize-none" id="description" placeholder="Provide any additional context or details..." rows="4"></textarea>
+</div>
+<div>
+<label class="block font-label-bold text-label-bold text-on-surface mb-1" for="reporter">Reporter Name (Optional)</label>
+<input class="w-full border border-outline-variant rounded-DEFAULT px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-body-md text-body-md bg-surface-container-lowest" id="reporter" placeholder="John Doe" type="text"/>
+</div>
+<div class="mt-stack-md flex justify-end">
+<button class="bg-primary text-on-primary font-label-bold text-label-bold px-6 py-3 rounded-DEFAULT hover:opacity-90 transition-opacity" type="button">Submit Report</button>
+</div>
+</div>
+<!-- Right Column: Map -->
+<div class="bg-surface-container-lowest border border-outline-variant p-container-padding flex flex-col gap-stack-md rounded-DEFAULT">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-stack-sm">
+<h2 class="font-headline-md text-headline-md text-primary">Location</h2>
+<span class="font-label-sm text-label-sm text-secondary bg-surface-container px-2 py-1 rounded-DEFAULT flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="my_location">my_location</span>
+                        Ankara
+                    </span>
+</div>
+<p class="font-body-md text-body-md text-secondary">Click on the map to drop a pin and set exact coordinates for this issue.</p>
+<div class="relative w-full h-[400px] border border-outline-variant rounded-DEFAULT overflow-hidden bg-tertiary-fixed-dim/20 cursor-crosshair flex items-center justify-center group">
+<!-- Map Placeholder -->
+<img class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-multiply" data-alt="A top-down view of a modern, stylized digital city map focusing on Ankara, Turkey. The map is designed in a minimalist UI style, utilizing muted pastel greens and soft grays to denote parks, roads, and building blocks. The aesthetic is clean, functional, and highly legible, suited for an administrative dashboard, devoid of excessive clutter or photorealism." data-location="Ankara" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCE8FSLFfhRNSHrHxm3rneq0HYyvXmBWs9L0QU_dWnmGutQ1B6o5kt9WPeZAHwzi5gJO6wLdmJARZOUoXQ9lcU2BubUjTqschJ9LK4vYQKjx7JsvmcoPwp88xaoKkn5lFFTX_LmgUdSUug8395yStnPhJq4Hu3WAmNSikpw-Ap0QM9cIS6iNKmaBIrwPpL_-kWKx8yKs6KkgnKx1DpJtjsBl_1keWZyaibqCJnNJmPriPSc22vRZWy_"/>
+<!-- Overlay Grid -->
+<div class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+<!-- Instruction overlay on hover -->
+<div class="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="bg-surface-container-lowest border border-primary text-primary font-label-bold text-label-bold px-4 py-2 rounded-DEFAULT shadow-sm">Click to set pin</span>
+</div>
+<!-- Simulated Pin (hidden by default, normally JS controlled) -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full text-error hidden group-hover:block transition-all transform scale-110">
+<span class="material-symbols-outlined" data-icon="location_on" data-weight="fill" style="font-variation-settings: 'FILL' 1; font-size: 32px;">location_on</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-stack-md mt-auto">
+<div>
+<label class="block font-label-bold text-label-bold text-on-surface mb-1">Latitude</label>
+<input class="w-full border border-outline-variant rounded-DEFAULT px-3 py-2 bg-surface-container-low text-secondary font-body-md text-body-md" readonly="" type="text" value="--"/>
+</div>
+<div>
+<label class="block font-label-bold text-label-bold text-on-surface mb-1">Longitude</label>
+<input class="w-full border border-outline-variant rounded-DEFAULT px-3 py-2 bg-surface-container-low text-secondary font-body-md text-body-md" readonly="" type="text" value="--"/>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="flex flex-col items-center justify-center py-stack-md w-full gap-stack-sm bg-secondary dark:bg-inverse-surface border-t border-outline-variant mt-auto flex-shrink-0">
+<span class="font-label-bold text-label-bold text-on-secondary">GeoIssue Internship Project</span>
+<div class="flex gap-stack-md">
+<a class="text-secondary-fixed-dim hover:text-on-secondary font-body-md text-body-md hover:text-primary-fixed transition-colors" href="#">Privacy Policy</a>
+<a class="text-secondary-fixed-dim hover:text-on-secondary font-body-md text-body-md hover:text-primary-fixed transition-colors" href="#">Terms of Service</a>
+<a class="text-secondary-fixed-dim hover:text-on-secondary font-body-md text-body-md hover:text-primary-fixed transition-colors" href="#">Contact Support</a>
+</div>
+</footer>
+</body></html>

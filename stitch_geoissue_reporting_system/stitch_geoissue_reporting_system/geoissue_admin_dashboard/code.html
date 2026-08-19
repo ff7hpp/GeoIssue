@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GeoIssue - Administrator Dashboard</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-container": "#1a2b45",
+                      "on-tertiary-fixed": "#012108",
+                      "on-background": "#1b1b1e",
+                      "tertiary-container": "#113116",
+                      "error": "#ba1a1a",
+                      "surface-dim": "#dbd9dc",
+                      "inverse-primary": "#b6c7e8",
+                      "primary-fixed-dim": "#b6c7e8",
+                      "surface-container": "#efedf0",
+                      "surface-container-low": "#f5f3f5",
+                      "primary": "#04162f",
+                      "on-tertiary-fixed-variant": "#2e4e30",
+                      "on-surface": "#1b1b1e",
+                      "tertiary": "#001b05",
+                      "secondary-fixed-dim": "#c4c7ca",
+                      "outline-variant": "#c5c6ce",
+                      "tertiary-fixed-dim": "#abd0a9",
+                      "surface-tint": "#4e5f7c",
+                      "primary-fixed": "#d6e3ff",
+                      "inverse-surface": "#303032",
+                      "secondary-fixed": "#e0e3e6",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary-fixed-variant": "#44474a",
+                      "on-primary-fixed": "#091c35",
+                      "inverse-on-surface": "#f2f0f3",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed-variant": "#374763",
+                      "on-primary-container": "#8293b2",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-high": "#e9e7ea",
+                      "on-error-container": "#93000a",
+                      "surface": "#fbf9fb",
+                      "on-secondary-container": "#626567",
+                      "tertiary-fixed": "#c6edc4",
+                      "on-secondary-fixed": "#191c1e",
+                      "surface-variant": "#e4e2e4",
+                      "on-surface-variant": "#44474d",
+                      "error-container": "#ffdad6",
+                      "surface-bright": "#fbf9fb",
+                      "on-tertiary-container": "#779b77",
+                      "background": "#fbf9fb",
+                      "outline": "#75777e",
+                      "on-primary": "#ffffff",
+                      "secondary": "#5c5f61",
+                      "on-error": "#ffffff",
+                      "secondary-container": "#e0e3e6",
+                      "surface-container-highest": "#e4e2e4"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "stack-md": "16px",
+                      "container-padding": "24px",
+                      "gutter": "16px",
+                      "stack-lg": "32px",
+                      "stack-sm": "8px"
+              },
+              "fontFamily": {
+                      "label-bold": ["Work Sans"],
+                      "body-lg": ["Work Sans"],
+                      "label-sm": ["Work Sans"],
+                      "data-table": ["Work Sans"],
+                      "body-md": ["Work Sans"],
+                      "headline-lg": ["Work Sans"],
+                      "headline-md": ["Work Sans"],
+                      "headline-sm": ["Work Sans"]
+              },
+              "fontSize": {
+                      "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "data-table": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-lg": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-primary dark:bg-primary border-b-[1px] border-tertiary-fixed w-full top-0 z-50">
+<div class="flex justify-between items-center w-full px-gutter h-16 max-w-[1280px] mx-auto">
+<!-- Brand -->
+<div class="flex items-center gap-4">
+<span class="font-headline-lg text-headline-lg text-on-primary tracking-tight">GeoIssue</span>
+</div>
+<!-- Navigation -->
+<nav class="hidden md:flex gap-6 h-full items-end">
+<!-- Active Item -->
+<a class="text-on-primary border-b-2 border-tertiary-fixed pb-1 font-label-bold text-label-bold opacity-90 transition-opacity flex items-center gap-2 h-full" href="#">
+                    Dashboard
+                </a>
+<!-- Inactive Items -->
+<a class="text-on-primary-container dark:text-primary-fixed-dim hover:text-on-primary hover:bg-primary-container/50 dark:hover:bg-primary-container transition-colors pb-1 font-label-bold text-label-bold flex items-center gap-2 h-full border-b-2 border-transparent" href="#">
+                    Reports
+                </a>
+<a class="text-on-primary-container dark:text-primary-fixed-dim hover:text-on-primary hover:bg-primary-container/50 dark:hover:bg-primary-container transition-colors pb-1 font-label-bold text-label-bold flex items-center gap-2 h-full border-b-2 border-transparent" href="#">
+                    Map View
+                </a>
+<a class="text-on-primary-container dark:text-primary-fixed-dim hover:text-on-primary hover:bg-primary-container/50 dark:hover:bg-primary-container transition-colors pb-1 font-label-bold text-label-bold flex items-center gap-2 h-full border-b-2 border-transparent" href="#">
+                    Analytics
+                </a>
+</nav>
+<!-- Actions -->
+<div class="flex items-center gap-4">
+<button class="text-on-primary-container hover:text-on-primary hover:bg-primary-container/50 p-2 rounded transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-primary-container hover:text-on-primary hover:bg-primary-container/50 p-2 rounded transition-colors">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Grid -->
+<main class="flex-grow w-full max-w-[1280px] mx-auto px-gutter py-container-padding grid grid-cols-1 md:grid-cols-12 gap-gutter h-full items-start">
+<!-- Dashboard Content Canvas (No SideNav for standard dashboard per fixed layout philosophy) -->
+<div class="col-span-1 md:col-span-12 flex flex-col gap-stack-lg">
+<!-- Page Header -->
+<div class="flex justify-between items-end border-b border-outline-variant pb-stack-sm">
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface">System Overview</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Real-time status of reported civic issues.</p>
+</div>
+<div>
+<button class="bg-primary text-on-primary font-label-bold text-label-bold px-4 py-2 rounded flex items-center gap-2 hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                        Create Report
+                    </button>
+</div>
+</div>
+<!-- Summary Cards (Level 1 Elevation: White bg, 1px border) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Total Reports -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md flex flex-col justify-between h-32 relative overflow-hidden group">
+<!-- Subtle Accent Line -->
+<div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+<div class="flex justify-between items-start z-10">
+<h2 class="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Total Reports</h2>
+<span class="material-symbols-outlined text-primary text-[24px]">assignment</span>
+</div>
+<div class="z-10">
+<span class="font-headline-lg text-headline-lg text-on-surface block">12,458</span>
+<span class="font-label-sm text-label-sm text-on-tertiary-container flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span> 12% this month
+                        </span>
+</div>
+</div>
+<!-- Pending -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md flex flex-col justify-between h-32 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-1 bg-[#D97706]"></div> <!-- Using arbitrary warm yellow accent as requested by user context, despite strict palette, overriding for specific user card request 'yellow accent' -->
+<div class="flex justify-between items-start z-10">
+<h2 class="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Pending</h2>
+<span class="material-symbols-outlined text-[#D97706] text-[24px]">pending_actions</span>
+</div>
+<div class="z-10">
+<span class="font-headline-lg text-headline-lg text-on-surface block">432</span>
+<span class="font-label-sm text-label-sm text-on-error-container flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px]">warning</span> Action required
+                        </span>
+</div>
+</div>
+<!-- Resolved -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md flex flex-col justify-between h-32 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-1 bg-tertiary-container"></div>
+<div class="flex justify-between items-start z-10">
+<h2 class="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Resolved</h2>
+<span class="material-symbols-outlined text-tertiary-container text-[24px]">check_circle</span>
+</div>
+<div class="z-10">
+<span class="font-headline-lg text-headline-lg text-on-surface block">11,894</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1">
+                            95.4% resolution rate
+                        </span>
+</div>
+</div>
+</div>
+<!-- Data Table Section -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded flex flex-col overflow-hidden">
+<div class="px-stack-md py-3 border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Recent Reports</h3>
+<div class="flex gap-2">
+<button class="text-on-surface-variant hover:text-on-surface border border-outline-variant bg-surface-container-lowest rounded px-2 py-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface border border-outline-variant bg-surface-container-lowest rounded px-2 py-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant">
+<th class="py-2 px-4 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider w-24">ID</th>
+<th class="py-2 px-4 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Title</th>
+<th class="py-2 px-4 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider w-40">Category</th>
+<th class="py-2 px-4 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider w-32">Status</th>
+<th class="py-2 px-4 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider w-32">Date</th>
+<th class="py-2 px-4 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider text-right w-32">Actions</th>
+</tr>
+</thead>
+<tbody class="font-data-table text-data-table text-on-surface divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant">#REP-001</td>
+<td class="py-3 px-4 font-medium">Pothole on Main St.</td>
+<td class="py-3 px-4">Roads &amp; Infrastructure</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-[2px] font-label-sm text-label-sm bg-surface-variant text-on-surface-variant">
+                                        New
+                                    </span>
+</td>
+<td class="py-3 px-4 text-on-surface-variant">2023-10-24</td>
+<td class="py-3 px-4 text-right">
+<button aria-label="Edit" class="text-primary hover:text-primary-container mr-2">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button aria-label="Remove" class="text-error hover:text-on-error-container">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant">#REP-002</td>
+<td class="py-3 px-4 font-medium">Broken Streetlight</td>
+<td class="py-3 px-4">Utilities</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-[2px] font-label-sm text-label-sm bg-[#FEF3C7] text-[#92400E]">
+                                        In Progress
+                                    </span>
+</td>
+<td class="py-3 px-4 text-on-surface-variant">2023-10-23</td>
+<td class="py-3 px-4 text-right">
+<button aria-label="Edit" class="text-primary hover:text-primary-container mr-2">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button aria-label="Remove" class="text-error hover:text-on-error-container">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant">#REP-003</td>
+<td class="py-3 px-4 font-medium">Graffiti in Park</td>
+<td class="py-3 px-4">Parks &amp; Rec</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-[2px] font-label-sm text-label-sm bg-tertiary-fixed text-tertiary">
+                                        Closed
+                                    </span>
+</td>
+<td class="py-3 px-4 text-on-surface-variant">2023-10-22</td>
+<td class="py-3 px-4 text-right">
+<button aria-label="Edit" class="text-primary hover:text-primary-container mr-2">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button aria-label="Remove" class="text-error hover:text-on-error-container">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant">#REP-004</td>
+<td class="py-3 px-4 font-medium">Fallen Tree Branch</td>
+<td class="py-3 px-4">Roads &amp; Infrastructure</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-[2px] font-label-sm text-label-sm bg-tertiary-fixed text-tertiary">
+                                        Closed
+                                    </span>
+</td>
+<td class="py-3 px-4 text-on-surface-variant">2023-10-20</td>
+<td class="py-3 px-4 text-right">
+<button aria-label="Edit" class="text-primary hover:text-primary-container mr-2">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button aria-label="Remove" class="text-error hover:text-on-error-container">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-stack-md py-3 border-t border-outline-variant bg-surface-container-lowest flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Showing 1-4 of 12,458</span>
+<div class="flex gap-1">
+<button class="px-3 py-1 border border-outline-variant rounded font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container" disabled="">Prev</button>
+<button class="px-3 py-1 border border-outline-variant rounded font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container bg-surface-container-low">1</button>
+<button class="px-3 py-1 border border-outline-variant rounded font-label-sm text-label-sm text-on-surface hover:bg-surface-container">2</button>
+<button class="px-3 py-1 border border-outline-variant rounded font-label-sm text-label-sm text-on-surface hover:bg-surface-container">3</button>
+<span class="px-2 py-1 text-on-surface-variant">...</span>
+<button class="px-3 py-1 border border-outline-variant rounded font-label-sm text-label-sm text-on-surface hover:bg-surface-container">Next</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-secondary dark:bg-inverse-surface mt-auto flex flex-col items-center justify-center py-stack-md w-full gap-stack-sm border-t border-outline-variant">
+<div class="font-label-bold text-label-bold text-on-secondary">GeoIssue</div>
+<div class="flex gap-4 font-body-md text-body-md">
+<a class="text-secondary-fixed-dim hover:text-on-secondary transition-colors" href="#">Privacy Policy</a>
+<a class="text-secondary-fixed-dim hover:text-on-secondary transition-colors" href="#">Terms of Service</a>
+<a class="text-secondary-fixed-dim hover:text-on-secondary transition-colors" href="#">Contact Support</a>
+</div>
+<div class="font-label-sm text-label-sm text-secondary-fixed-dim mt-2">© GeoIssue Internship Project</div>
+</footer>
+</body></html>

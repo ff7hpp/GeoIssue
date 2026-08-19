@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Report a City Issue - GeoIssue</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#c6edc4",
+                        "secondary-fixed": "#e0e3e6",
+                        "inverse-primary": "#b6c7e8",
+                        "secondary": "#5c5f61",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#8293b2",
+                        "surface-container-low": "#f5f3f5",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#191c1e",
+                        "surface-bright": "#fbf9fb",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#012108",
+                        "background": "#fbf9fb",
+                        "primary-fixed-dim": "#b6c7e8",
+                        "secondary-container": "#e0e3e6",
+                        "on-secondary-fixed-variant": "#44474a",
+                        "surface-container-high": "#e9e7ea",
+                        "on-background": "#1b1b1e",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "outline-variant": "#c5c6ce",
+                        "surface-tint": "#4e5f7c",
+                        "outline": "#75777e",
+                        "on-surface": "#1b1b1e",
+                        "surface-container-highest": "#e4e2e4",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#44474d",
+                        "surface-variant": "#e4e2e4",
+                        "primary": "#04162f",
+                        "surface-container": "#efedf0",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#091c35",
+                        "tertiary-container": "#113116",
+                        "on-tertiary-fixed-variant": "#2e4e30",
+                        "primary-fixed": "#d6e3ff",
+                        "error-container": "#ffdad6",
+                        "surface-dim": "#dbd9dc",
+                        "secondary-fixed-dim": "#c4c7ca",
+                        "tertiary": "#001b05",
+                        "primary-container": "#1a2b45",
+                        "inverse-on-surface": "#f2f0f3",
+                        "on-tertiary-container": "#779b77",
+                        "tertiary-fixed-dim": "#abd0a9",
+                        "surface": "#fbf9fb",
+                        "on-primary-fixed-variant": "#374763",
+                        "on-secondary-container": "#626567",
+                        "inverse-surface": "#303032"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "gutter": "16px",
+                        "container-padding": "24px",
+                        "stack-lg": "32px",
+                        "stack-sm": "8px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "label-bold": ["Work Sans"],
+                        "headline-lg": ["Work Sans"],
+                        "headline-sm": ["Work Sans"],
+                        "label-sm": ["Work Sans"],
+                        "headline-md": ["Work Sans"],
+                        "body-lg": ["Work Sans"],
+                        "body-md": ["Work Sans"],
+                        "data-table": ["Work Sans"]
+                    },
+                    "fontSize": {
+                        "label-bold": ["12px", { "lineHeight": "16px", "fontWeight": "700" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-md": ["22px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "data-table": ["13px", { "lineHeight": "18px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="bg-primary dark:bg-primary text-on-primary dark:text-primary-fixed flex justify-between items-center w-full px-gutter h-16 border-b-[1px] border-tertiary-fixed full-width top-0 z-50 sticky">
+<div class="flex items-center gap-stack-lg">
+<span class="font-headline-lg text-headline-lg text-on-primary tracking-tight">GeoIssue</span>
+<div class="hidden md:flex gap-stack-md">
+<a class="text-on-primary-container hover:text-on-primary font-label-bold text-label-bold px-2 py-1 rounded hover:bg-primary-container/50 transition-colors" href="#">Dashboard</a>
+<a class="text-on-primary border-b-2 border-tertiary-fixed pb-1 font-label-bold text-label-bold px-2 opacity-90 transition-opacity" href="#">Reports</a>
+<a class="text-on-primary-container hover:text-on-primary font-label-bold text-label-bold px-2 py-1 rounded hover:bg-primary-container/50 transition-colors" href="#">Map View</a>
+<a class="text-on-primary-container hover:text-on-primary font-label-bold text-label-bold px-2 py-1 rounded hover:bg-primary-container/50 transition-colors" href="#">Analytics</a>
+</div>
+</div>
+<div class="flex items-center gap-stack-md">
+<!-- Search Bar on Right -->
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-2 top-1/2 transform -translate-y-1/2 text-on-primary-container" style="font-size: 18px;">search</span>
+<input class="bg-primary-container text-on-primary border-none rounded-lg pl-8 pr-4 py-1 text-sm focus:ring-2 focus:ring-tertiary-fixed w-48 placeholder-on-primary-container" placeholder="Search..." type="text"/>
+</div>
+<button class="text-on-primary hover:bg-primary-container/50 p-2 rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-primary hover:bg-primary-container/50 p-2 rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow w-full max-w-[1280px] mx-auto p-container-padding grid grid-cols-1 gap-stack-lg">
+<!-- Page Header -->
+<header class="border-b border-outline-variant pb-stack-sm">
+<h1 class="font-headline-lg text-headline-lg text-primary">Report a City Issue</h1>
+<p class="font-body-lg text-body-lg text-secondary mt-1">Log a civic problem for review.</p>
+</header>
+<!-- Top Section: Form and Map Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-stack-lg">
+<!-- Add New Issue Form -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-container-padding flex flex-col gap-stack-md">
+<h2 class="font-headline-sm text-headline-sm text-primary border-b border-outline-variant pb-2 mb-2">Add New Issue</h2>
+<form class="flex flex-col gap-stack-md">
+<div class="flex flex-col gap-1">
+<label class="font-label-bold text-label-bold text-on-surface" for="title">Title</label>
+<input class="border border-outline-variant rounded-lg p-2 font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none" id="title" placeholder="E.g., Pothole on Main St" type="text"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-bold text-label-bold text-on-surface" for="description">Description</label>
+<textarea class="border border-outline-variant rounded-lg p-2 font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none" id="description" placeholder="Provide details about the issue..." rows="3"></textarea>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-stack-md">
+<div class="flex flex-col gap-1">
+<label class="font-label-bold text-label-bold text-on-surface" for="category">Category</label>
+<select class="border border-outline-variant rounded-lg p-2 font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white" id="category">
+<option>Road</option>
+<option>Water</option>
+<option>Electricity</option>
+<option>Traffic</option>
+<option>Environment</option>
+<option>Other</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-bold text-label-bold text-on-surface" for="reporter">Reporter Name</label>
+<input class="border border-outline-variant rounded-lg p-2 font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none" id="reporter" placeholder="Your Name" type="text"/>
+</div>
+</div>
+<div class="flex flex-col gap-1 mt-2">
+<label class="font-label-bold text-label-bold text-on-surface">Location Coordinates (Read-only)</label>
+<div class="flex gap-2">
+<input class="border border-outline-variant rounded-lg p-2 font-body-md text-secondary bg-surface-container-low w-full outline-none cursor-not-allowed" readonly="" type="text" value="Lat: 39.9207"/>
+<input class="border border-outline-variant rounded-lg p-2 font-body-md text-secondary bg-surface-container-low w-full outline-none cursor-not-allowed" readonly="" type="text" value="Lng: 32.8541"/>
+</div>
+</div>
+<div class="mt-4 flex justify-end">
+<button class="bg-primary hover:bg-primary-container text-on-primary font-label-bold text-label-bold py-2 px-6 rounded-lg transition-colors border border-primary" type="submit">
+                            Submit Report
+                        </button>
+</div>
+</form>
+</div>
+<!-- Select Location Map Panel -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-container-padding flex flex-col gap-stack-md h-full min-h-[400px]">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-2">
+<h2 class="font-headline-sm text-headline-sm text-primary">Select Location</h2>
+<span class="font-label-sm text-label-sm text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined" style="font-size: 14px;">info</span>
+                        Click map to pin
+                    </span>
+</div>
+<div class="relative flex-grow border border-outline-variant rounded bg-surface-container-low overflow-hidden flex items-center justify-center group cursor-crosshair">
+<!-- Placeholder Map Grid -->
+<div class="absolute inset-0" style="background-image: radial-gradient(#c6edc4 1px, transparent 1px); background-size: 20px 20px; opacity: 0.5;"></div>
+<!-- Center Marker & Label -->
+<div class="relative flex flex-col items-center">
+<span class="material-symbols-outlined text-primary drop-shadow-md z-10" style="font-size: 32px; font-variation-settings: 'FILL' 1;">location_on</span>
+<div class="bg-white border border-outline-variant px-3 py-1 rounded shadow-sm mt-1 z-10">
+<span class="font-label-bold text-label-bold text-primary tracking-widest">ANKARA</span>
+</div>
+</div>
+<!-- Decorative elements to make it look like a map -->
+<svg class="absolute inset-0 w-full h-full opacity-20 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+<path d="M 0 100 Q 150 150 300 100 T 600 150" fill="none" stroke="#04162f" stroke-width="2"></path>
+<path d="M 100 0 L 150 400" fill="none" stroke="#5c5f61" stroke-dasharray="4" stroke-width="1"></path>
+<path d="M 400 0 L 350 400" fill="none" stroke="#5c5f61" stroke-dasharray="4" stroke-width="1"></path>
+</svg>
+<!-- Overlay instruction -->
+<div class="absolute bottom-4 bg-white/90 backdrop-blur-sm border border-outline-variant px-4 py-2 rounded-full shadow-sm text-center">
+<span class="font-label-sm text-label-sm text-on-surface">Click on the map to select a location.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- My Reports Section -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-container-padding mt-stack-md flex flex-col gap-stack-md">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-stack-md border-b border-outline-variant pb-stack-md">
+<h2 class="font-headline-sm text-headline-sm text-primary">My Reports</h2>
+<div class="flex flex-wrap gap-stack-md w-full sm:w-auto">
+<div class="relative flex-grow sm:flex-grow-0">
+<span class="material-symbols-outlined absolute left-2 top-1/2 transform -translate-y-1/2 text-secondary" style="font-size: 18px;">search</span>
+<input class="border border-outline-variant rounded p-1.5 pl-8 font-body-md text-sm w-full focus:border-primary outline-none" placeholder="Search reports..." type="text"/>
+</div>
+<select class="border border-outline-variant rounded p-1.5 font-body-md text-sm bg-white focus:border-primary outline-none min-w-[120px]">
+<option>All Categories</option>
+<option>Road</option>
+<option>Water</option>
+</select>
+</div>
+</div>
+<!-- Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant">
+<th class="p-3 font-label-bold text-label-bold text-secondary uppercase tracking-wider">Title</th>
+<th class="p-3 font-label-bold text-label-bold text-secondary uppercase tracking-wider">Category</th>
+<th class="p-3 font-label-bold text-label-bold text-secondary uppercase tracking-wider">Status</th>
+<th class="p-3 font-label-bold text-label-bold text-secondary uppercase tracking-wider">Location</th>
+<th class="p-3 font-label-bold text-label-bold text-secondary uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="font-data-table text-data-table text-on-surface">
+<!-- Row 1 -->
+<tr class="border-b border-surface-variant hover:bg-surface-bright transition-colors">
+<td class="p-3 font-medium text-primary">Pothole on Main St</td>
+<td class="p-3">Road</td>
+<td class="p-3">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-container-high text-secondary border border-outline-variant">
+                                    Pending
+                                </span>
+</td>
+<td class="p-3 text-secondary text-sm">39.9207, 32.8541</td>
+<td class="p-3 text-right">
+<button class="text-primary hover:bg-primary-container/10 p-1 rounded mr-1 transition-colors" title="Edit">
+<span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+</button>
+<button class="text-error hover:bg-error-container/20 p-1 rounded transition-colors" title="Remove">
+<span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-surface-variant hover:bg-surface-bright transition-colors">
+<td class="p-3 font-medium text-primary">Leaking Fire Hydrant</td>
+<td class="p-3">Water</td>
+<td class="p-3">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#fef08a]/20 text-[#a16207] border border-[#fde047]">
+                                    In Progress
+                                </span>
+</td>
+<td class="p-3 text-secondary text-sm">39.9190, 32.8530</td>
+<td class="p-3 text-right">
+<button class="text-primary hover:bg-primary-container/10 p-1 rounded mr-1 transition-colors" title="Edit">
+<span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+</button>
+<button class="text-error hover:bg-error-container/20 p-1 rounded transition-colors" title="Remove">
+<span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-bright transition-colors">
+<td class="p-3 font-medium text-primary">Broken Streetlight</td>
+<td class="p-3">Electricity</td>
+<td class="p-3">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-tertiary-fixed/30 text-tertiary-container border border-tertiary-fixed-dim">
+                                    Resolved
+                                </span>
+</td>
+<td class="p-3 text-secondary text-sm">39.9215, 32.8550</td>
+<td class="p-3 text-right">
+<button class="text-primary hover:bg-primary-container/10 p-1 rounded mr-1 transition-colors" title="Edit">
+<span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+</button>
+<button class="text-error hover:bg-error-container/20 p-1 rounded transition-colors" title="Remove">
+<span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-secondary dark:bg-inverse-surface text-on-secondary dark:text-inverse-on-surface flex flex-col items-center justify-center py-stack-md w-full gap-stack-sm border-t border-outline-variant full-width bottom mt-auto">
+<div class="font-label-bold text-label-bold text-on-secondary">
+            GeoIssue Internship Project
+        </div>
+<div class="flex gap-stack-md font-body-md text-body-md">
+<a class="text-secondary-fixed-dim hover:text-primary-fixed transition-colors" href="#">Privacy Policy</a>
+<a class="text-secondary-fixed-dim hover:text-primary-fixed transition-colors" href="#">Terms of Service</a>
+<a class="text-secondary-fixed-dim hover:text-primary-fixed transition-colors" href="#">Contact Support</a>
+</div>
+</footer>
+</body></html>

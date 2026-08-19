@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GeoIssue - Admin Dashboard</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#e4e2e4",
+                        "on-primary-fixed": "#091c35",
+                        "surface-container-low": "#f5f3f5",
+                        "surface-dim": "#dbd9dc",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#c6edc4",
+                        "on-tertiary-fixed-variant": "#2e4e30",
+                        "on-secondary-fixed-variant": "#44474a",
+                        "primary-fixed": "#d6e3ff",
+                        "on-primary-container": "#8293b2",
+                        "secondary-container": "#e0e3e6",
+                        "surface-bright": "#fbf9fb",
+                        "primary": "#04162f",
+                        "tertiary": "#001b05",
+                        "on-secondary-fixed": "#191c1e",
+                        "on-background": "#1b1b1e",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-surface": "#1b1b1e",
+                        "on-secondary-container": "#626567",
+                        "on-surface-variant": "#44474d",
+                        "surface-container-high": "#e9e7ea",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#b6c7e8",
+                        "tertiary-fixed-dim": "#abd0a9",
+                        "secondary": "#5c5f61",
+                        "surface": "#fbf9fb",
+                        "on-tertiary-container": "#779b77",
+                        "secondary-fixed-dim": "#c4c7ca",
+                        "primary-fixed-dim": "#b6c7e8",
+                        "surface-container": "#efedf0",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#374763",
+                        "primary-container": "#1a2b45",
+                        "background": "#fbf9fb",
+                        "inverse-on-surface": "#f2f0f3",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#012108",
+                        "surface-container-highest": "#e4e2e4",
+                        "surface-tint": "#4e5f7c",
+                        "secondary-fixed": "#e0e3e6",
+                        "tertiary-container": "#113116",
+                        "on-secondary": "#ffffff",
+                        "outline-variant": "#c5c6ce",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#303032",
+                        "outline": "#75777e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "container-padding": "24px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "stack-lg": "32px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Work Sans"],
+                        "label-bold": ["Work Sans"],
+                        "data-table": ["Work Sans"],
+                        "headline-md": ["Work Sans"],
+                        "headline-lg": ["Work Sans"],
+                        "headline-sm": ["Work Sans"],
+                        "label-sm": ["Work Sans"],
+                        "body-lg": ["Work Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-bold": ["12px", { "lineHeight": "16px", "fontWeight": "700" }],
+                        "data-table": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "headline-md": ["22px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap');
+        body { font-family: 'Work Sans', sans-serif; background-color: #F2F4F7; } /* Light Gray Level 0 Background */
+    </style>
+</head>
+<body class="bg-[#F2F4F7] text-on-surface min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-primary text-on-primary font-body-md text-body-md border-b border-outline-variant w-full h-16 sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-container-padding h-16">
+<div class="flex items-center gap-stack-lg h-full">
+<div class="font-headline-md text-headline-md font-bold text-on-primary">
+                    GeoIssue
+                </div>
+<nav class="hidden md:flex h-full items-end gap-stack-md">
+<!-- Active: Dashboard -->
+<a class="h-full flex items-center px-2 text-on-primary font-bold border-b-2 border-on-primary hover:bg-primary-fixed-dim/10 transition-colors duration-200 ease-in-out" href="#">
+                        Dashboard
+                    </a>
+<a class="h-full flex items-center px-2 text-on-primary/80 font-medium hover:bg-primary-fixed-dim/10 transition-colors duration-200 ease-in-out" href="#">
+                        Reports
+                    </a>
+<a class="h-full flex items-center px-2 text-on-primary/80 font-medium hover:bg-primary-fixed-dim/10 transition-colors duration-200 ease-in-out" href="#">
+                        Map View
+                    </a>
+</nav>
+</div>
+<div class="flex items-center gap-stack-md">
+<!-- Search bar on right -->
+<div class="hidden md:flex relative text-on-surface">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-outline text-label-sm">search</span>
+<input class="bg-surface-container-lowest border border-outline-variant rounded pl-8 pr-3 py-1 font-body-md text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none w-48 text-on-surface" placeholder="Search..." type="text"/>
+</div>
+<button aria-label="notifications" class="p-2 text-on-primary/80 hover:bg-primary-fixed-dim/10 rounded transition-colors duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button aria-label="account_circle" class="p-2 text-on-primary/80 hover:bg-primary-fixed-dim/10 rounded transition-colors duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Layout: Fixed Grid 12-column, Sidebar + Content -->
+<div class="flex-1 flex max-w-[1520px] mx-auto w-full">
+<!-- Sidebar Navigation (240px fixed) -->
+<aside class="hidden lg:block w-[240px] flex-shrink-0 border-r border-outline-variant bg-surface-container-lowest h-[calc(100vh-64px)] sticky top-16 overflow-y-auto">
+<div class="p-container-padding flex flex-col gap-unit">
+<div class="font-label-bold text-label-bold text-outline uppercase tracking-wider mb-stack-sm px-2">Management</div>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary rounded font-body-md text-body-md font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+                    Dashboard
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant rounded font-body-md text-body-md transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">report</span>
+                    Reports
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant rounded font-body-md text-body-md transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">map</span>
+                    Map View
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant rounded font-body-md text-body-md transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">group</span>
+                    Users
+                </a>
+<div class="font-label-bold text-label-bold text-outline uppercase tracking-wider mt-stack-md mb-stack-sm px-2">Settings</div>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant rounded font-body-md text-body-md transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+                    System Config
+                </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 p-container-padding max-w-[1280px] mx-auto w-full">
+<div class="mb-stack-lg">
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-unit">Admin Dashboard</h1>
+<p class="font-body-md text-body-md text-secondary">Overview of municipal maintenance reports.</p>
+</div>
+<!-- Top Section: Simple Statistic Boxes -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-stack-lg">
+<!-- Total Issues -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-container-padding flex flex-col justify-center">
+<div class="font-label-bold text-label-bold text-secondary uppercase mb-stack-sm">Total Issues</div>
+<div class="font-headline-lg text-headline-lg text-on-surface">12,458</div>
+</div>
+<!-- Pending Issues -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-container-padding flex flex-col justify-center">
+<div class="font-label-bold text-label-bold text-secondary uppercase mb-stack-sm">Pending Issues</div>
+<div class="font-headline-lg text-headline-lg text-error">432</div>
+</div>
+<!-- Resolved Issues -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-container-padding flex flex-col justify-center">
+<div class="font-label-bold text-label-bold text-secondary uppercase mb-stack-sm">Resolved Issues</div>
+<div class="font-headline-lg text-headline-lg text-tertiary-fixed-dim">11,894</div>
+</div>
+</div>
+<!-- Main Section: All Reported Issues -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded mb-stack-lg overflow-hidden flex flex-col">
+<!-- Header & Filters -->
+<div class="p-stack-md border-b border-outline-variant flex flex-col sm:flex-row justify-between items-start sm:items-center gap-stack-md bg-surface-container-low">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">All Reported Issues</h2>
+<div class="flex flex-wrap gap-stack-sm w-full sm:w-auto">
+<!-- Search -->
+<div class="relative flex-grow sm:flex-grow-0">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded pl-8 pr-3 py-1.5 font-body-md text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Search issues..." type="text"/>
+</div>
+<!-- Category Filter -->
+<select class="bg-surface-container-lowest border border-outline-variant rounded px-3 py-1.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option value="">All Categories</option>
+<option value="infrastructure">Infrastructure</option>
+<option value="sanitation">Sanitation</option>
+<option value="parks">Parks &amp; Rec</option>
+</select>
+<!-- Status Filter -->
+<select class="bg-surface-container-lowest border border-outline-variant rounded px-3 py-1.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option value="">All Statuses</option>
+<option value="pending">Pending</option>
+<option value="in_progress">In Progress</option>
+<option value="resolved">Resolved</option>
+</select>
+</div>
+</div>
+<!-- Data Table -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low border-b border-outline-variant">
+<tr>
+<th class="font-label-bold text-label-bold text-on-surface-variant uppercase p-stack-md">Issue Title</th>
+<th class="font-label-bold text-label-bold text-on-surface-variant uppercase p-stack-md hidden md:table-cell">Description</th>
+<th class="font-label-bold text-label-bold text-on-surface-variant uppercase p-stack-md">Category</th>
+<th class="font-label-bold text-label-bold text-on-surface-variant uppercase p-stack-md">Status</th>
+<th class="font-label-bold text-label-bold text-on-surface-variant uppercase p-stack-md hidden lg:table-cell">Reporter</th>
+<th class="font-label-bold text-label-bold text-on-surface-variant uppercase p-stack-md hidden xl:table-cell">Location (Lat/Lng)</th>
+<th class="font-label-bold text-label-bold text-on-surface-variant uppercase p-stack-md">Date</th>
+<th class="font-label-bold text-label-bold text-on-surface-variant uppercase p-stack-md text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="font-data-table text-data-table divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="p-stack-md text-on-surface font-medium">Pothole on Main St</td>
+<td class="p-stack-md text-secondary truncate max-w-[200px] hidden md:table-cell">Large pothole forming near intersection, causing traffic disruption.</td>
+<td class="p-stack-md text-on-surface">Infrastructure</td>
+<td class="p-stack-md">
+<select class="bg-surface-container-lowest border border-outline-variant rounded px-2 py-1 text-data-table focus:border-primary focus:ring-1 focus:ring-primary outline-none text-error">
+<option selected="" value="pending">Pending</option>
+<option value="in_progress">In Progress</option>
+<option value="resolved">Resolved</option>
+</select>
+</td>
+<td class="p-stack-md text-on-surface hidden lg:table-cell">jdoe88</td>
+<td class="p-stack-md text-secondary hidden xl:table-cell">39.9334, 32.8597</td>
+<td class="p-stack-md text-secondary">2024-05-14</td>
+<td class="p-stack-md text-right flex gap-2 justify-end">
+<button class="bg-surface-container-lowest border border-outline-variant text-primary rounded px-3 py-1 font-body-md text-body-md hover:bg-surface-container-low transition-colors">Edit</button>
+<button class="bg-error text-on-error rounded px-3 py-1 font-body-md text-body-md hover:bg-error/90 transition-colors">Remove</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="p-stack-md text-on-surface font-medium">Overflowing Bin</td>
+<td class="p-stack-md text-secondary truncate max-w-[200px] hidden md:table-cell">Public trash bin overflowing in Gençlik Park.</td>
+<td class="p-stack-md text-on-surface">Sanitation</td>
+<td class="p-stack-md">
+<select class="bg-surface-container-lowest border border-outline-variant rounded px-2 py-1 text-data-table focus:border-primary focus:ring-1 focus:ring-primary outline-none text-yellow-600">
+<option value="pending">Pending</option>
+<option selected="" value="in_progress">In Progress</option>
+<option value="resolved">Resolved</option>
+</select>
+</td>
+<td class="p-stack-md text-on-surface hidden lg:table-cell">parks_watcher</td>
+<td class="p-stack-md text-secondary hidden xl:table-cell">39.9392, 32.8488</td>
+<td class="p-stack-md text-secondary">2024-05-13</td>
+<td class="p-stack-md text-right flex gap-2 justify-end">
+<button class="bg-surface-container-lowest border border-outline-variant text-primary rounded px-3 py-1 font-body-md text-body-md hover:bg-surface-container-low transition-colors">Edit</button>
+<button class="bg-error text-on-error rounded px-3 py-1 font-body-md text-body-md hover:bg-error/90 transition-colors">Remove</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="p-stack-md text-on-surface font-medium">Broken Streetlight</td>
+<td class="p-stack-md text-secondary truncate max-w-[200px] hidden md:table-cell">Streetlight out on Tunalı Hilmi, dark area.</td>
+<td class="p-stack-md text-on-surface">Infrastructure</td>
+<td class="p-stack-md">
+<select class="bg-surface-container-lowest border border-outline-variant rounded px-2 py-1 text-data-table focus:border-primary focus:ring-1 focus:ring-primary outline-none text-tertiary-fixed-dim">
+<option value="pending">Pending</option>
+<option value="in_progress">In Progress</option>
+<option selected="" value="resolved">Resolved</option>
+</select>
+</td>
+<td class="p-stack-md text-on-surface hidden lg:table-cell">night_owl</td>
+<td class="p-stack-md text-secondary hidden xl:table-cell">39.9075, 32.8601</td>
+<td class="p-stack-md text-secondary">2024-05-10</td>
+<td class="p-stack-md text-right flex gap-2 justify-end">
+<button class="bg-surface-container-lowest border border-outline-variant text-primary rounded px-3 py-1 font-body-md text-body-md hover:bg-surface-container-low transition-colors">Edit</button>
+<button class="bg-error text-on-error rounded px-3 py-1 font-body-md text-body-md hover:bg-error/90 transition-colors">Remove</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="p-stack-md border-t border-outline-variant bg-surface-container-low flex justify-between items-center">
+<div class="font-body-md text-body-md text-secondary hidden sm:block">Showing 1 to 3 of 12,458 entries</div>
+<div class="flex gap-unit">
+<button class="bg-surface-container-lowest border border-outline-variant text-on-surface rounded px-3 py-1 font-body-md text-body-md hover:bg-surface-variant transition-colors disabled:opacity-50" disabled="">Prev</button>
+<button class="bg-primary border border-primary text-on-primary rounded px-3 py-1 font-body-md text-body-md">1</button>
+<button class="bg-surface-container-lowest border border-outline-variant text-on-surface rounded px-3 py-1 font-body-md text-body-md hover:bg-surface-variant transition-colors">2</button>
+<button class="bg-surface-container-lowest border border-outline-variant text-on-surface rounded px-3 py-1 font-body-md text-body-md hover:bg-surface-variant transition-colors">3</button>
+<span class="px-2 py-1 text-secondary">...</span>
+<button class="bg-surface-container-lowest border border-outline-variant text-on-surface rounded px-3 py-1 font-body-md text-body-md hover:bg-surface-variant transition-colors">Next</button>
+</div>
+</div>
+</section>
+<!-- Secondary Section: Map Preview -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded mb-stack-lg p-container-padding">
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-stack-md">Area Overview: Ankara</h2>
+<div class="relative w-full h-[400px] border border-outline-variant rounded overflow-hidden bg-tertiary-fixed-dim/20" data-location="Ankara, Turkey" style="">
+<!-- Placeholder map background representing a muted-green grid map -->
+<div class="absolute inset-0 bg-cover bg-center opacity-80" data-alt="A minimalist, top-down map of Ankara, Turkey, rendered in a muted-green civic style with a faint grid overlay. The map should look like a digital dashboard tool, clean, highly functional, and lacking unnecessary topographic detail. Light gray background level 0 style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDwQr2L0QqMcW-b0JsVFvtNLhkBs6tFFbKvXV-Th1NqZKSEa9XDTf8ec9aH1sJ5IkA3lRLKTKNC8gt0Abzsji4As0-RFl0PVGhsPLlsSMsbnbj0Aq6CsdIKgT5vUDgiuQegzOknni26cwxxAyydCE60ArvVpGd09F3SaYRqwH_qxwtbYE185pMBbxOLVkyq7OnKg5zTj0fmYhKugz3_RkRdjPd5qm1cHEIYjSBojr2apNj0p8vU5reK')"></div>
+<!-- Map Markers (Simulated) -->
+<!-- Pending (Red) -->
+<div class="absolute top-[30%] left-[45%] w-4 h-4 bg-error rounded-full border-2 border-white shadow-sm flex items-center justify-center" title="Pending Issue"></div>
+<!-- In Progress (Yellow) -->
+<div class="absolute top-[50%] left-[60%] w-4 h-4 bg-yellow-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center" title="In Progress Issue"></div>
+<!-- Resolved (Green) -->
+<div class="absolute top-[70%] left-[30%] w-4 h-4 bg-tertiary-fixed-dim rounded-full border-2 border-white shadow-sm flex items-center justify-center" title="Resolved Issue"></div>
+<div class="absolute top-[40%] left-[20%] w-4 h-4 bg-tertiary-fixed-dim rounded-full border-2 border-white shadow-sm flex items-center justify-center" title="Resolved Issue"></div>
+</div>
+</section>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-low border-t border-outline-variant w-full mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center w-full py-stack-md px-container-padding max-w-[1520px] mx-auto">
+<div class="font-label-bold text-label-bold text-primary mb-2 md:mb-0">
+                © 2024 GeoIssue Internship Project
+            </div>
+<nav class="flex gap-4 font-label-sm text-label-sm">
+<a class="text-secondary hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-secondary hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-secondary hover:text-primary transition-colors" href="#">Contact Support</a>
+</nav>
+</div>
+</footer>
+</body></html>
