@@ -44,10 +44,10 @@ async function searchNominatim(query) {
 
 router.get("/", async (req, res, next) => {
   try {
-    const query = req.query.q?.trim();
+    const query = typeof req.query.q === "string" ? req.query.q.trim() : "";
 
-    if (!query || query.length < 2) {
-      return res.status(400).json({ message: "Enter at least two characters." });
+    if (!query || query.length < 2 || query.length > 120) {
+      return res.status(400).json({ message: "Enter between 2 and 120 characters." });
     }
 
     const cacheKey = query.toLowerCase();

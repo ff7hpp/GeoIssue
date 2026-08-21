@@ -14,9 +14,10 @@ html[data-theme="dark"] {
 
 body {
   margin: 0;
-  background: #f4f5f7;
-  color: #181a1f;
-  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  background: #f4f6f5;
+  color: #13231c;
+  font-family: "Noto Sans Arabic", "Segoe UI", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 html[data-theme="dark"] body {
@@ -40,6 +41,6 @@ button, a, input, select, textarea {
 }
 
 button:focus-visible, a:focus-visible {
-  outline: 2px solid #ef334e;
-  outline-offset: 2px;
+  outline: 3px solid color-mix(in srgb, #0b5138 35%, transparent);
+  outline-offset: 3px;
 }
