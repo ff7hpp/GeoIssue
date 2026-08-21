@@ -11,15 +11,29 @@ import {
 
 const router = express.Router();
 const statuses = ["Pending", "In Progress", "Resolved"];
+const categories = ["Road", "Water", "Electricity", "Traffic", "Environment", "Other"];
+
+function readIssueId(value) {
+  const id = Number(value);
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
+}
 
 function readIssue(body) {
-  const title = body.title?.trim();
-  const description = body.description?.trim();
-  const category = body.category?.trim();
+  if (!body || typeof body !== "object" || Array.isArray(body)) return null;
+
+  const title = typeof body.title === "string" ? body.title.trim() : "";
+  const description = typeof body.description === "string" ? body.description.trim() : "";
+  const category = typeof body.category === "string" ? body.category.trim() : "";
   const latitude = Number(body.latitude);
   const longitude = Number(body.longitude);
 
-  if (!title || !description || !category || Number.isNaN(latitude) || Number.isNaN(longitude)) {
+  if (
+    !title || title.length > 160 ||
+    !description || description.length > 3000 ||
+    !categories.includes(category) ||
+    !Number.isFinite(latitude) || latitude < -90 || latitude > 90 ||
+    !Number.isFinite(longitude) || longitude < -180 || longitude > 180
+  ) {
     return null;
   }
 
@@ -52,7 +66,10 @@ router.post("/", requireAuth, async (req, res) => {
 });
 
 router.put("/:id", requireAuth, async (req, res) => {
-  const issue = await findIssue(req.params.id);
+  const issueId = readIssueId(req.params.id);
+  if (!issueId) return res.status(400).json({ message: "A valid issue ID is required." });
+
+  const issue = await findIssue(issueId);
   const issueData = readIssue(req.body);
 
   if (!issue) {
@@ -67,12 +84,17 @@ router.put("/:id", requireAuth, async (req, res) => {
     return res.status(400).json({ message: "Title, description, category, and coordinates are required." });
   }
 
-  return res.json({ issue: await updateIssue(req.params.id, issueData) });
+  return res.json({ issue: await updateIssue(issueId, issueData) });
 });
 
 router.patch("/:id/status", requireAuth, async (req, res) => {
-  const issue = await findIssue(req.params.id);
-  const { status } = req.body;
+  const issueId = readIssueId(req.params.id);
+  if (!issueId) return res.status(400).json({ message: "A valid issue ID is required." });
+
+  const issue = await findIssue(issueId);
+  const status = req.body && typeof req.body === "object" && !Array.isArray(req.body)
+    ? req.body.status
+    : null;
 
   if (!issue) {
     return res.status(404).json({ message: "Issue not found." });
@@ -86,11 +108,14 @@ router.patch("/:id/status", requireAuth, async (req, res) => {
     return res.status(400).json({ message: "Status must be Pending, In Progress, or Resolved." });
   }
 
-  return res.json({ issue: await updateIssueStatus(req.params.id, status) });
+  return res.json({ issue: await updateIssueStatus(issueId, status) });
 });
 
 router.delete("/:id", requireAuth, async (req, res) => {
-  const issue = await findIssue(req.params.id);
+  const issueId = readIssueId(req.params.id);
+  if (!issueId) return res.status(400).json({ message: "A valid issue ID is required." });
+
+  const issue = await findIssue(issueId);
 
   if (!issue) {
     return res.status(404).json({ message: "Issue not found." });
@@ -100,7 +125,7 @@ router.delete("/:id", requireAuth, async (req, res) => {
     return res.status(403).json({ message: "You can only remove your own reports." });
   }
 
-  await deleteIssue(req.params.id);
+  await deleteIssue(issueId);
   return res.status(204).send();
 });
 

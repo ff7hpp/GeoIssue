@@ -6,7 +6,7 @@ import {
   signOut as firebaseSignOut,
   updateProfile,
 } from "firebase/auth";
-import { LogOut, Moon, Plus, Sun } from "lucide-react";
+import { BarChart3, FilePlus2, LogOut, MapPinned, Moon, Plus, Sparkles, Sun, TrendingUp } from "lucide-react";
 import { issueApi } from "./api";
 import AuthPage from "./components/AuthPage";
 import IssueMap from "./components/IssueMap";
@@ -16,22 +16,24 @@ import "./App.css";
 
 const categories = ["Road", "Water", "Electricity", "Traffic", "Environment", "Other"];
 const statuses = ["Pending", "In Progress", "Resolved"];
+const categoryLabels = { Road: "الطرق", Water: "المياه", Electricity: "الكهرباء", Traffic: "المرور", Environment: "البيئة", Other: "أخرى" };
+const statusLabels = { Pending: "جديد", "In Progress": "قيد المعالجة", Resolved: "تم الحل" };
 const emptyForm = {
   title: "",
   description: "",
   category: "Road",
-  latitude: 39.9207,
-  longitude: 32.8541,
+  latitude: null,
+  longitude: null,
 };
 
 function authMessage(error) {
   const messages = {
-    "auth/email-already-in-use": "This email already has an account.",
-    "auth/invalid-credential": "Email or password is incorrect.",
-    "auth/operation-not-allowed": "Enable Email/Password in the Firebase Authentication console.",
-    "auth/too-many-requests": "Too many attempts. Please wait and try again.",
+    "auth/email-already-in-use": "هذا البريد مرتبط بحساب موجود.",
+    "auth/invalid-credential": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "auth/operation-not-allowed": "تسجيل الدخول بالبريد غير متاح حاليًا.",
+    "auth/too-many-requests": "محاولات كثيرة. انتظر قليلًا ثم حاول مجددًا.",
   };
-  return messages[error.code] || error.message || "Authentication failed.";
+  return messages[error.code] || error.message || "تعذر تسجيل الدخول.";
 }
 
 function App() {
@@ -56,6 +58,8 @@ function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
+    document.documentElement.lang = "ar";
+    document.documentElement.dir = "rtl";
     localStorage.setItem("geoissue-theme", theme);
   }, [theme]);
 
@@ -141,7 +145,12 @@ function App() {
     setMessage("");
 
     if (!form.title.trim() || !form.description.trim()) {
-      setMessage("Please enter a title and description.");
+      setMessage("أدخل عنوان البلاغ ووصفه قبل الإرسال.");
+      return;
+    }
+
+    if (!Number.isFinite(form.latitude) || !Number.isFinite(form.longitude)) {
+      setMessage("حدد موقع البلاغ من الخريطة أو استخدم موقعك الحالي قبل الإرسال.");
       return;
     }
 
@@ -178,7 +187,7 @@ function App() {
   }
 
   async function removeIssue(id) {
-    if (!window.confirm("Remove this report?")) return;
+    if (!window.confirm("هل تريد حذف هذا البلاغ نهائيًا؟")) return;
 
     try {
       await issueApi.remove(id);
@@ -198,11 +207,11 @@ function App() {
     }
   }
 
-  const userName = user?.displayName || user?.email?.split("@")[0] || "User";
+  const userName = user?.displayName || user?.email?.split("@")[0] || "مستخدم";
   const totalIssues = issues.length;
   const pendingIssues = issues.filter((issue) => issue.status === "Pending").length;
   const resolvedIssues = issues.filter((issue) => issue.status === "Resolved").length;
-  const themeLabel = theme === "dark" ? "Use light mode" : "Use dark mode";
+  const themeLabel = theme === "dark" ? "استخدام الوضع الفاتح" : "استخدام الوضع الداكن";
 
   const themeButton = (
     <button className="icon-button theme-toggle" type="button" onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")} aria-label={themeLabel} title={themeLabel}>
@@ -211,28 +220,29 @@ function App() {
   );
 
   if (authLoading) {
-    return <div className="app-loading">Loading GeoIssue...</div>;
+    return <div className="app-loading"><span className="brand-mark">G</span><p>جارٍ تجهيز منصّة GeoIssue...</p></div>;
   }
 
   return (
     <div className="app">
       <header className="topbar">
         <div className="topbar-inner">
-          <button className="brand" type="button" onClick={() => setPage(user ? "reports" : "sign-in")}>GeoIssue</button>
+          <button className="brand" type="button" onClick={() => setPage(user ? "reports" : "sign-in")}><span className="brand-mark">G</span><span><b>GeoIssue</b><small>منصة البلاغات الحضرية</small></span></button>
 
           {user ? (
             <>
-              <nav className="main-nav" aria-label="Main navigation">
-                <button className={page === "dashboard" ? "nav-link active" : "nav-link"} type="button" onClick={() => setPage("dashboard")}>Dashboard</button>
-                <button className={page === "reports" ? "nav-link active" : "nav-link"} type="button" onClick={() => setPage("reports")}>Reports</button>
+              <nav className="main-nav" aria-label="التنقل الرئيسي">
+                <button className={page === "dashboard" ? "nav-link active" : "nav-link"} type="button" onClick={() => setPage("dashboard")}><BarChart3 size={17} />لوحة المتابعة</button>
+                <button className={page === "reports" ? "nav-link active" : "nav-link"} type="button" onClick={() => setPage("reports")}><MapPinned size={17} />البلاغات</button>
+                <button className={page === "insights" ? "nav-link active" : "nav-link"} type="button" onClick={() => setPage("insights")}><TrendingUp size={17} />التحليلات</button>
               </nav>
-              <div className="account-area"><span>{userName}</span>{themeButton}<button className="sign-out-button" type="button" onClick={signOut}><LogOut size={16} />Sign out</button></div>
+              <div className="account-area"><span className="user-chip"><small>مرحبًا</small>{userName}</span>{themeButton}<button className="sign-out-button" type="button" onClick={signOut}><LogOut size={16} />خروج</button></div>
             </>
           ) : (
             <nav className="auth-nav">
               {themeButton}
-              <button className="nav-link" type="button" onClick={() => { setAuthError(""); setPage("sign-in"); }}>Sign in</button>
-              <button className="header-register" type="button" onClick={() => { setAuthError(""); setPage("register"); }}>Create account</button>
+              <button className="nav-link" type="button" onClick={() => { setAuthError(""); setPage("sign-in"); }}>تسجيل الدخول</button>
+              <button className="header-register" type="button" onClick={() => { setAuthError(""); setPage("register"); }}>إنشاء حساب</button>
             </nav>
           )}
         </div>
@@ -262,7 +272,7 @@ function App() {
             onRemove={removeIssue}
             loading={issuesLoading}
           />
-        ) : (
+        ) : page === "dashboard" ? (
           <DashboardPage
             total={totalIssues}
             pending={pendingIssues}
@@ -281,10 +291,12 @@ function App() {
             onStatusChange={updateStatus}
             loading={issuesLoading}
           />
+        ) : (
+          <InsightsPage issues={issues} onCreate={() => setPage("reports")} />
         )}
       </main>
 
-      <footer className="footer">GeoIssue Internship Project</footer>
+      <footer className="footer"><span>GeoIssue</span><p>مدينة أوضح تبدأ ببلاغ أدق.</p></footer>
     </div>
   );
 }
@@ -292,27 +304,30 @@ function App() {
 function ReportsPage({ form, editingId, issues, allIssues, search, categoryFilter, currentUserId, onChange, onChooseLocation, onSubmit, onCancel, onSearch, onCategoryFilter, onEdit, onRemove, loading }) {
   return (
     <section>
-      <div className="page-heading"><h1>Report a City Issue</h1><p>Log a civic problem for review.</p></div>
+      <div className="page-heading"><p className="eyebrow">بلاغ جديد</p><h1>ساعدنا في تحسين مدينتك</h1><p>صف المشكلة وحدد موقعها على الخريطة، وسنتابع حالة البلاغ معك.</p></div>
       <div className="report-layout">
         <section className="panel report-form-panel">
-          <h2>{editingId !== null ? "Edit Report" : "Add New Issue"}</h2>
+          <div className="section-kicker"><FilePlus2 size={19} /><span>تفاصيل البلاغ</span></div><h2>{editingId !== null ? "تعديل البلاغ" : "ما المشكلة التي لاحظتها؟"}</h2>
           <form onSubmit={onSubmit}>
-            <label htmlFor="title">Title</label>
-            <input id="title" value={form.title} onChange={(event) => onChange("title", event.target.value)} placeholder="E.g., Pothole on Main St" />
-            <label htmlFor="description">Description</label>
-            <textarea id="description" rows="5" value={form.description} onChange={(event) => onChange("description", event.target.value)} placeholder="Provide details about the issue..." />
-            <label htmlFor="category">Category</label>
-            <select id="category" value={form.category} onChange={(event) => onChange("category", event.target.value)}>{categories.map((category) => <option key={category} value={category}>{category}</option>)}</select>
-            <label>Location Coordinates</label>
-            <div className="two-fields coordinates"><input readOnly value={`Lat: ${form.latitude.toFixed(5)}`} /><input readOnly value={`Lng: ${form.longitude.toFixed(5)}`} /></div>
-            <div className="form-actions">{editingId !== null && <button className="secondary-button" type="button" onClick={onCancel}>Cancel</button>}<button className="primary-button" type="submit">{editingId !== null ? "Update Report" : "Submit Report"}</button></div>
+            <label htmlFor="title">عنوان مختصر</label>
+            <input id="title" value={form.title} onChange={(event) => onChange("title", event.target.value)} placeholder="مثال: حفرة كبيرة في الطريق الرئيسي" />
+            <label htmlFor="description">وصف المشكلة</label>
+            <textarea id="description" rows="5" value={form.description} onChange={(event) => onChange("description", event.target.value)} placeholder="أضف تفاصيل تساعد فريق المعالجة على فهم المشكلة..." />
+            <label htmlFor="category">التصنيف</label>
+            <select id="category" value={form.category} onChange={(event) => onChange("category", event.target.value)}>{categories.map((category) => <option key={category} value={category}>{categoryLabels[category]}</option>)}</select>
+            <label>إحداثيات الموقع</label>
+            <div className="two-fields coordinates" dir="ltr">
+              <input aria-label="خط العرض" readOnly value={Number.isFinite(form.latitude) ? `Lat: ${form.latitude.toFixed(5)}` : "Lat: —"} />
+              <input aria-label="خط الطول" readOnly value={Number.isFinite(form.longitude) ? `Lng: ${form.longitude.toFixed(5)}` : "Lng: —"} />
+            </div>
+            <div className="form-actions">{editingId !== null && <button className="secondary-button" type="button" onClick={onCancel}>إلغاء</button>}<button className="primary-button" type="submit">{editingId !== null ? "حفظ التعديلات" : "إرسال البلاغ"}</button></div>
           </form>
         </section>
         <IssueMap latitude={form.latitude} longitude={form.longitude} issues={allIssues} onPick={onChooseLocation} />
       </div>
 
       <section className="panel reports-panel">
-        <div className="panel-title-row table-title-row"><h2>Community Reports</h2><div className="filters"><input type="search" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Search reports..." /><select value={categoryFilter} onChange={(event) => onCategoryFilter(event.target.value)}><option value="All">All Categories</option>{categories.map((category) => <option key={category} value={category}>{category}</option>)}</select></div></div>
+        <div className="panel-title-row table-title-row"><div><span className="section-label">المجتمع</span><h2>أحدث البلاغات</h2></div><div className="filters"><input aria-label="البحث في البلاغات" type="search" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="ابحث في البلاغات..." /><select aria-label="تصفية حسب التصنيف" value={categoryFilter} onChange={(event) => onCategoryFilter(event.target.value)}><option value="All">كل التصنيفات</option>{categories.map((category) => <option key={category} value={category}>{categoryLabels[category]}</option>)}</select></div></div>
         <IssueTable issues={issues} currentUserId={currentUserId} onEdit={onEdit} onRemove={onRemove} loading={loading} />
       </section>
     </section>
@@ -322,10 +337,10 @@ function ReportsPage({ form, editingId, issues, allIssues, search, categoryFilte
 function DashboardPage({ total, pending, resolved, issues, search, categoryFilter, statusFilter, currentUserId, onSearch, onCategoryFilter, onStatusFilter, onCreate, onEdit, onRemove, onStatusChange, loading }) {
   return (
     <section>
-      <div className="page-heading dashboard-heading"><div><h1>System Overview</h1><p>Real-time status of reported civic issues.</p></div><button className="primary-button" type="button" onClick={onCreate}><Plus size={17} />Create Report</button></div>
-      <div className="stat-grid"><StatCard label="Total Reports" value={total} type="total" /><StatCard label="Pending" value={pending} type="pending" /><StatCard label="Resolved" value={resolved} type="resolved" /></div>
+      <div className="page-heading dashboard-heading"><div><p className="eyebrow">مركز المتابعة</p><h1>صورة واضحة عن المدينة</h1><p>تابع البلاغات ومراحل معالجتها من مكان واحد.</p></div><button className="primary-button" type="button" onClick={onCreate}><Plus size={17} />إنشاء بلاغ</button></div>
+      <div className="stat-grid"><StatCard label="إجمالي البلاغات" value={total} type="total" /><StatCard label="بانتظار المراجعة" value={pending} type="pending" /><StatCard label="تم حلها" value={resolved} type="resolved" /></div>
       <section className="panel admin-panel">
-        <div className="panel-title-row table-title-row"><h2>Recent Reports</h2><div className="filters admin-filters"><input type="search" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Search issues..." /><select value={categoryFilter} onChange={(event) => onCategoryFilter(event.target.value)}><option value="All">All Categories</option>{categories.map((category) => <option key={category} value={category}>{category}</option>)}</select><select value={statusFilter} onChange={(event) => onStatusFilter(event.target.value)}><option value="All">All Statuses</option>{statuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></div></div>
+        <div className="panel-title-row table-title-row"><div><span className="section-label">إدارة البلاغات</span><h2>سجل النشاط</h2></div><div className="filters admin-filters"><input aria-label="البحث في البلاغات" type="search" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="ابحث عن بلاغ..." /><select aria-label="تصفية حسب التصنيف" value={categoryFilter} onChange={(event) => onCategoryFilter(event.target.value)}><option value="All">كل التصنيفات</option>{categories.map((category) => <option key={category} value={category}>{categoryLabels[category]}</option>)}</select><select aria-label="تصفية حسب الحالة" value={statusFilter} onChange={(event) => onStatusFilter(event.target.value)}><option value="All">كل الحالات</option>{statuses.map((status) => <option key={status} value={status}>{statusLabels[status]}</option>)}</select></div></div>
         <IssueTable admin issues={issues} currentUserId={currentUserId} onEdit={onEdit} onRemove={onRemove} onStatusChange={onStatusChange} loading={loading} />
       </section>
     </section>
@@ -333,7 +348,49 @@ function DashboardPage({ total, pending, resolved, issues, search, categoryFilte
 }
 
 function StatCard({ label, value, type }) {
-  return <section className={`stat-card ${type}`}><span>{label}</span><strong>{value}</strong></section>;
+  return <section className={`stat-card ${type}`}><span>{label}</span><strong>{value}</strong><small>محدّث الآن</small></section>;
+}
+
+function InsightsPage({ issues, onCreate }) {
+  const total = issues.length;
+  const resolved = issues.filter((issue) => issue.status === "Resolved").length;
+  const progress = issues.filter((issue) => issue.status === "In Progress").length;
+  const resolutionRate = total ? Math.round((resolved / total) * 100) : 0;
+  const categoryCounts = categories.map((category) => ({
+    category,
+    count: issues.filter((issue) => issue.category === category).length,
+  })).sort((a, b) => b.count - a.count);
+  const highest = Math.max(...categoryCounts.map((item) => item.count), 1);
+
+  return (
+    <section>
+      <div className="page-heading dashboard-heading">
+        <div><p className="eyebrow">رؤية وتحليل</p><h1>بيانات تساعد على اتخاذ القرار</h1><p>ملخص حيّ لاتجاهات البلاغات وأداء المعالجة.</p></div>
+        <button className="primary-button" type="button" onClick={onCreate}><Plus size={17} />إضافة بلاغ</button>
+      </div>
+      <div className="insight-hero panel">
+        <div><span className="section-label">معدل الإنجاز</span><strong>{resolutionRate}%</strong><p>من إجمالي البلاغات المسجلة تم حلها بنجاح.</p></div>
+        <div className="progress-ring" style={{ "--progress": `${resolutionRate * 3.6}deg` }}><span>{resolutionRate}%</span></div>
+      </div>
+      <div className="insights-grid">
+        <section className="panel insight-panel">
+          <div className="panel-title-row"><div><span className="section-label">حسب التصنيف</span><h2>توزيع البلاغات</h2></div><Sparkles size={20} /></div>
+          <div className="bar-list">
+            {categoryCounts.map(({ category, count }) => (
+              <div className="bar-item" key={category}><div><span>{categoryLabels[category]}</span><b>{count}</b></div><div className="bar-track"><span style={{ width: `${(count / highest) * 100}%` }} /></div></div>
+            ))}
+          </div>
+        </section>
+        <section className="panel insight-panel response-card">
+          <span className="section-label">حالة العمل</span><h2>مؤشرات سريعة</h2>
+          <div className="metric-row"><span>قيد المعالجة الآن</span><strong>{progress}</strong></div>
+          <div className="metric-row"><span>تم إغلاقها</span><strong>{resolved}</strong></div>
+          <div className="metric-row"><span>إجمالي السجل</span><strong>{total}</strong></div>
+          <p className="insight-note">تساعد هذه المؤشرات فرق المدينة على ترتيب الأولويات ومتابعة الإنجاز.</p>
+        </section>
+      </div>
+    </section>
+  );
 }
 
 export default App;
