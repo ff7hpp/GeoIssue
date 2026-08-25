@@ -11,7 +11,7 @@ import { issueApi } from "./api";
 import AuthPage from "./components/AuthPage";
 import IssueMap from "./components/IssueMap";
 import IssueTable from "./components/IssueTable";
-import { auth } from "./firebase";
+import { auth, firebaseConfigured } from "./firebase";
 import "./App.css";
 
 const categories = ["Road", "Water", "Electricity", "Traffic", "Environment", "Other"];
@@ -46,7 +46,9 @@ function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [authBusy, setAuthBusy] = useState(false);
-  const [authError, setAuthError] = useState("");
+  const [authError, setAuthError] = useState(
+    firebaseConfigured ? "" : "أضف إعدادات Firebase إلى client/.env لتفعيل تسجيل الدخول."
+  );
   const [issues, setIssues] = useState([]);
   const [issuesLoading, setIssuesLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -64,6 +66,11 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
+    if (!auth) {
+      setAuthLoading(false);
+      return undefined;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (account) => {
       setUser(account);
       setAuthLoading(false);
@@ -103,6 +110,11 @@ function App() {
   }, [issues, search, categoryFilter, statusFilter]);
 
   async function handleAuthentication(account, mode) {
+    if (!auth) {
+      setAuthError("أضف إعدادات Firebase إلى client/.env لتفعيل تسجيل الدخول.");
+      return;
+    }
+
     try {
       setAuthBusy(true);
       setAuthError("");
@@ -123,6 +135,7 @@ function App() {
   }
 
   async function signOut() {
+    if (!auth) return;
     await firebaseSignOut(auth);
     setForm(emptyForm);
     setEditingId(null);
