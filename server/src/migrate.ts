@@ -1,0 +1,10 @@
+import { sql } from "./db.js";
+if (!sql) throw new Error("DATABASE_URL is required for migration.");
+await sql`CREATE TABLE IF NOT EXISTS users (user_id TEXT PRIMARY KEY, email TEXT NOT NULL, name TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'user', created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+await sql`CREATE TABLE IF NOT EXISTS categories (id SERIAL PRIMARY KEY, name TEXT UNIQUE NOT NULL)`;
+await sql`CREATE TABLE IF NOT EXISTS issues (id UUID PRIMARY KEY, title VARCHAR(160) NOT NULL, description VARCHAR(3000) NOT NULL, category TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'submitted', priority TEXT NOT NULL DEFAULT 'normal', latitude DOUBLE PRECISION NOT NULL, longitude DOUBLE PRECISION NOT NULL, report_count INTEGER NOT NULL DEFAULT 0, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+await sql`CREATE TABLE IF NOT EXISTS reports (id UUID PRIMARY KEY, issue_id UUID NOT NULL REFERENCES issues(id), reporter_id TEXT NOT NULL REFERENCES users(user_id), title VARCHAR(160) NOT NULL, description VARCHAR(3000) NOT NULL, category TEXT NOT NULL, latitude DOUBLE PRECISION NOT NULL, longitude DOUBLE PRECISION NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+await sql`CREATE TABLE IF NOT EXISTS issue_supporters (issue_id UUID NOT NULL REFERENCES issues(id), user_id TEXT NOT NULL REFERENCES users(user_id), PRIMARY KEY(issue_id, user_id))`;
+await sql`CREATE TABLE IF NOT EXISTS issue_status_history (id BIGSERIAL PRIMARY KEY, issue_id UUID NOT NULL REFERENCES issues(id), status TEXT NOT NULL, changed_by TEXT NOT NULL, note TEXT, changed_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+await sql`CREATE INDEX IF NOT EXISTS issues_geo_idx ON issues(category, status, latitude, longitude)`;
+console.log("GeoIssue migration complete");

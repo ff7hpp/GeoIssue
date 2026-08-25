@@ -1,40 +1,35 @@
-# ANKAGEO GeoIssue
+# GeoIssue — Report. Track. Resolve.
 
-GeoIssue is a beginner-friendly internship project for reporting city problems on a real map. The code is intentionally simple so each frontend and backend step is easy to review.
+GeoIssue is a compact, professional civic-tech MVP for reporting, grouping, tracking, and resolving location-based community issues. The code intentionally keeps the architecture small: one frontend screen, one API entrypoint, one domain module, and one migration.
 
 ## Current Features
 
-- Firebase email/password registration, sign-in, and sign-out
-- Persistent light and dark themes using a restrained 60-30-10 color system
-- Live Leaflet map with OpenStreetMap tiles
-- Browser location button and map-click coordinate selection
-- Readable nearest-address confirmation after clicking the map
-- Explicit place search through the backend using Nominatim
-- Common university abbreviations such as `uni` are expanded when a search has no result
-- Add, edit, remove, filter, and update issue status
-- Firebase-token protection for every write request
-- Neon PostgreSQL storage when `DATABASE_URL` is configured
-- Public read-only issue list
+- Report ≠ Issue: reports are citizen submissions; nearby reports are grouped into one real-world Issue.
+- Haversine matching with a configurable `MATCH_RADIUS_METERS` (default 50m).
+- Explicit `submitted → in_review → accepted → in_progress → resolved` lifecycle with rejection branch.
+- Local demo identity headers, server-side role checks, and admin routes; production auth can be added later without changing the report/issue model.
+- Leaflet/OpenStreetMap map, Nominatim proxy, responsive light/dark UI, and consistent response envelopes.
+- Neon PostgreSQL migration for users, categories, issues, reports, supporters, and status history.
+- Memory fallback for local study/demo use when `DATABASE_URL` is absent.
 
 Without `DATABASE_URL`, the API uses temporary in-memory demo data. With Neon configured, reports are stored permanently in PostgreSQL.
 
-## Project Structure
+## Minimal project structure
 
 ```text
 geoissue/
-|-- client/   React + Vite frontend
-`-- server/   Express API, Neon repository, Firebase checks, and geocoding proxy
+|-- client/src/App.tsx       UI, auth, map, report form, issue list
+|-- client/src/api.ts        typed API client
+|-- client/src/styles.css    design tokens and responsive styles
+`-- server/src/index.ts      API routes and response envelope
+   server/src/domain.ts      model, matching, validation, permissions
+   server/src/db.ts          Neon + memory storage boundary
+   server/src/migrate.ts     database schema
 ```
 
-## Firebase Setup
+## Local identity
 
-1. In Firebase Console, open **Authentication > Sign-in method**.
-2. Enable **Email/Password**.
-3. Copy `client/.env.example` to `client/.env` and add the Firebase web values.
-4. Download a Firebase Admin service-account JSON file and keep it outside Git.
-5. Copy `server/.env.example` to `server/.env` and set its path in `GOOGLE_APPLICATION_CREDENTIALS`.
-
-Service-account JSON files and `.env` files are ignored by Git. Never publish them.
+This study-friendly MVP intentionally has no external authentication provider. The client uses `demo-resident` and sends it as `x-user-id`; set `ADMIN_USER_ID=demo-admin` to exercise admin routes with that identity.
 
 ## Run Locally
 
@@ -58,15 +53,32 @@ Open `http://localhost:5173`. The API runs at `http://localhost:5000`.
 
 The **Use exact location** button requires browser location permission. It works on localhost during development and requires HTTPS after deployment. A phone with GPS normally gives a more accurate result than a desktop computer. If permission or GPS is unavailable, the interface offers an approximate city location based on the user's IP; click the map afterward to mark the exact issue position.
 
-## API Routes
+## API routes
 
 - `GET /api/health` - API and database connection status
-- `GET /api/issues` - public
-- `GET /api/geocode?q=Ankara` - public, cached place search
-- `POST /api/issues` - signed-in user
-- `PUT /api/issues/:id` - issue owner
-- `PATCH /api/issues/:id/status` - issue owner
-- `DELETE /api/issues/:id` - issue owner
+- `GET /api/issues`, `GET /api/issues/:id`, `GET /api/geocode?q=Ankara` - public
+- `GET /api/me`, `POST /api/me/sync`, `GET /api/me/reports` - authenticated
+- `POST /api/reports`, support routes - authenticated
+- `GET /api/admin/issues`, `PATCH /api/admin/issues/:id/status`, `PATCH /api/admin/issues/:id/priority`, `GET /api/admin/users` - admin
+
+All success responses are `{ data, meta }`; errors are `{ error: { code, message, fields? } }`. List endpoints accept `page` and `limit`.
+
+## Decisions
+
+- Design: Work Sans, dark navy `#04162f`, tonal gray surfaces, muted green for resolved/map states, warm yellow for active work, 4px geometry, and no shadows.
+- Matching: 50m default, overridden by `MATCH_RADIUS_METERS`.
+- Images: deferred because no attachment flow is in scope.
+- Hosting: Vercel frontend + Node-compatible backend + Neon recommended; domain remains deployment-specific.
+- Reviewer: intentionally merged into Admin for MVP. Splitting it later is a role/permission configuration change, not a domain rewrite.
+
+## Verification
+
+```bash
+cd client && npm run typecheck && npm run lint && npm run build
+cd ../server && npm run typecheck && npm test
+```
+
+Status: frontend checks **VERIFIED**; domain unit tests **VERIFIED**; local demo API **VERIFIED**; Neon flow **IMPLEMENTED-NOT-VERIFIED** until a database is supplied. The memory fallback is intentionally not a production data store.
 
 ## Neon PostgreSQL Setup
 

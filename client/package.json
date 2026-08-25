@@ -6,11 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "oxlint",
+    "lint": "oxlint src",
+    "typecheck": "tsc --noEmit",
     "preview": "vite preview"
   },
   "dependencies": {
-    "firebase": "^12.17.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.33.0",
     "react": "^19.2.8",
@@ -20,8 +20,10 @@
   "devDependencies": {
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@types/leaflet": "^1.9.16",
     "@vitejs/plugin-react": "^6.0.4",
     "oxlint": "^1.75.0",
+    "typescript": "^5.9.2",
     "vite": "^8.2.0"
   }
 }

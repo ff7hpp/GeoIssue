@@ -15,10 +15,8 @@ These instructions are the project source of truth for AI agents and future deve
 
 ```text
 client/                              React 19 + Vite frontend
-client/src/App.jsx                   Main application state and page composition
-client/src/components/               Auth, map, and issue table components
-client/src/api.js                    Frontend API and location-service client
-client/src/firebase.js               Firebase web configuration
+client/src/App.tsx                   Main application state, report form, and map composition
+client/src/api.ts                    Frontend API client
 server/                              Express 5 API
 server/src/index.js                  HTTP server, CORS, Helmet, health endpoint
 server/src/routes/issues.routes.js   Issue CRUD and ownership checks
@@ -58,22 +56,21 @@ npm run db:migrate  # requires a working DATABASE_URL
 
 Before running the app on a new laptop:
 
-1. Copy `client/.env.example` to `client/.env` and set the Firebase web values and `VITE_API_URL`.
-2. Copy `server/.env.example` to `server/.env` and set `PORT`, `CLIENT_ORIGIN`, `FIREBASE_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS`, and optionally `DATABASE_URL`.
-3. Keep Firebase Admin service-account JSON outside Git when practical. Never commit `.env` files, service-account files, or credentials.
+1. Copy `server/.env.example` to `server/.env` and set `PORT`, `CLIENT_ORIGIN`, `ADMIN_USER_ID`, and optionally `DATABASE_URL`.
+2. The MVP uses a local demo identity via the `x-user-id` header; no external auth provider is required.
 4. If `DATABASE_URL` is set, run `npm run db:migrate` from `server`; without it, the API intentionally falls back to temporary in-memory demo data.
 
 ## Runtime behavior and contracts
 
 - `GET /api/health` reports API/database status.
 - `GET /api/issues` is public read access.
-- `POST /api/issues` requires a Firebase ID token.
+- `POST /api/reports` requires the local `x-user-id` identity header.
 - `PUT /api/issues/:id`, `PATCH /api/issues/:id/status`, and `DELETE /api/issues/:id` require auth and currently allow only the issue owner.
 - Valid categories are `Road`, `Water`, `Electricity`, `Traffic`, `Environment`, and `Other`.
 - Valid statuses are `Pending`, `In Progress`, and `Resolved`.
 - Issue coordinates must be valid latitude/longitude values; issue titles are limited to 160 characters and descriptions to 3000 characters.
 - Public issue responses currently include `reporter` and `createdBy`; treat this as a known privacy risk and do not expand public personal-data exposure.
-- Firebase handles client authentication; the server verifies bearer tokens with Firebase Admin.
+- The server resolves the local demo identity and role; replace this middleware with production auth later if needed.
 - Neon PostgreSQL is optional. The repository layer must continue to support the memory fallback for demos unless the user explicitly removes it.
 - Geocoding is proxied through the server, cached in memory, and rate-limited to respect Nominatim usage. Preserve a descriptive User-Agent and do not add client-side direct Nominatim calls.
 

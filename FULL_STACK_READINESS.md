@@ -3,7 +3,7 @@
 ## Scope
 
 - Product: civic issue reporting web application
-- Current environment: local React/Vite client, Express API, Firebase Authentication, Neon PostgreSQL, Leaflet/OpenStreetMap and Nominatim
+- Current environment: local React/Vite client, Express API, local demo identity middleware, Neon PostgreSQL, Leaflet/OpenStreetMap and Nominatim
 - Review date: 2026-08-21
 - Release verdict: **NOT READY for public production; suitable as a technical MVP/demo**
 
@@ -36,11 +36,11 @@
 | Frontend/UX | VERIFIED for core desktop flow; partial mobile | Registration, map search, create/edit/status/delete, dashboard and insights exercised in a real browser | Add user/admin separation, settings, details/timeline, mobile logout, accessibility and device checks |
 | APIs/backend | VERIFIED for current CRUD | Authenticated CRUD, invalid input, 401/403, body limits and geocoding exercised | Add API versioning, public/private DTOs, pagination, detail, assignment, admin and settings endpoints |
 | Database/storage | VERIFIED for current single table | Neon connection, migration and persistent CRUD verified | Add profiles, roles, history, assignments, attachments, notifications, audit logs and migration recovery |
-| Authentication | VERIFIED for basic email/password | Registration, login state, Firebase token verification and logout work | Add email verification, password reset, account lifecycle and admin MFA policy |
+| Authentication | IMPLEMENTED-NOT-VERIFIED for local demo identity | `x-user-id` resolves a local user and server-side role | Replace with a production identity provider and account lifecycle policy if the MVP moves beyond study/demo use |
 | Authorization | MISSING | Ownership is enforced, but there is no RBAC; owners can change status and delete permanently | Add trusted roles/claims and server-enforced state/role policies |
 | Security/privacy | PARTIAL | Helmet, CORS allowlist, parameterized SQL, validation, safe errors and secret exclusion exist | Remove reporter/UID from public output, add rate limits, audit trail, privacy and retention rules |
 | Tests/quality gates | MISSING | Manual and temporary automated verification only; no committed suite | Add unit, API integration, migration, authorization and Playwright E2E tests |
-| Hosting/deployment/cloud | MISSING | Firebase and Neon services are configured; application runs locally | Select hosting, staging/production environments, HTTPS/domain, secret manager and rollback |
+| Hosting/deployment/cloud | MISSING | Neon is optional and application runs locally with memory fallback | Select hosting, staging/production environments, HTTPS/domain, secret manager and rollback |
 | Version control/CI/CD | MISSING | Git and lockfiles exist | Add CI for install, lint, tests, build, audit and migration verification |
 | Performance/cache/CDN/load balancing | IMPLEMENTED, NOT VERIFIED for production | Client build is about 146 KB gzip; geocode uses in-memory caching | Add production metrics and bounded cache; CDN/load balancing are N/A until traffic/availability requires them |
 | Reliability/backups/recovery | MISSING | Health endpoint confirms Neon connection | Add external-call timeouts, degraded states, backup/restore test and production fail-closed database configuration |
