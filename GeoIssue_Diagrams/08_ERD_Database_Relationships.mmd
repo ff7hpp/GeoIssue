@@ -1,0 +1,76 @@
+erDiagram
+  USERS ||--o{ REPORTS : creates
+  ISSUES ||--o{ REPORTS : contains
+  CATEGORIES ||--o{ ISSUES : classifies
+  USERS ||--o{ ISSUE_SUPPORTERS : supports
+  ISSUES ||--o{ ISSUE_SUPPORTERS : has
+  USERS ||--o{ ISSUE_STATUS_HISTORY : changes
+  ISSUES ||--o{ ISSUE_STATUS_HISTORY : records
+  USERS ||--o{ AUDIT_LOGS : performs
+
+  USERS {
+    uuid id PK
+    text firebase_uid UK
+    text email UK
+    text display_name
+    enum role
+    text language
+    enum account_status
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  CATEGORIES {
+    uuid id PK
+    text name
+    text slug UK
+    text icon
+    boolean is_active
+    timestamptz created_at
+  }
+  ISSUES {
+    uuid id PK
+    uuid category_id FK
+    text title
+    decimal latitude
+    decimal longitude
+    enum status
+    enum priority
+    int report_count
+    timestamptz created_at
+    timestamptz updated_at
+    timestamptz resolved_at
+  }
+  REPORTS {
+    uuid id PK
+    uuid issue_id FK
+    uuid user_id FK
+    text description
+    decimal latitude
+    decimal longitude
+    text image_url
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  ISSUE_SUPPORTERS {
+    uuid issue_id FK
+    uuid user_id FK
+    timestamptz created_at
+  }
+  ISSUE_STATUS_HISTORY {
+    uuid id PK
+    uuid issue_id FK
+    uuid changed_by_user_id FK
+    enum from_status
+    enum to_status
+    text note
+    timestamptz created_at
+  }
+  AUDIT_LOGS {
+    uuid id PK
+    uuid actor_user_id FK
+    text action
+    text entity_type
+    uuid entity_id
+    jsonb metadata
+    timestamptz created_at
+  }

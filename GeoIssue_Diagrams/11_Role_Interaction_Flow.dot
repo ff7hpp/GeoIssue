@@ -1,0 +1,34 @@
+digraph G {
+
+    graph [fontname="DejaVu Sans", bgcolor="white", pad="0.25", nodesep="0.45", ranksep="0.60"];
+    node  [fontname="DejaVu Sans", shape=box, style="rounded,filled", fillcolor="#FAFAFA", color="#D4D4D8", fontcolor="#18181B", margin="0.16,0.10"];
+    edge  [fontname="DejaVu Sans", color="#71717A", fontcolor="#52525B", arrowsize="0.8"];
+
+rankdir=TB; labelloc="t"; label="GeoIssue — Role Interaction / End-to-End Flow"; fontsize=20;
+subgraph cluster_user { label="Citizen / User"; color="#E4E4E7"; style="rounded";
+u1 [label="Browse map"];
+u2 [label="Create report or support issue"];
+u3 [label="Track status"];
+u4 [label="View resolved/rejected result"];
+u1 -> u2 -> u3 -> u4;
+}
+subgraph cluster_system { label="GeoIssue"; color="#E4E4E7"; style="rounded";
+s1 [label="Validate identity/input"];
+s2 [label="Match report to issue
+or create issue"];
+s3 [label="Persist + expose safe public data"];
+s1 -> s2 -> s3;
+}
+subgraph cluster_reviewer { label="Reviewer"; color="#E4E4E7"; style="rounded";
+r1 [label="Open review queue"];
+r2 [label="Inspect reports/support/location"];
+r3 [label="Accept / reject / prioritize"];
+r4 [label="Move to in_progress / resolved"];
+r1 -> r2 -> r3 -> r4;
+}
+subgraph cluster_admin { label="Admin"; color="#E4E4E7"; style="rounded";
+a1 [label="Manage users/roles/categories"];
+a2 [label="Review audit logs"];
+}
+u2 -> s1; s3 -> r1; r4 -> u3; a1 -> s3 [style=dashed]; r3 -> a2 [label="sensitive actions logged", style=dashed];
+}

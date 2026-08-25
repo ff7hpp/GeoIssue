@@ -1,0 +1,162 @@
+{
+  "app": {
+    "name": "GeoIssue",
+    "tagline": "Bildir. Takip Et. Çöz.",
+    "description": "Vatandaşları ve belediyeleri buluşturarak kentsel sorunları tespit eden, önceliklendiren ve çözen modern bir sivil teknoloji platformu."
+  },
+  "nav": {
+    "explore": "Haritayı Keşfet",
+    "issues": "Sorunlar",
+    "report": "Yeni Bildirim",
+    "myReports": "Bildirimlerim",
+    "admin": "Yönetici Paneli",
+    "login": "Giriş Yap",
+    "register": "Kayıt Ol",
+    "logout": "Çıkış Yap",
+    "settings": "Ayarlar",
+    "dashboard": "Panel"
+  },
+  "theme": {
+    "light": "Açık",
+    "dark": "Koyu",
+    "system": "Sistem"
+  },
+  "language": {
+    "en": "English",
+    "ar": "العربية",
+    "tr": "Türkçe"
+  },
+  "status": {
+    "submitted": "Gönderildi",
+    "in_review": "İnceleniyor",
+    "accepted": "Kabul Edildi",
+    "in_progress": "İşlemde",
+    "resolved": "Çözüldü",
+    "rejected": "Reddedildi"
+  },
+  "priority": {
+    "low": "Düşük",
+    "medium": "Orta",
+    "high": "Yüksek",
+    "urgent": "Acil"
+  },
+  "explore": {
+    "searchPlaceholder": "Başlığa veya anahtar kelimeye göre ara...",
+    "allCategories": "Tüm Kategoriler",
+    "allStatuses": "Tüm Durumlar",
+    "activeOnly": "Sadece Aktifler",
+    "issuesCount": "{{count}} Sorun Bulundu",
+    "viewMap": "Harita Görünümü",
+    "viewList": "Liste Görünümü",
+    "noIssuesFound": "Arama kriterlerinize uygun sorun bulunamadı.",
+    "selectOnMap": "Detayları görüntülemek için haritadan veya listeden bir soruna tıklayın."
+  },
+  "issue": {
+    "details": "Sorun Detayları",
+    "canonicalProblem": "Birleşik Topluluk Sorunu",
+    "reportsCount": "{{count}} vatandaş bildirimi eklendi",
+    "supportersCount": "{{count}} destekçi",
+    "supportAction": "Sorunu Destekle",
+    "supportedAction": "Desteklendi",
+    "statusTimeline": "Çözüm Süreci Zaman Çizelgesi",
+    "citizenReports": "Eklenen Vatandaş Bildirimleri",
+    "reportBy": "Bildiren: {{name}}",
+    "noReports": "Henüz bildirim eklenmedi.",
+    "location": "Konum Koordinatları",
+    "created": "Oluşturulma {{date}}",
+    "updated": "Güncellenme {{date}}",
+    "resolved": "Çözülme {{date}}"
+  },
+  "reportWizard": {
+    "title": "Topluluk Sorunu Bildir",
+    "subtitle": "Kentsel problemleri bildirerek şehrinizin gelişimine katkıda bulunun.",
+    "step1": "1. Konum",
+    "step2": "2. Detaylar",
+    "step3": "3. Fotoğraf",
+    "step4": "4. İnceleme",
+    "step5": "5. Onay",
+    "selectLocationInstruction": "Sorunun konumunu hassas şekilde belirlemek için haritaya tıklayın veya GPS kullanın.",
+    "useGps": "Mevcut GPS Konumumu Kullan",
+    "gpsSuccess": "Konum cihazdan başarıyla alındı.",
+    "searchLocation": "Sokak, mahalle veya mekan ara...",
+    "selectedCoords": "Seçilen Konum: {{lat}}, {{lon}}",
+    "categoryLabel": "Sorun Kategorisi",
+    "categoryPlaceholder": "Kategori seçin...",
+    "issueTitleLabel": "Sorun Başlığı (İsteğe bağlı)",
+    "issueTitlePlaceholder": "Örn: Atatürk Caddesi üzerindeki çukur",
+    "descriptionLabel": "Detaylı Açıklama",
+    "descriptionPlaceholder": "Gördüğünüz sorunu, oluşturduğu tehlikeleri ve ne zamandır devam ettiğini açıklayın...",
+    "photoLabel": "Fotoğraf Ekle (İsteğe bağlı)",
+    "photoInstruction": "Sorunu gösteren bir fotoğraf yükleyin.",
+    "photoUrlPlaceholder": "Veya doğrudan görsel bağlantısını yapıştırın...",
+    "reviewTitle": "Bildiriminizi Kontrol Edin",
+    "reviewNotice": "Sistemimiz yakındaki vatandaşların (50 metre mesafede) benzer bildirimde bulunup bulunmadığını otomatik kontrol eder ve mükerrer kayıtları önler.",
+    "submitButton": "Bildirimi Gönder",
+    "submitting": "Gönderiliyor...",
+    "back": "Geri",
+    "next": "Devam Et",
+    "successTitle": "Bildiriminiz Başarıyla Gönderildi!",
+    "attachedToExisting": "Bildiriminiz yakındaki ({{distance}}m mesafedeki) mevcut bir soruna bağlandı. Bu sayede mükerrer kayıt açılmadan sorun önceliği yükseltildi!",
+    "newIssueCreated": "Bildiriminiz için yeni bir topluluk sorunu kaydı oluşturuldu. Takibini Bildirimlerim sayfasından yapabilirsiniz.",
+    "viewIssue": "Sorunu Haritada Gör",
+    "createAnother": "Yeni Bir Bildirim Yap"
+  },
+  "myReports": {
+    "title": "Bildirdiğim Sorunlar",
+    "subtitle": "Gönderdiğiniz tüm bildirimleri ve belediye inceleme durumlarını takip edin.",
+    "noReports": "Henüz herhangi bir bildirimde bulunmadınız.",
+    "reportNew": "İlk Bildiriminizi Yapın",
+    "edit": "Düzenle",
+    "delete": "Sil",
+    "deleteConfirm": "Bu bildirimi silmek istediğinizden emin misiniz? Bildiriminiz sorundan ayrılacaktır."
+  },
+  "admin": {
+    "portal": "Yönetici Operasyon Paneli",
+    "subtitle": "Vatandaş bildirimlerini inceleyin, durum süreçlerini güncelleyin ve ekipleri yönlendirin.",
+    "tabs": {
+      "issues": "Sorun İnceleme Kuyruğu",
+      "categories": "Kategoriler",
+      "users": "Kullanıcı Hesapları"
+    },
+    "changeStatus": "Durumu Değiştir",
+    "changePriority": "Önceliği Değiştir",
+    "addNotePlaceholder": "İnceleme notu veya işlem gerekçesi girin...",
+    "updateStatusAction": "Durumu Güncelle",
+    "statusUpdatedSuccess": "Sorun durumu başarıyla güncellendi.",
+    "priorityUpdatedSuccess": "Sorun önceliği güncellendi.",
+    "createCategory": "Yeni Kategori Ekle",
+    "categoryName": "Kategori Adı",
+    "categorySlug": "URL Kısa Adı",
+    "categoryIcon": "Lucide İkon Adı",
+    "save": "Kaydet",
+    "userRole": "Rol",
+    "accountStatus": "Hesap Durumu"
+  },
+  "auth": {
+    "signInTitle": "Tekrar Hoş Geldiniz",
+    "signInSubtitle": "Sorun bildirmek ve takibini yapmak için giriş yapın.",
+    "signUpTitle": "GeoIssue'ya Katılın",
+    "signUpSubtitle": "Şehrinizi güzelleştirmek için hemen bir hesap oluşturun.",
+    "email": "E-posta Adresi",
+    "password": "Şifre",
+    "displayName": "Ad Soyad / Vatandaş Adı",
+    "signInButton": "Giriş Yap",
+    "signUpButton": "Hesap Oluştur",
+    "noAccount": "Hesabınız yok mu?",
+    "haveAccount": "Zaten hesabınız var mı?",
+    "demoAccounts": "Hızlı Demo Girişi:",
+    "demoAdmin": "Demo Yönetici",
+    "demoUser": "Demo Vatandaş"
+  },
+  "common": {
+    "loading": "Yükleniyor...",
+    "error": "Bir hata oluştu",
+    "retry": "Tekrar Dene",
+    "cancel": "İptal",
+    "close": "Kapat",
+    "save": "Kaydet",
+    "delete": "Sil",
+    "optional": "İsteğe bağlı",
+    "required": "Zorunlu"
+  }
+}

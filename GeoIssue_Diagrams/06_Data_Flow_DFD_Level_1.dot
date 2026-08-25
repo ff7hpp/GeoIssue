@@ -1,0 +1,41 @@
+digraph G {
+
+    graph [fontname="DejaVu Sans", bgcolor="white", pad="0.25", nodesep="0.45", ranksep="0.60"];
+    node  [fontname="DejaVu Sans", shape=box, style="rounded,filled", fillcolor="#FAFAFA", color="#D4D4D8", fontcolor="#18181B", margin="0.16,0.10"];
+    edge  [fontname="DejaVu Sans", color="#71717A", fontcolor="#52525B", arrowsize="0.8"];
+
+rankdir=LR; labelloc="t"; label="GeoIssue — Data Flow Diagram (Level 1)"; fontsize=20;
+node [shape=box];
+user [label="External Entity
+User / Visitor"];
+reviewer [label="External Entity
+Reviewer / Admin"];
+firebase [label="External System
+Firebase Auth"];
+nominatim [label="External System
+Nominatim"];
+storage [label="External System
+Image Storage"];
+node [shape=ellipse, fillcolor="#F4F4F5"];
+p1 [label="1. Authentication & Identity"];
+p2 [label="2. Public Issue Query"];
+p3 [label="3. Report Submission & Validation"];
+p4 [label="4. Issue Matching / Creation"];
+p5 [label="5. Support / Tracking"];
+p6 [label="6. Reviewer/Admin Workflow"];
+node [shape=cylinder, fillcolor="#FFFFFF"];
+db [label="D1 Neon PostgreSQL
+users • issues • reports • supporters • history • audit"];
+user -> p1 [label="credentials / token"];
+p1 -> firebase [dir=both, label="identity"];
+p1 -> db [label="sync app user"];
+user -> p2 [label="filters / issue id"]; p2 -> db [dir=both, label="public-safe issue data"]; p2 -> user [label="map/list/details"];
+user -> p3 [label="report data + location + optional image"]; p3 -> p1 [label="verify identity"];
+p3 -> nominatim [dir=both, label="geocode/reverse geocode"];
+p3 -> storage [dir=both, label="optional image"];
+p3 -> p4 [label="validated report"];
+p4 -> db [dir=both, label="candidate lookup + transactional write"];
+p4 -> user [label="reportId / issueId / match result"];
+user -> p5 [label="support / my reports"]; p5 -> db [dir=both]; p5 -> user [label="current state"];
+reviewer -> p6 [label="review/status/priority/admin actions"]; p6 -> p1 [label="verify role"]; p6 -> db [dir=both, label="update + history + audit"]; p6 -> reviewer [label="result / dashboards"];
+}

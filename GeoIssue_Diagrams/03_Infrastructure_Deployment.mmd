@@ -1,0 +1,12 @@
+flowchart TB
+  Browser[Browser / Mobile Browser] --> HTTPS[HTTPS + Domain/DNS]
+  HTTPS --> Frontend[Frontend Hosting — static React build — provider TBD]
+  Frontend -->|HTTPS /api| API[API Hosting — Node.js/Express — provider TBD]
+  API --> Firebase[Firebase Authentication]
+  API <--> Neon[Neon PostgreSQL]
+  API <--> Nominatim[Nominatim]
+  API <--> Storage[Object/Image Storage — TBD]
+  API --> Logs[Logs / Monitoring — TBD]
+  Secrets[Environment Secrets] -.-> API
+  GitHub[GitHub + CI: lint/typecheck/tests] -.-> Frontend
+  GitHub -.-> API

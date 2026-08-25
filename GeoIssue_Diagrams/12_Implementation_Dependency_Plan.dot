@@ -1,0 +1,28 @@
+digraph G {
+
+    graph [fontname="DejaVu Sans", bgcolor="white", pad="0.25", nodesep="0.45", ranksep="0.60"];
+    node  [fontname="DejaVu Sans", shape=box, style="rounded,filled", fillcolor="#FAFAFA", color="#D4D4D8", fontcolor="#18181B", margin="0.16,0.10"];
+    edge  [fontname="DejaVu Sans", color="#71717A", fontcolor="#52525B", arrowsize="0.8"];
+
+rankdir=LR; labelloc="t"; label="GeoIssue — Technical Design → Implementation Dependency Plan"; fontsize=20;
+req [label="Requirements + Scope"];
+domain [label="Domain Model
+Report vs Issue"];
+perm [label="Roles + Permission Matrix"];
+erd [label="ERD + DB Rules"];
+state [label="Issue State Machine"];
+match [label="Matching Rules"];
+api [label="API Contract + Error Model"];
+arch [label="Architecture + Infrastructure"];
+ui [label="User Flows + Responsive UI"];
+slice [label="Working Vertical Slice
+Auth → Report → DB → Map → Review"];
+tests [label="API/E2E Tests"];
+deploy [label="Staging → Production + Rollback"];
+req -> domain;
+domain -> perm; domain -> erd; domain -> state; domain -> match;
+perm -> api; erd -> api; state -> api; match -> api;
+api -> arch; api -> ui;
+arch -> slice; ui -> slice;
+slice -> tests -> deploy;
+}

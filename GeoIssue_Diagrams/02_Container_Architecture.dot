@@ -1,0 +1,36 @@
+digraph G {
+
+    graph [fontname="DejaVu Sans", bgcolor="white", pad="0.25", nodesep="0.45", ranksep="0.60"];
+    node  [fontname="DejaVu Sans", shape=box, style="rounded,filled", fillcolor="#FAFAFA", color="#D4D4D8", fontcolor="#18181B", margin="0.16,0.10"];
+    edge  [fontname="DejaVu Sans", color="#71717A", fontcolor="#52525B", arrowsize="0.8"];
+
+rankdir=TB; labelloc="t"; label="GeoIssue — Container / Application Architecture"; fontsize=20;
+subgraph cluster_client { label="Client"; color="#E4E4E7"; style="rounded";
+  ui [label="React + Vite + TypeScript
+Routes, components, map, forms, dashboards"];
+  authsdk [label="Firebase Client SDK
+Sign in / register / token acquisition"];
+}
+subgraph cluster_api { label="Backend API"; color="#E4E4E7"; style="rounded";
+  routes [label="Express Routes"];
+  middleware [label="Middleware
+Auth verification • validation • authorization • rate limit • errors"];
+  controllers [label="Controllers"];
+  services [label="Domain Services
+Reports • Issues • Matching • Support • Reviewer/Admin"];
+  repos [label="Repositories / Data Access"];
+  routes -> middleware -> controllers -> services -> repos;
+}
+firebase [label="Firebase Admin / Auth"];
+neon [label="Neon PostgreSQL"];
+nominatim [label="Nominatim"];
+storage [label="Object/Image Storage
+TBD provider", style="rounded,dashed,filled"];
+ui -> routes [label="HTTPS REST / JSON"];
+ui -> authsdk;
+authsdk -> firebase [label="identity"];
+middleware -> firebase [label="verify ID token"];
+repos -> neon [dir=both];
+services -> nominatim [dir=both, label="server-side geocoding"];
+services -> storage [dir=both, label="image upload/url"];
+}

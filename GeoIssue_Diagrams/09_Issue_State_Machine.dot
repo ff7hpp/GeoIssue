@@ -1,0 +1,21 @@
+digraph G {
+
+    graph [fontname="DejaVu Sans", bgcolor="white", pad="0.25", nodesep="0.45", ranksep="0.60"];
+    node  [fontname="DejaVu Sans", shape=box, style="rounded,filled", fillcolor="#FAFAFA", color="#D4D4D8", fontcolor="#18181B", margin="0.16,0.10"];
+    edge  [fontname="DejaVu Sans", color="#71717A", fontcolor="#52525B", arrowsize="0.8"];
+
+rankdir=LR; labelloc="t"; label="GeoIssue — Issue Status State Machine"; fontsize=20;
+submitted [label="submitted"];
+in_review [label="in_review"];
+accepted [label="accepted"];
+in_progress [label="in_progress"];
+resolved [label="resolved", peripheries=2];
+rejected [label="rejected", peripheries=2];
+submitted -> in_review [label="Reviewer begins review"];
+in_review -> accepted [label="valid / actionable"];
+in_review -> rejected [label="invalid / duplicate / not actionable"];
+accepted -> in_progress [label="work starts"];
+in_progress -> resolved [label="work completed + note/evidence"];
+resolved -> in_review [label="PROPOSED: reopen if verified recurrence", style=dashed];
+rejected -> in_review [label="PROPOSED: reconsider with new evidence", style=dashed];
+}

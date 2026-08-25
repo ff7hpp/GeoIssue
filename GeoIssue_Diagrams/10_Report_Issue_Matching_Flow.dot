@@ -1,0 +1,29 @@
+digraph G {
+
+    graph [fontname="DejaVu Sans", bgcolor="white", pad="0.25", nodesep="0.45", ranksep="0.60"];
+    node  [fontname="DejaVu Sans", shape=box, style="rounded,filled", fillcolor="#FAFAFA", color="#D4D4D8", fontcolor="#18181B", margin="0.16,0.10"];
+    edge  [fontname="DejaVu Sans", color="#71717A", fontcolor="#52525B", arrowsize="0.8"];
+
+rankdir=TB; labelloc="t"; label="GeoIssue — Report → Issue Matching Flow (MVP Proposed)"; fontsize=20;
+new [label="Validated new Report"];
+cat [label="Filter open Issues by same category"];
+dist [label="Compute distance to issue location
+using simple geographic distance"];
+near [shape=diamond, label="Within configured radius?
+PROPOSED default: 50 m"];
+cands [label="Candidate issues"];
+count [shape=diamond, label="How many candidates?"];
+zero [label="Create new Issue"];
+one [label="Attach to nearest/only candidate"];
+many [label="Choose nearest candidate
+or flag for Reviewer confirmation"];
+writeTx [label="Transactional write
+Report + Issue counters/history"];
+new -> cat -> dist -> near;
+near -> cands [label="yes"]; near -> zero [label="no"];
+cands -> count;
+count -> zero [label="0"];
+count -> one [label="1"];
+count -> many [label=">1"];
+zero -> writeTx; one -> writeTx; many -> writeTx;
+}

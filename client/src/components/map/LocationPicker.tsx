@@ -1,0 +1,286 @@
+import React, { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import { Navigation, Search, MapPin, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { api } from '../../services/api';
+
+interface LocationPickerProps {
+  latitude: number;
+  longitude: number;
+  onChange: (lat: number, lon: number, address?: string) => void;
+}
+
+// Map Click Listener
+function MapClickHandler({
+  onSelect,
+}: {
+  onSelect: (lat: number, lon: number) => void;
+}) {
+  useMapEvents({
+    click(e) {
+      onSelect(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+}
+
+// Recenter Map on location change
+function MapCenterController({ center }: { center: [number, number] }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo(center, map.getZoom(), { duration: 0.5 });
+  }, [center, map]);
+  return null;
+}
+
+export const LocationPicker: React.FC<LocationPickerProps> = ({
+  latitude,
+  longitude,
+  onChange,
+}) => {
+  const { t } = useTranslation();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isLocatingGps, setIsLocatingGps] = useState(false);
+  const [addressLabel, setAddressLabel] = useState<string | null>(null);
+
+  const pickerIcon = L.divIcon({
+    className: 'custom-picker-pin-wrapper',
+    html: `
+      <div class="picker-pin-marker">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+    `,
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+  });
+
+  const handleSelectLocation = async (lat: number, lon: number) => {
+    onChange(lat, lon);
+    try {
+      const addr = await api.reverseGeocode(lat, lon);
+      if (addr) {
+        setAddressLabel(addr);
+        onChange(lat, lon, addr);
+      }
+    } catch (err) {
+      console.warn('Reverse geocode failed:', err);
+    }
+  };
+
+  const handleUseGps = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser');
+      return;
+    }
+
+    setIsLocatingGps(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setIsLocatingGps(false);
+        handleSelectLocation(pos.coords.latitude, pos.coords.longitude);
+      },
+      (err) => {
+        setIsLocatingGps(false);
+        console.warn('GPS location error:', err.message);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setIsSearching(true);
+    try {
+      const results = await api.searchGeocode(searchQuery);
+      setSearchResults(results);
+    } catch (err) {
+      console.warn('Search geocode error:', err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSelectSearchResult = (result: any) => {
+    handleSelectLocation(result.lat, result.lon);
+    setAddressLabel(result.display_name);
+    setSearchResults([]);
+    setSearchQuery('');
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+      {/* Search & GPS Controls Bar */}
+      <div style={{ display: 'flex', gap: '8px', position: 'relative' }}>
+        <form onSubmit={handleSearch} style={{ flex: 1, position: 'relative' }}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('reportWizard.searchLocation')}
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              paddingInlineStart: '36px',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-default)',
+              backgroundColor: 'var(--bg-surface)',
+              fontSize: '0.875rem',
+            }}
+          />
+          <Search
+            size={16}
+            style={{
+              position: 'absolute',
+              top: '50%',
+              insetInlineStart: '12px',
+              transform: 'translateY(-50%)',
+              color: 'var(--text-tertiary)',
+            }}
+          />
+          {isSearching && (
+            <Loader2
+              size={16}
+              className="animate-spin"
+              style={{
+                position: 'absolute',
+                top: '50%',
+                insetInlineEnd: '12px',
+                transform: 'translateY(-50%)',
+                color: 'var(--text-tertiary)',
+              }}
+            />
+          )}
+        </form>
+
+        <button
+          type="button"
+          onClick={handleUseGps}
+          className="btn btn-secondary"
+          disabled={isLocatingGps}
+          title={t('reportWizard.useGps')}
+          style={{ padding: '8px 14px', fontSize: '0.875rem', gap: '6px' }}
+        >
+          {isLocatingGps ? <Loader2 size={16} className="animate-spin" /> : <Navigation size={16} />}
+          <span style={{ display: 'none' }} className="gps-btn-text">
+            GPS
+          </span>
+        </button>
+
+        {/* Search Autocomplete Results Dropdown */}
+        {searchResults.length > 0 && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 'calc(100% + 4px)',
+              insetInlineStart: 0,
+              insetInlineEnd: 0,
+              backgroundColor: 'var(--bg-surface-elevated)',
+              border: '1px solid var(--border-default)',
+              borderRadius: 'var(--radius-md)',
+              boxShadow: 'var(--shadow-overlay)',
+              zIndex: 3000,
+              maxHeight: '220px',
+              overflowY: 'auto',
+              padding: '4px',
+            }}
+          >
+            {searchResults.map((item) => (
+              <button
+                key={item.place_id}
+                type="button"
+                onClick={() => handleSelectSearchResult(item)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  width: '100%',
+                  padding: '10px 12px',
+                  textAlign: 'start',
+                  fontSize: '0.8125rem',
+                  borderRadius: 'var(--radius-sm)',
+                  color: 'var(--text-primary)',
+                  borderBottom: '1px solid var(--border-subtle)',
+                }}
+              >
+                <MapPin size={14} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {item.display_name}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Interactive Map Surface */}
+      <div
+        style={{
+          width: '100%',
+          height: '340px',
+          borderRadius: 'var(--radius-lg)',
+          overflow: 'hidden',
+          border: '1px solid var(--border-default)',
+          position: 'relative',
+        }}
+      >
+        <MapContainer
+          center={[latitude, longitude]}
+          zoom={15}
+          style={{ width: '100%', height: '100%' }}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <MapCenterController center={[latitude, longitude]} />
+          <MapClickHandler onSelect={handleSelectLocation} />
+          <Marker position={[latitude, longitude]} icon={pickerIcon} />
+        </MapContainer>
+      </div>
+
+      {/* Coordinate & Address info display */}
+      <div
+        style={{
+          padding: '10px 14px',
+          backgroundColor: 'var(--bg-surface-subtle)',
+          borderRadius: 'var(--radius-md)',
+          fontSize: '0.8125rem',
+          color: 'var(--text-secondary)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          border: '1px solid var(--border-default)',
+        }}
+      >
+        <MapPin size={16} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+        <div>
+          <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+            {latitude.toFixed(6)}, {longitude.toFixed(6)}
+          </div>
+          {addressLabel && (
+            <div style={{ fontSize: '0.75rem', marginTop: '2px', color: 'var(--text-tertiary)' }}>
+              {addressLabel}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <style>{`
+        @media (min-width: 480px) {
+          .gps-btn-text {
+            display: inline !important;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};

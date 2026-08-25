@@ -1,0 +1,19 @@
+flowchart TB
+  subgraph Citizen_User
+    U1[Browse map] --> U2[Create report or support issue] --> U3[Track status] --> U4[View result]
+  end
+  subgraph GeoIssue
+    S1[Validate identity/input] --> S2[Match to issue or create issue] --> S3[Persist + expose safe public data]
+  end
+  subgraph Reviewer
+    R1[Open review queue] --> R2[Inspect reports/support/location] --> R3[Accept / reject / prioritize] --> R4[Move to in_progress / resolved]
+  end
+  subgraph Admin
+    A1[Manage users/roles/categories]
+    A2[Review audit logs]
+  end
+  U2 --> S1
+  S3 --> R1
+  R4 --> U3
+  A1 -.-> S3
+  R3 -. sensitive actions logged .-> A2

@@ -1,0 +1,16 @@
+flowchart LR
+  A[Requirements + Scope] --> B[Domain Model: Report vs Issue]
+  B --> C[Roles + Permission Matrix]
+  B --> D[ERD + DB Rules]
+  B --> E[Issue State Machine]
+  B --> F[Matching Rules]
+  C --> G[API Contract + Error Model]
+  D --> G
+  E --> G
+  F --> G
+  G --> H[Architecture + Infrastructure]
+  G --> I[User Flows + Responsive UI]
+  H --> J[Working vertical slice: Auth → Report → DB → Map → Review]
+  I --> J
+  J --> K[API + E2E tests]
+  K --> L[Staging → Production + rollback]

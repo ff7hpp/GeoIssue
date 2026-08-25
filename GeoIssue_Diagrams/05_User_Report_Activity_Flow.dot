@@ -1,0 +1,40 @@
+digraph G {
+
+    graph [fontname="DejaVu Sans", bgcolor="white", pad="0.25", nodesep="0.45", ranksep="0.60"];
+    node  [fontname="DejaVu Sans", shape=box, style="rounded,filled", fillcolor="#FAFAFA", color="#D4D4D8", fontcolor="#18181B", margin="0.16,0.10"];
+    edge  [fontname="DejaVu Sans", color="#71717A", fontcolor="#52525B", arrowsize="0.8"];
+
+rankdir=TB; labelloc="t"; label="GeoIssue — User Report Activity Flow"; fontsize=20;
+start [shape=circle, label="", width=0.2, fillcolor="#18181B"];
+open [label="Open map / browse issues"];
+loginq [shape=diamond, label="Authenticated?"];
+login [label="Login / Register"];
+new [label="Select Report an Issue"];
+loc [label="Select location
+GPS / map click / place search"];
+gpsq [shape=diamond, label="Location available?"];
+manual [label="Fallback: manual map selection / coordinates"];
+form [label="Enter category + description
+Optional image"];
+valid [shape=diamond, label="Input valid?"];
+fix [label="Show field errors and preserve input"];
+submit [label="Submit report"];
+match [label="Search nearby similar open issues"];
+found [shape=diamond, label="Candidate issue found?"];
+attach [label="Attach report to existing issue"];
+create [label="Create new issue + attach report"];
+saved [label="Persist in Neon transaction"];
+show [label="Return issue/report result
+Update map and My Reports"];
+end [shape=doublecircle, label="Done", fillcolor="#FFFFFF"];
+start -> open -> loginq;
+loginq -> new [label="yes"];
+loginq -> login [label="no"]; login -> new;
+new -> loc -> gpsq;
+gpsq -> form [label="yes"]; gpsq -> manual [label="no"]; manual -> form;
+form -> valid;
+valid -> submit [label="yes"]; valid -> fix [label="no"]; fix -> form;
+submit -> match -> found;
+found -> attach [label="yes"]; found -> create [label="no"];
+attach -> saved; create -> saved; saved -> show -> end;
+}

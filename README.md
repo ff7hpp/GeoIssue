@@ -1,90 +1,131 @@
-# ANKAGEO GeoIssue
+# GeoIssue
 
-GeoIssue is a beginner-friendly internship project for reporting city problems on a real map. The code is intentionally simple so each frontend and backend step is easy to review.
+> **Report. Track. Resolve.**
+> Modern Civic-Tech Platform for Reporting, Grouping, and Resolving Community Problems.
 
-## Current Features
+Inspired by Apple, Linear, and Vercel design principles — built as a clean, modular full-stack application with strict **Report ≠ Issue** domain segregation, Haversine geographic deduplication, full multilingual support (**English**, **العربية** with RTL layout mirroring, and **Türkçe**), and Light/Dark/System theme parity.
 
-- Firebase email/password registration, sign-in, and sign-out
-- Persistent light and dark themes using a restrained 60-30-10 color system
-- Live Leaflet map with OpenStreetMap tiles
-- Browser location button and map-click coordinate selection
-- Readable nearest-address confirmation after clicking the map
-- Explicit place search through the backend using Nominatim
-- Common university abbreviations such as `uni` are expanded when a search has no result
-- Add, edit, remove, filter, and update issue status
-- Firebase-token protection for every write request
-- Neon PostgreSQL storage when `DATABASE_URL` is configured
-- Public read-only issue list
+---
 
-Without `DATABASE_URL`, the API uses temporary in-memory demo data. With Neon configured, reports are stored permanently in PostgreSQL.
+## 1. Domain Architecture: Report ≠ Issue
 
-## Project Structure
+- **Report**: An individual citizen submission containing exact observed coordinates, description, category, and optional photo.
+- **Issue**: The canonical, unified real-world problem.
 
-```text
-geoissue/
-|-- client/   React + Vite frontend
-`-- server/   Express API, Neon repository, Firebase checks, and geocoding proxy
+When multiple citizens report the same problem (e.g. 50 citizens reporting the same pothole within 50 meters), GeoIssue uses the **Haversine formula** to attach reports to the single canonical Issue, elevating its priority without creating duplicate tickets.
+
+```
+[Citizen 1: Report] ──┐
+[Citizen 2: Report] ──┼──> [Haversine Match ≤ 50m] ──> [Single Canonical Issue]
+[Citizen 3: Report] ──┘
 ```
 
-## Firebase Setup
+---
 
-1. In Firebase Console, open **Authentication > Sign-in method**.
-2. Enable **Email/Password**.
-3. Copy `client/.env.example` to `client/.env` and add the Firebase web values.
-4. Download a Firebase Admin service-account JSON file and keep it outside Git.
-5. Copy `server/.env.example` to `server/.env` and set its path in `GOOGLE_APPLICATION_CREDENTIALS`.
+## 2. Technology Stack
 
-Service-account JSON files and `.env` files are ignored by Git. Never publish them.
+### Frontend
+- **Framework**: React 18 + Vite + TypeScript
+- **Routing**: React Router v7
+- **Server State**: TanStack Query (React Query)
+- **Maps**: Leaflet + React-Leaflet + OpenStreetMap
+- **Internationalization**: i18next + react-i18next with dynamic RTL/LTR document direction
+- **Icons**: Lucide React
+- **Styling**: Vanilla CSS Design Tokens (Apple / Linear / Vercel minimal aesthetic)
 
-## Run Locally
+### Backend
+- **Framework**: Node.js + Express + TypeScript (Modular Monolith)
+- **Database**: Neon PostgreSQL / pg Pool (with in-memory fallback store for offline testing)
+- **Auth**: Firebase Authentication + Firebase Admin token verification + First-login sync (`/api/me/sync`)
+- **Geocoding**: Nominatim proxy with timeout resilience and graceful fallback
+- **Validation**: Zod runtime schema validation
+- **Testing**: Vitest (Haversine calculations, State machine transitions, Role permissions, Smoke tests)
 
-Start the API:
+---
+
+## 3. Getting Started
+
+### Prerequisites
+- Node.js 18+ and npm
+
+### Installation
+```bash
+# Install server dependencies
+npm --prefix server install
+
+# Install client dependencies
+npm --prefix client install
+```
+
+### Running the Application
 
 ```bash
-cd server
-npm install
-npm run dev
+# Terminal 1: Start Express API server (port 4000)
+npm --prefix server run dev
+
+# Terminal 2: Start Vite React client (port 5173)
+npm --prefix client run dev
 ```
 
-Start the client in a second terminal:
+Visit **`http://localhost:5173`** in your browser.
+
+---
+
+## 4. Testing
+
+Run the automated test suite:
 
 ```bash
-cd client
-npm install
-npm run dev
+npm --prefix server test
 ```
 
-Open `http://localhost:5173`. The API runs at `http://localhost:5000`.
+### Test Coverage:
+- **`haversine.test.ts`**: Verifies exact distance computation, 50m threshold bounds, and spherical coordinates.
+- **`stateMachine.test.ts`**: Verifies the strict lifecycle (`submitted -> in_review -> accepted -> in_progress -> resolved / rejected`).
+- **`permissions.test.ts`**: Verifies server-side role enforcement (Visitor, User, Admin).
+- **`api.smoke.test.ts`**: Verifies HTTP 401 unauthenticated and 403 forbidden security responses.
 
-The **Use exact location** button requires browser location permission. It works on localhost during development and requires HTTPS after deployment. A phone with GPS normally gives a more accurate result than a desktop computer. If permission or GPS is unavailable, the interface offers an approximate city location based on the user's IP; click the map afterward to mark the exact issue position.
+---
 
-## API Routes
+## 5. API Routes
 
-- `GET /api/health` - API and database connection status
-- `GET /api/issues` - public
-- `GET /api/geocode?q=Ankara` - public, cached place search
-- `POST /api/issues` - signed-in user
-- `PUT /api/issues/:id` - issue owner
-- `PATCH /api/issues/:id/status` - issue owner
-- `DELETE /api/issues/:id` - issue owner
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `GET` | `/api/health` | Public | Service health and version |
+| `GET` | `/api/categories` | Public | List active categories |
+| `GET` | `/api/issues` | Public | Filterable issue list with pagination |
+| `GET` | `/api/issues/:id` | Public | Issue details with report count & timeline |
+| `POST` | `/api/issues/:id/support` | User | Upvote / support issue |
+| `DELETE` | `/api/issues/:id/support` | User | Remove support |
+| `GET` | `/api/me` | User | Current user profile |
+| `POST` | `/api/me/sync` | User | First-login Firebase UID sync |
+| `GET` | `/api/me/reports` | User | Authenticated citizen's reports |
+| `POST` | `/api/reports` | User | Submit new report with Haversine matching |
+| `PUT` | `/api/reports/:id` | Owner/Admin | Edit report description |
+| `DELETE` | `/api/reports/:id` | Owner/Admin | Delete citizen report |
+| `GET` | `/api/geocode?q=` | Public | Nominatim search proxy |
+| `GET` | `/api/admin/issues` | Admin | Operational issue review queue |
+| `PATCH` | `/api/admin/issues/:id/status` | Admin | Change issue lifecycle status + record note |
+| `PATCH` | `/api/admin/issues/:id/priority` | Admin | Update issue priority |
+| `GET` | `/api/admin/users` | Admin | List all user accounts |
+| `PATCH` | `/api/admin/users/:id` | Admin | Update user role and status |
+| `POST` | `/api/admin/categories` | Admin | Add new category |
+| `PATCH` | `/api/admin/categories/:id` | Admin | Edit category / toggle active |
 
-## Neon PostgreSQL Setup
+---
 
-1. Create a Neon project and open its **Connect** dialog.
-2. Enable connection pooling and copy the PostgreSQL connection string.
-3. Put the private value in `server/.env`:
+## 6. Architecture & System Diagrams
 
-```env
-DATABASE_URL=postgresql://user:password@your-endpoint-pooler.neon.tech/database?sslmode=require
-```
-
-4. Create the tables and indexes:
-
-```bash
-cd server
-npm run db:migrate
-```
-
-5. Restart the API and open `http://localhost:5000/api/health`. It should report `"mode": "neon"` and `"connected": true`.
-
-Never place the Neon connection string in frontend code or commit `server/.env` to Git.
+The detailed system design diagrams are located in [`GeoIssue_Diagrams/`](./GeoIssue_Diagrams/):
+1. `01_System_Context`
+2. `02_Container_Architecture`
+3. `03_Infrastructure_Deployment`
+4. `04_Use_Case_Diagram`
+5. `05_User_Report_Activity_Flow`
+6. `06_Data_Flow_DFD_Level_1`
+7. `07_Report_Submission_Sequence`
+8. `08_ERD_Database_Relationships`
+9. `09_Issue_State_Machine`
+10. `10_Report_Issue_Matching_Flow`
+11. `11_Role_Interaction_Flow`
+12. `12_Implementation_Dependency_Plan`
