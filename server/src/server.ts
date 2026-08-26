@@ -13,7 +13,7 @@ async function bootstrap() {
     // Initialize Firebase
     initFirebase();
 
-    app.listen(config.port, () => {
+    app.listen(config.port, '0.0.0.0', () => {
       console.log(`GeoIssue API running on http://localhost:${config.port}`);
       console.log(`Environment: ${config.nodeEnv}`);
       console.log(`Match radius threshold: ${config.matchRadiusMeters} meters`);
