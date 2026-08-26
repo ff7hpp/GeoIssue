@@ -20,6 +20,9 @@ import {
   Sparkles,
   AlertCircle,
   FileCheck,
+  X,
+  Image as ImageIcon,
+  Trash2,
 } from 'lucide-react';
 
 export const ReportWizard: React.FC = () => {
@@ -99,20 +102,91 @@ export const ReportWizard: React.FC = () => {
     }
   };
 
+  const [isCompressingImage, setIsCompressingImage] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [imageFileName, setImageFileName] = useState<string>('');
+
+  const compressAndSetImage = async (file: File) => {
+    try {
+      setIsCompressingImage(true);
+      setImageFileName(file.name);
+      
+      const compressedDataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onerror = reject;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_DIMENSION = 1280;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height && width > MAX_DIMENSION) {
+              height = Math.round((height * MAX_DIMENSION) / width);
+              width = MAX_DIMENSION;
+            } else if (height > MAX_DIMENSION) {
+              width = Math.round((width * MAX_DIMENSION) / height);
+              height = MAX_DIMENSION;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              resolve(reader.result as string);
+              return;
+            }
+            ctx.drawImage(img, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+            resolve(dataUrl);
+          };
+          img.src = e.target?.result as string;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      setImagePreview(compressedDataUrl);
+      setImageUrl('');
+    } catch (err) {
+      console.error('Image compression failed:', err);
+      alert('Failed to process image. Please try another file.');
+    } finally {
+      setIsCompressingImage(false);
+    }
+  };
+
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image size exceeds 5MB limit');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-        setImageUrl('');
-      };
-      reader.readAsDataURL(file);
+      compressAndSetImage(file);
     }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      compressAndSetImage(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    setImageUrl('');
+    setImageFileName('');
   };
 
   const selectedCategory = categories.find((c) => c.id === categoryId);
@@ -344,90 +418,153 @@ export const ReportWizard: React.FC = () => {
               {t('reportWizard.photoInstruction')}
             </p>
 
-            {/* File Upload Box */}
-            <div
-              style={{
-                border: '2px dashed var(--border-default)',
-                borderRadius: 'var(--radius-lg)',
-                padding: 'var(--space-8) var(--space-4)',
-                textAlign: 'center',
-                backgroundColor: 'var(--bg-surface-subtle)',
-                position: 'relative',
-                cursor: 'pointer',
-              }}
-            >
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageFileChange}
+            {/* Selected Image Card */}
+            {(imagePreview || imageUrl) ? (
+              <div
                 style={{
-                  position: 'absolute',
-                  inset: 0,
-                  opacity: 0,
-                  cursor: 'pointer',
-                  width: '100%',
-                  height: '100%',
+                  border: '1px solid var(--border-default)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: 'var(--space-4)',
+                  backgroundColor: 'var(--bg-surface-subtle)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--space-4)',
                 }}
-              />
-              <Upload size={32} style={{ margin: '0 auto 10px', color: 'var(--text-tertiary)' }} />
-              <div style={{ fontSize: '0.9375rem', fontWeight: 500, color: 'var(--text-primary)', marginBottom: '4px' }}>
-                Click to upload an image or take a photo
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                PNG, JPG, WebP up to 5MB
-              </div>
-            </div>
-
-            {/* Direct URL alternative */}
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, marginBottom: '6px' }}>
-                {t('reportWizard.photoUrlPlaceholder')}
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="url"
-                  value={imageUrl}
-                  onChange={(e) => {
-                    setImageUrl(e.target.value);
-                    setImagePreview(null);
-                  }}
-                  placeholder="https://example.com/pothole.jpg"
+              >
+                <div
                   style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    paddingInlineStart: '36px',
+                    width: '90px',
+                    height: '90px',
                     borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border-default)',
+                    overflow: 'hidden',
+                    flexShrink: 0,
+                    border: '1px solid var(--border-subtle)',
                     backgroundColor: 'var(--bg-surface)',
                   }}
-                />
-                <Link2
-                  size={16}
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    insetInlineStart: '12px',
-                    transform: 'translateY(-50%)',
-                    color: 'var(--text-tertiary)',
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Image Preview */}
-            {(imagePreview || imageUrl) && (
-              <div style={{ marginTop: 'var(--space-2)' }}>
-                <div style={{ fontSize: '0.8125rem', fontWeight: 600, marginBottom: '6px' }}>
-                  Photo Preview:
-                </div>
-                <div style={{ maxWidth: '300px', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-default)' }}>
+                >
                   <img
                     src={imagePreview || imageUrl}
-                    alt="Problem preview"
-                    style={{ width: '100%', height: 'auto', maxHeight: '200px', objectFit: 'cover' }}
+                    alt="Uploaded issue evidence"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                 </div>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                    <ImageIcon size={16} style={{ color: 'var(--accent-primary)' }} />
+                    <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      {imageFileName || 'Attached Photo'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--status-resolved)', marginBottom: '8px' }}>
+                    ✓ Photo ready for submission
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="btn btn-subtle"
+                    style={{
+                      padding: '4px 10px',
+                      fontSize: '0.75rem',
+                      color: 'var(--status-rejected)',
+                      borderColor: 'var(--status-rejected-border)',
+                      gap: '4px',
+                    }}
+                  >
+                    <Trash2 size={13} />
+                    <span>Remove photo</span>
+                  </button>
+                </div>
               </div>
+            ) : (
+              <>
+                {/* File Upload / Camera Dropzone */}
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  style={{
+                    border: isDragging
+                      ? '2px dashed var(--accent-primary)'
+                      : '2px dashed var(--border-default)',
+                    borderRadius: 'var(--radius-lg)',
+                    padding: 'var(--space-8) var(--space-4)',
+                    textAlign: 'center',
+                    backgroundColor: isDragging
+                      ? 'var(--accent-subtle)'
+                      : 'var(--bg-surface-subtle)',
+                    position: 'relative',
+                    cursor: 'pointer',
+                    transition: 'all var(--transition-fast)',
+                  }}
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageFileChange}
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      opacity: 0,
+                      cursor: 'pointer',
+                      width: '100%',
+                      height: '100%',
+                    }}
+                  />
+                  {isCompressingImage ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                      <Loader2 size={32} className="animate-spin" style={{ color: 'var(--accent-primary)' }} />
+                      <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Optimizing image...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload size={32} style={{ margin: '0 auto 10px', color: 'var(--text-tertiary)' }} />
+                      <div style={{ fontSize: '0.9375rem', fontWeight: 500, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                        Click to choose photo or take camera picture
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                        Drag & drop or browse (PNG, JPG, WebP — automatically optimized)
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Direct URL alternative */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, marginBottom: '6px' }}>
+                    {t('reportWizard.photoUrlPlaceholder')}
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="url"
+                      value={imageUrl}
+                      onChange={(e) => {
+                        setImageUrl(e.target.value);
+                        setImagePreview(null);
+                      }}
+                      placeholder="https://example.com/pothole.jpg"
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        paddingInlineStart: '36px',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-default)',
+                        backgroundColor: 'var(--bg-surface)',
+                      }}
+                    />
+                    <Link2
+                      size={16}
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        insetInlineStart: '12px',
+                        transform: 'translateY(-50%)',
+                        color: 'var(--text-tertiary)',
+                      }}
+                    />
+                  </div>
+                </div>
+              </>
             )}
           </div>
         )}
@@ -492,8 +629,22 @@ export const ReportWizard: React.FC = () => {
                 <p style={{ marginTop: '4px', color: 'var(--text-primary)' }}>{description}</p>
               </div>
               {(imagePreview || imageUrl) && (
-                <div>
-                  <span style={{ color: 'var(--text-tertiary)', fontWeight: 500 }}>Photo attached</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
+                  <div style={{ width: '60px', height: '60px', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
+                    <img
+                      src={imagePreview || imageUrl}
+                      alt="Attached evidence preview"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      Photo attached
+                    </span>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                      {imageFileName || 'Image evidence'}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

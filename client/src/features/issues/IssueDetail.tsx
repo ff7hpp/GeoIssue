@@ -20,6 +20,8 @@ import {
   User,
   ExternalLink,
   CheckCircle2,
+  ZoomIn,
+  X,
 } from 'lucide-react';
 
 export const IssueDetail: React.FC = () => {
@@ -29,6 +31,7 @@ export const IssueDetail: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const { data: issue, isLoading, error } = useQuery({
     queryKey: ['issue', id],
@@ -314,12 +317,42 @@ export const IssueDetail: React.FC = () => {
                   </p>
 
                   {report.image_url && (
-                    <div style={{ marginTop: '8px', maxWidth: '320px', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+                    <div
+                      onClick={() => setSelectedImage(report.image_url!)}
+                      style={{
+                        marginTop: '8px',
+                        maxWidth: '320px',
+                        borderRadius: 'var(--radius-md)',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        border: '1px solid var(--border-default)',
+                      }}
+                      title="Click to view full image"
+                    >
                       <img
                         src={report.image_url}
                         alt="Report observation evidence"
-                        style={{ width: '100%', height: 'auto', maxHeight: '200px', objectFit: 'cover' }}
+                        style={{ width: '100%', height: 'auto', maxHeight: '200px', objectFit: 'cover', display: 'block' }}
                       />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          bottom: '6px',
+                          insetInlineEnd: '6px',
+                          backgroundColor: 'rgba(0,0,0,0.6)',
+                          color: '#fff',
+                          borderRadius: 'var(--radius-full)',
+                          padding: '4px 8px',
+                          fontSize: '0.75rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        <ZoomIn size={12} />
+                        <span>Enlarge</span>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -328,6 +361,70 @@ export const IssueDetail: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Lightbox Modal */}
+      {selectedImage && (
+        <div
+          onClick={() => setSelectedImage(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 'var(--space-6)',
+            cursor: 'zoom-out',
+            animation: 'fadeIn 0.2s ease-out',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              borderRadius: 'var(--radius-lg)',
+              overflow: 'hidden',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            }}
+          >
+            <button
+              onClick={() => setSelectedImage(null)}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                insetInlineEnd: '12px',
+                backgroundColor: 'rgba(0,0,0,0.65)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '50%',
+                width: '36px',
+                height: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s',
+              }}
+              aria-label="Close full size image"
+            >
+              <X size={20} />
+            </button>
+            <img
+              src={selectedImage}
+              alt="Full size observation evidence"
+              style={{
+                maxWidth: '90vw',
+                maxHeight: '85vh',
+                objectFit: 'contain',
+                display: 'block',
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
     </div>

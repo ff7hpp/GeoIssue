@@ -20,6 +20,7 @@ import {
   PlusCircle,
   Check,
   X,
+  ZoomIn,
 } from 'lucide-react';
 
 export const MyReports: React.FC = () => {
@@ -29,6 +30,7 @@ export const MyReports: React.FC = () => {
 
   const [editingReportId, setEditingReportId] = useState<string | null>(null);
   const [editDescription, setEditDescription] = useState<string>('');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const { data: reportsData, isLoading } = useQuery({
     queryKey: ['my-reports'],
@@ -238,12 +240,42 @@ export const MyReports: React.FC = () => {
 
                 {/* Optional Image */}
                 {report.image_url && (
-                  <div style={{ maxWidth: '240px', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: 'var(--space-3)' }}>
+                  <div
+                    onClick={() => setSelectedImage(report.image_url!)}
+                    style={{
+                      maxWidth: '240px',
+                      borderRadius: 'var(--radius-md)',
+                      overflow: 'hidden',
+                      marginBottom: 'var(--space-3)',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      border: '1px solid var(--border-default)',
+                    }}
+                    title="Click to view full image"
+                  >
                     <img
                       src={report.image_url}
                       alt="Citizen report evidence"
-                      style={{ width: '100%', height: 'auto', maxHeight: '160px', objectFit: 'cover' }}
+                      style={{ width: '100%', height: 'auto', maxHeight: '160px', objectFit: 'cover', display: 'block' }}
                     />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: '6px',
+                        insetInlineEnd: '6px',
+                        backgroundColor: 'rgba(0,0,0,0.6)',
+                        color: '#fff',
+                        borderRadius: 'var(--radius-full)',
+                        padding: '2px 6px',
+                        fontSize: '0.7rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      <ZoomIn size={11} />
+                      <span>Zoom</span>
+                    </div>
                   </div>
                 )}
 
@@ -297,6 +329,70 @@ export const MyReports: React.FC = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Lightbox Modal */}
+      {selectedImage && (
+        <div
+          onClick={() => setSelectedImage(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 'var(--space-6)',
+            cursor: 'zoom-out',
+            animation: 'fadeIn 0.2s ease-out',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              borderRadius: 'var(--radius-lg)',
+              overflow: 'hidden',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            }}
+          >
+            <button
+              onClick={() => setSelectedImage(null)}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                insetInlineEnd: '12px',
+                backgroundColor: 'rgba(0,0,0,0.65)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '50%',
+                width: '36px',
+                height: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s',
+              }}
+              aria-label="Close full size image"
+            >
+              <X size={20} />
+            </button>
+            <img
+              src={selectedImage}
+              alt="Full size observation evidence"
+              style={{
+                maxWidth: '90vw',
+                maxHeight: '85vh',
+                objectFit: 'contain',
+                display: 'block',
+              }}
+            />
+          </div>
         </div>
       )}
     </div>
