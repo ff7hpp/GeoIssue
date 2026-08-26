@@ -83,3 +83,19 @@ CREATE INDEX IF NOT EXISTS idx_reports_issue ON reports (issue_id);
 CREATE INDEX IF NOT EXISTS idx_reports_user ON reports (user_id);
 CREATE INDEX IF NOT EXISTS idx_supporters_issue ON issue_supporters (issue_id);
 CREATE INDEX IF NOT EXISTS idx_status_history_issue ON issue_status_history (issue_id);
+
+-- SEED DEFAULT CATEGORIES
+INSERT INTO categories (id, name, slug, icon, is_active) VALUES
+    ('c1000000-0000-0000-0000-000000000001', 'Road & Potholes', 'road-potholes', 'Construction', true),
+    ('c1000000-0000-0000-0000-000000000002', 'Street Lighting', 'street-lighting', 'Lightbulb', true),
+    ('c1000000-0000-0000-0000-000000000003', 'Waste & Sanitation', 'waste-sanitation', 'Trash2', true),
+    ('c1000000-0000-0000-0000-000000000004', 'Sidewalks & Walkways', 'sidewalks', 'Footprints', true),
+    ('c1000000-0000-0000-0000-000000000005', 'Water & Drainage', 'water-drainage', 'Droplets', true),
+    ('c1000000-0000-0000-0000-000000000006', 'Public Parks & Trees', 'parks-trees', 'Trees', true)
+ON CONFLICT (slug) DO NOTHING;
+
+-- SEED DEMO USERS
+INSERT INTO users (id, firebase_uid, email, display_name, role, language, account_status) VALUES
+    ('a1000000-0000-0000-0000-000000000001', 'demo-resident', 'resident@geoissue.local', 'Demo Resident', 'user', 'en', 'active'),
+    ('a1000000-0000-0000-0000-000000000002', 'demo-admin', 'admin@geoissue.local', 'Demo Administrator', 'admin', 'en', 'active')
+ON CONFLICT (firebase_uid) DO NOTHING;

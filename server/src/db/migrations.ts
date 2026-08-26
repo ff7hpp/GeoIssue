@@ -20,6 +20,7 @@ export async function runMigrations() {
 
   try {
     await client.connect();
+    console.log('Connected to Neon PostgreSQL database.');
     console.log('Running database schema migrations...');
 
     const currentDir = path.dirname(fileURLToPath(import.meta.url));
@@ -27,7 +28,7 @@ export async function runMigrations() {
     const sql = fs.readFileSync(schemaPath, 'utf8');
 
     await client.query(sql);
-    console.log('Database migrations completed successfully.');
+    console.log('✓ Database schema and seeds migrated successfully!');
   } catch (err) {
     console.error('Migration error:', err);
     throw err;
@@ -35,3 +36,14 @@ export async function runMigrations() {
     await client.end();
   }
 }
+
+// Auto-run if executed directly
+runMigrations()
+  .then(() => {
+    console.log('Migration process finished.');
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error('Migration failed:', err);
+    process.exit(1);
+  });
