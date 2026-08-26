@@ -88,6 +88,21 @@ export interface IssueStatusHistory {
   };
 }
 
+export interface IssueComment {
+  id: string;
+  issue_id: string;
+  user_id: string;
+  content: string;
+  is_official: boolean;
+  created_at: string;
+  updated_at: string;
+  user?: {
+    id: string;
+    display_name: string | null;
+    role: UserRole;
+  };
+}
+
 export interface ApiResponse<T = any> {
   data: T;
   meta?: {

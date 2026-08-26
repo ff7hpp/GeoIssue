@@ -14,6 +14,7 @@ export const mockStore = {
   reports: new Map<string, any>(),
   issue_supporters: new Set<string>(), // key: "issueId:userId"
   issue_status_history: new Map<string, any>(),
+  issue_comments: new Map<string, any>(),
 };
 
 export async function initDb(): Promise<void> {

@@ -65,7 +65,14 @@
     "location": "Location Coordinates",
     "created": "Created {{date}}",
     "updated": "Updated {{date}}",
-    "resolved": "Resolved {{date}}"
+    "resolved": "Resolved {{date}}",
+    "commentsTitle": "Community Discussion & Updates",
+    "noComments": "No comments yet. Be the first to share an update or question about this issue!",
+    "addCommentPlaceholder": "Write an update, question, or detail about this problem...",
+    "postComment": "Post Comment",
+    "postingComment": "Posting...",
+    "officialBadge": "Official / Municipality",
+    "deleteComment": "Delete comment"
   },
   "reportWizard": {
     "title": "Report a Community Issue",

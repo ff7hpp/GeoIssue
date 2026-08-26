@@ -44,7 +44,7 @@ export const issuesRepository = {
     search?: string;
     page?: number;
     limit?: number;
-  }): Promise<{ issues: DbIssue[]; total: number }> {
+  } = {}): Promise<{ issues: DbIssue[]; total: number }> {
     const page = filters.page || 1;
     const limit = filters.limit || 20;
 

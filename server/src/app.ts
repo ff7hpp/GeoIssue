@@ -7,6 +7,7 @@ import issuesRouter from './modules/issues/issues.routes.js';
 import reportsRouter from './modules/reports/reports.routes.js';
 import usersRouter from './modules/users/users.routes.js';
 import supportRouter from './modules/support/support.routes.js';
+import commentsRouter from './modules/comments/comments.routes.js';
 import geocodeRouter from './modules/geocoding/geocode.routes.js';
 import adminRouter from './modules/admin/admin.routes.js';
 
@@ -37,6 +38,7 @@ app.get('/api/health', (req, res) => {
 // Domain Routes
 app.use('/api/categories', categoriesRouter);
 app.use('/api/issues/:id/support', supportRouter);
+app.use('/api/issues/:id/comments', commentsRouter);
 app.use('/api/issues', issuesRouter);
 app.use('/api/reports', reportsRouter);
 app.use('/api', usersRouter); // mounts /api/me, /api/me/sync, /api/me/reports

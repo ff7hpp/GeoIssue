@@ -75,6 +75,17 @@ CREATE TABLE IF NOT EXISTS issue_status_history (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 7. ISSUE COMMENTS TABLE
+CREATE TABLE IF NOT EXISTS issue_comments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    issue_id UUID NOT NULL REFERENCES issues(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    content TEXT NOT NULL,
+    is_official BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- INDEXES
 CREATE INDEX IF NOT EXISTS idx_issues_status ON issues (status);
 CREATE INDEX IF NOT EXISTS idx_issues_category ON issues (category_id);
@@ -83,6 +94,7 @@ CREATE INDEX IF NOT EXISTS idx_reports_issue ON reports (issue_id);
 CREATE INDEX IF NOT EXISTS idx_reports_user ON reports (user_id);
 CREATE INDEX IF NOT EXISTS idx_supporters_issue ON issue_supporters (issue_id);
 CREATE INDEX IF NOT EXISTS idx_status_history_issue ON issue_status_history (issue_id);
+CREATE INDEX IF NOT EXISTS idx_comments_issue ON issue_comments (issue_id);
 
 -- SEED DEFAULT CATEGORIES
 INSERT INTO categories (id, name, slug, icon, is_active) VALUES

@@ -1,4 +1,4 @@
-import { ApiResponse, Issue, Category, Report, User, IssueStatus, IssuePriority } from '../types';
+import { ApiResponse, Issue, Category, Report, User, IssueStatus, IssuePriority, IssueComment } from '../types';
 
 const API_BASE = '/api';
 
@@ -94,6 +94,28 @@ export const api = {
   async unsupportIssue(id: string) {
     const res = await request<{ supported: boolean; supporter_count: number }>(
       `/issues/${id}/support`,
+      { method: 'DELETE' }
+    );
+    return res.data;
+  },
+
+  // Issue Comments
+  async getIssueComments(issueId: string) {
+    const res = await request<IssueComment[]>(`/issues/${issueId}/comments`);
+    return res.data;
+  },
+
+  async addIssueComment(issueId: string, content: string) {
+    const res = await request<IssueComment>(`/issues/${issueId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    });
+    return res.data;
+  },
+
+  async deleteIssueComment(issueId: string, commentId: string) {
+    const res = await request<{ success: boolean }>(
+      `/issues/${issueId}/comments/${commentId}`,
       { method: 'DELETE' }
     );
     return res.data;

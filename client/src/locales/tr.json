@@ -65,7 +65,14 @@
     "location": "Konum Koordinatları",
     "created": "Oluşturulma {{date}}",
     "updated": "Güncellenme {{date}}",
-    "resolved": "Çözülme {{date}}"
+    "resolved": "Çözülme {{date}}",
+    "commentsTitle": "Topluluk Tartışması ve Güncellemeler",
+    "noComments": "Henüz yorum yok. Bu sorunla ilgili güncelleme veya soru paylaşan ilk kişi siz olun!",
+    "addCommentPlaceholder": "Bu sorun hakkında bir güncelleme, soru veya ayrıntı yazın...",
+    "postComment": "Yorum Yap",
+    "postingComment": "Gönderiliyor...",
+    "officialBadge": "Resmi / Belediye",
+    "deleteComment": "Yorumu sil"
   },
   "reportWizard": {
     "title": "Topluluk Sorunu Bildir",

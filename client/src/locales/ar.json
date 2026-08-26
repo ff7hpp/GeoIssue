@@ -65,7 +65,14 @@
     "location": "إحداثيات الموقع",
     "created": "تاريخ الإنشاء {{date}}",
     "updated": "آخر تحديث {{date}}",
-    "resolved": "تاريخ الإغلاق {{date}}"
+    "resolved": "تاريخ الإغلاق {{date}}",
+    "commentsTitle": "النقاش المجتمعي والتحديثات",
+    "noComments": "لا توجد تعليقات بعد. كن أول من يشارك تحديثاً أو استفساراً حول هذه المشكلة!",
+    "addCommentPlaceholder": "اكتب تحديثاً أو استفساراً أو تفاصيل حول هذه المشكلة...",
+    "postComment": "نشر التعليق",
+    "postingComment": "جارٍ النشر...",
+    "officialBadge": "رد رسمي / البلدية",
+    "deleteComment": "حذف التعليق"
   },
   "reportWizard": {
     "title": "تقديم بلاغ عن مشكلة مجتمعية",

@@ -22,6 +22,11 @@ import {
   CheckCircle2,
   ZoomIn,
   X,
+  MessageSquare,
+  Send,
+  ShieldCheck,
+  Trash2,
+  Loader2,
 } from 'lucide-react';
 
 export const IssueDetail: React.FC = () => {
@@ -32,12 +37,48 @@ export const IssueDetail: React.FC = () => {
   const queryClient = useQueryClient();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [commentText, setCommentText] = useState('');
 
   const { data: issue, isLoading, error } = useQuery({
     queryKey: ['issue', id],
     queryFn: () => api.getIssueById(id!),
     enabled: !!id,
   });
+
+  const { data: comments = [], isLoading: isCommentsLoading } = useQuery({
+    queryKey: ['issue-comments', id],
+    queryFn: () => api.getIssueComments(id!),
+    enabled: !!id,
+  });
+
+  const addCommentMutation = useMutation({
+    mutationFn: async (content: string) => {
+      return api.addIssueComment(id!, content);
+    },
+    onSuccess: () => {
+      setCommentText('');
+      queryClient.invalidateQueries({ queryKey: ['issue-comments', id] });
+    },
+  });
+
+  const deleteCommentMutation = useMutation({
+    mutationFn: async (commentId: string) => {
+      return api.deleteIssueComment(id!, commentId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['issue-comments', id] });
+    },
+  });
+
+  const handlePostComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      setIsAuthOpen(true);
+      return;
+    }
+    if (!commentText.trim() || commentText.trim().length < 2) return;
+    addCommentMutation.mutate(commentText.trim());
+  };
 
   const supportMutation = useMutation({
     mutationFn: async () => {
@@ -357,6 +398,238 @@ export const IssueDetail: React.FC = () => {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* 4. PUBLIC COMMENTS & DISCUSSION */}
+        <div className="card" style={{ padding: 'var(--space-6)', backgroundColor: 'var(--bg-surface-elevated)' }}>
+          <h3
+            style={{
+              fontSize: '1.125rem',
+              fontWeight: 600,
+              marginBottom: 'var(--space-4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <MessageSquare size={18} style={{ color: 'var(--accent-primary)' }} />
+              <span>{t('issue.commentsTitle')}</span>
+            </div>
+            <span
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                backgroundColor: 'var(--bg-surface-subtle)',
+                color: 'var(--text-secondary)',
+                padding: '2px 8px',
+                borderRadius: 'var(--radius-full)',
+                border: '1px solid var(--border-default)',
+              }}
+            >
+              {comments.length}
+            </span>
+          </h3>
+
+          {/* New Comment Input Box */}
+          <form
+            onSubmit={handlePostComment}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--space-3)',
+              marginBottom: 'var(--space-6)',
+              padding: 'var(--space-4)',
+              backgroundColor: 'var(--bg-surface-subtle)',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--border-default)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <div
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--accent-subtle)',
+                  color: 'var(--accent-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  flexShrink: 0,
+                }}
+              >
+                {user?.display_name ? user.display_name.charAt(0).toUpperCase() : 'C'}
+              </div>
+              <div style={{ flex: 1 }}>
+                <textarea
+                  rows={3}
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder={
+                    user
+                      ? t('issue.addCommentPlaceholder')
+                      : 'Sign in to join the discussion and post updates...'
+                  }
+                  onClick={() => {
+                    if (!user) setIsAuthOpen(true);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-default)',
+                    backgroundColor: 'var(--bg-surface)',
+                    fontSize: '0.875rem',
+                    color: 'var(--text-primary)',
+                    resize: 'vertical',
+                    fontFamily: 'inherit',
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                {commentText.length}/1000
+              </span>
+              <button
+                type="submit"
+                disabled={addCommentMutation.isPending || !commentText.trim()}
+                className="btn btn-primary"
+                style={{ padding: '6px 14px', fontSize: '0.8125rem', gap: '6px' }}
+              >
+                {addCommentMutation.isPending ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>{t('issue.postingComment')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Send size={14} />
+                    <span>{t('issue.postComment')}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* Comments List */}
+          {isCommentsLoading ? (
+            <div style={{ textAlign: 'center', padding: 'var(--space-4)' }}>
+              <Loader2 size={24} className="animate-spin" style={{ color: 'var(--accent-primary)', margin: '0 auto' }} />
+            </div>
+          ) : comments.length === 0 ? (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: 'var(--space-6)',
+                color: 'var(--text-secondary)',
+                fontSize: '0.875rem',
+                backgroundColor: 'var(--bg-surface-subtle)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px dashed var(--border-default)',
+              }}
+            >
+              {t('issue.noComments')}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+              {comments.map((comment) => {
+                const isAuthor = user?.id === comment.user_id;
+                const isAdmin = user?.role === 'admin';
+                const canDelete = isAuthor || isAdmin;
+                const isOfficial = comment.is_official || comment.user?.role === 'admin';
+
+                return (
+                  <div
+                    key={comment.id}
+                    style={{
+                      padding: 'var(--space-4)',
+                      borderRadius: 'var(--radius-md)',
+                      backgroundColor: isOfficial
+                        ? 'var(--accent-subtle)'
+                        : 'var(--bg-surface-subtle)',
+                      border: isOfficial
+                        ? '1px solid var(--accent-primary)'
+                        : '1px solid var(--border-default)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        fontSize: '0.8125rem',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                          {comment.user?.display_name || 'Citizen'}
+                        </span>
+
+                        {isOfficial && (
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '2px 8px',
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                              borderRadius: 'var(--radius-full)',
+                              backgroundColor: 'var(--status-resolved-bg, rgba(16, 185, 129, 0.15))',
+                              color: 'var(--status-resolved, #10b981)',
+                              border: '1px solid var(--status-resolved, #10b981)',
+                            }}
+                          >
+                            <ShieldCheck size={12} />
+                            <span>{t('issue.officialBadge')}</span>
+                          </span>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
+                          {new Date(comment.created_at).toLocaleDateString()}
+                        </span>
+
+                        {canDelete && (
+                          <button
+                            type="button"
+                            onClick={() => deleteCommentMutation.mutate(comment.id)}
+                            disabled={deleteCommentMutation.isPending}
+                            className="btn-icon"
+                            title={t('issue.deleteComment')}
+                            style={{ padding: '2px 4px', color: 'var(--status-rejected)' }}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <p
+                      style={{
+                        fontSize: '0.875rem',
+                        color: 'var(--text-primary)',
+                        lineHeight: 1.55,
+                        whiteSpace: 'pre-wrap',
+                        margin: 0,
+                      }}
+                    >
+                      {comment.content}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
