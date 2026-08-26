@@ -1,10 +1,55 @@
 import { Request, Response, NextFunction } from 'express';
 import { getFirebaseAuth } from '../config/firebase.js';
+import { config } from '../config/env.js';
 import { AppError } from '../shared/errors.js';
 import { DbUser, UserRole } from '../shared/types.js';
 import { usersRepository } from '../modules/users/users.repository.js';
 
 import { verifyToken } from '../shared/auth.utils.js';
+
+interface TrustedIdentity {
+  uid: string;
+  email: string;
+  displayName: string | null;
+  role: UserRole;
+}
+
+function resolveDevelopmentIdentity(token: string): TrustedIdentity | null {
+  if (config.nodeEnv === 'production') return null;
+
+  if (token === 'dev-admin') {
+    return {
+      uid: 'admin_demo_uid_123',
+      email: 'admin@geoissue.org',
+      displayName: 'Lead Admin',
+      role: 'admin',
+    };
+  }
+
+  if (token === 'dev-user') {
+    return {
+      uid: 'citizen_demo_uid_456',
+      email: 'citizen@geoissue.org',
+      displayName: 'Tariq Al-Mansoor',
+      role: 'user',
+    };
+  }
+
+  if (token.startsWith('mock:')) {
+    const uid = token.slice('mock:'.length);
+    if (!/^[A-Za-z0-9_-]{1,100}$/.test(uid)) {
+      throw AppError.unauthenticated('Invalid mock authentication token');
+    }
+    return {
+      uid,
+      email: `${uid}@geoissue.org`,
+      displayName: null,
+      role: 'user',
+    };
+  }
+
+  return null;
+}
 
 declare global {
   namespace Express {
@@ -46,37 +91,27 @@ export async function authenticate(
       return next();
     }
 
-    const firebaseAuth = getFirebaseAuth();
+    const developmentIdentity = resolveDevelopmentIdentity(token);
     let uid: string;
     let email: string;
-    let displayName: string | null = null;
+    let displayName: string | null;
+    let role: UserRole;
 
-    if (firebaseAuth) {
+    if (developmentIdentity) {
+      ({ uid, email, displayName, role } = developmentIdentity);
+    } else {
+      const firebaseAuth = getFirebaseAuth();
+      if (!firebaseAuth) {
+        throw AppError.unauthenticated('Invalid authentication token');
+      }
       try {
         const decodedToken = await firebaseAuth.verifyIdToken(token);
         uid = decodedToken.uid;
         email = decodedToken.email || `${uid}@geoissue.local`;
         displayName = decodedToken.name || null;
-      } catch (err: any) {
-        throw AppError.unauthenticated(`Invalid authentication token: ${err.message}`);
-      }
-    } else {
-      // Dev / Test / Demo mock token support
-      if (token.startsWith('mock:')) {
-        uid = token.replace('mock:', '');
-        email = `${uid}@geoissue.org`;
-      } else if (token === 'dev-admin') {
-        uid = 'admin_demo_uid_123';
-        email = 'admin@geoissue.org';
-        displayName = 'Lead Admin';
-      } else if (token === 'dev-user') {
-        uid = 'citizen_demo_uid_456';
-        email = 'citizen@geoissue.org';
-        displayName = 'Tariq Al-Mansoor';
-      } else {
-        // Assume raw UID or token in dev mode
-        uid = token;
-        email = `${token}@geoissue.org`;
+        role = 'user';
+      } catch {
+        throw AppError.unauthenticated('Invalid authentication token');
       }
     }
 
@@ -86,11 +121,17 @@ export async function authenticate(
     // Load or lazy sync local user
     let user = await usersRepository.findByFirebaseUid(uid);
     if (!user) {
+      const emailOwner = await usersRepository.findByEmail(email);
+      if (emailOwner) {
+        throw AppError.conflict(
+          'An account with this email already uses a different sign-in method'
+        );
+      }
       user = await usersRepository.upsert({
         firebase_uid: uid,
         email,
         display_name: displayName || (email ? email.split('@')[0] : 'Citizen'),
-        role: email.includes('admin') || uid.includes('admin') ? 'admin' : 'user',
+        role,
         language: 'en',
         account_status: 'active',
       });
@@ -121,27 +162,27 @@ export async function optionalAuth(
     const token = authHeader.split('Bearer ')[1].trim();
     if (!token) return next();
 
-    const firebaseAuth = getFirebaseAuth();
-    let uid: string;
-    let email: string;
+    const jwtPayload = verifyToken(token);
+    if (jwtPayload) {
+      const user = await usersRepository.findById(jwtPayload.id);
+      if (user && user.account_status !== 'suspended') {
+        req.user = user;
+      }
+      return next();
+    }
 
-    if (firebaseAuth) {
+    const developmentIdentity = resolveDevelopmentIdentity(token);
+    let uid: string;
+    if (developmentIdentity) {
+      uid = developmentIdentity.uid;
+    } else {
+      const firebaseAuth = getFirebaseAuth();
+      if (!firebaseAuth) return next();
       try {
         const decodedToken = await firebaseAuth.verifyIdToken(token);
         uid = decodedToken.uid;
-        email = decodedToken.email || `${uid}@geoissue.local`;
       } catch {
         return next();
-      }
-    } else {
-      if (token.startsWith('mock:')) {
-        uid = token.replace('mock:', '');
-      } else if (token === 'dev-admin') {
-        uid = 'admin_demo_uid_123';
-      } else if (token === 'dev-user') {
-        uid = 'citizen_demo_uid_456';
-      } else {
-        uid = token;
       }
     }
 

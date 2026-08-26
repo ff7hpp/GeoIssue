@@ -3,8 +3,6 @@ import { usersService } from './users.service.js';
 import { z } from 'zod';
 
 export const syncUserSchema = z.object({
-  firebase_uid: z.string().optional(),
-  email: z.string().email().optional(),
   display_name: z.string().nullable().optional(),
   language: z.enum(['en', 'ar', 'tr']).optional(),
 });
@@ -26,21 +24,7 @@ export const usersController = {
 
   async syncMe(req: Request, res: Response, next: NextFunction) {
     try {
-      const firebaseUid = req.body.firebase_uid || req.firebaseUid || req.user?.firebase_uid;
-      const email = req.body.email || req.firebaseEmail || req.user?.email;
-
-      if (!firebaseUid || !email) {
-        return res.status(400).json({
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Firebase UID and email are required for sync',
-          },
-        });
-      }
-
-      const user = await usersService.syncUser({
-        firebase_uid: firebaseUid,
-        email,
+      const user = await usersService.syncUser(req.user!.id, {
         display_name: req.body.display_name ?? req.user?.display_name,
         language: req.body.language,
       });

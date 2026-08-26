@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { app } from '../app.js';
 import { initDb } from '../db/pool.js';
+import { mockStore } from '../db/pool.js';
+import { authService } from '../modules/auth/auth.service.js';
+import { generateToken } from '../shared/auth.utils.js';
 
 // Simple lightweight supertest-like invocation helper using express app
 async function makeRequest(
@@ -102,6 +105,89 @@ describe('API Smoke & Security Tests', () => {
     expect(res.body.error.code).toBe('UNAUTHENTICATED');
   });
 
+  it('GET /api/auth/me should reject invalid and expired tokens', async () => {
+    const invalid = await makeRequest('GET', '/api/auth/me', {
+      authorization: 'Bearer definitely-not-a-valid-token',
+    });
+    expect(invalid.status).toBe(401);
+    expect(invalid.body.error.code).toBe('UNAUTHENTICATED');
+
+    const registered = await authService.register({
+      email: `expired_${Date.now()}@geoissue.local`,
+      password: 'StrongPassword123!',
+      display_name: 'Expired Token User',
+    });
+    const expiredToken = generateToken(
+      {
+        id: registered.user.id,
+        email: registered.user.email,
+        role: registered.user.role,
+      },
+      -1
+    );
+    const expired = await makeRequest('GET', '/api/auth/me', {
+      authorization: `Bearer ${expiredToken}`,
+    });
+    expect(expired.status).toBe(401);
+    expect(expired.body.error.code).toBe('UNAUTHENTICATED');
+  });
+
+  it('should restore a native JWT session and enforce suspended-user blocking', async () => {
+    const registered = await authService.register({
+      email: `session_${Date.now()}@geoissue.local`,
+      password: 'StrongPassword123!',
+      display_name: 'Session User',
+    });
+
+    const active = await makeRequest('GET', '/api/auth/me', {
+      authorization: `Bearer ${registered.token}`,
+    });
+    expect(active.status).toBe(200);
+    expect(active.body.data.id).toBe(registered.user.id);
+
+    const profile = await makeRequest('GET', '/api/me', {
+      authorization: `Bearer ${registered.token}`,
+    });
+    expect(profile.status).toBe(200);
+    expect(profile.body.data.password_hash).toBeUndefined();
+
+    const stored = mockStore.users.get(registered.user.id)!;
+    stored.account_status = 'suspended';
+    mockStore.users.set(stored.id, stored);
+
+    const suspended = await makeRequest('GET', '/api/auth/me', {
+      authorization: `Bearer ${registered.token}`,
+    });
+    expect(suspended.status).toBe(403);
+    expect(suspended.body.error.code).toBe('FORBIDDEN');
+
+    await expect(
+      authService.login({
+        email: registered.user.email,
+        password: 'StrongPassword123!',
+      })
+    ).rejects.toThrow('suspended');
+  });
+
+  it('should ignore client-supplied identity fields during profile sync', async () => {
+    const res = await makeRequest(
+      'POST',
+      '/api/me/sync',
+      { authorization: 'Bearer dev-user' },
+      {
+        firebase_uid: 'attacker-admin-uid',
+        email: 'attacker-admin@geoissue.org',
+        display_name: 'Updated Citizen',
+      }
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.firebase_uid).toBe('citizen_demo_uid_456');
+    expect(res.body.data.email).toBe('citizen@geoissue.org');
+    expect(res.body.data.role).toBe('user');
+    expect(res.body.data.display_name).toBe('Updated Citizen');
+  });
+
   it('GET /api/admin/users with regular user token should return 403 FORBIDDEN', async () => {
     const res = await makeRequest('GET', '/api/admin/users', {
       authorization: 'Bearer dev-user',
@@ -116,5 +202,6 @@ describe('API Smoke & Security Tests', () => {
     });
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.data.every((user: any) => user.password_hash === undefined)).toBe(true);
   });
 });

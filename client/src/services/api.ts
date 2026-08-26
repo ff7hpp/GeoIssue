@@ -1,6 +1,6 @@
 import { ApiResponse, Issue, Category, Report, User, IssueStatus, IssuePriority, IssueComment } from '../types';
 
-const API_BASE = '/api';
+const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
 
 let getAuthToken: (() => Promise<string | null>) | null = null;
 
@@ -163,8 +163,6 @@ export const api = {
   },
 
   async syncMe(data: {
-    firebase_uid?: string;
-    email?: string;
     display_name?: string | null;
     language?: string;
   }) {

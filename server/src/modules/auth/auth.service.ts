@@ -47,17 +47,14 @@ export const authService = {
       throw AppError.forbidden('Your account has been suspended. Please contact support.');
     }
 
-    // If user has a password_hash, verify it
-    if (user.password_hash) {
-      const isValid = await verifyPassword(data.password, user.password_hash);
-      if (!isValid) {
-        throw AppError.unauthenticated('Invalid email or password');
-      }
-    } else {
-      // Fallback for initial demo seeds if password isn't hashed yet
-      if (data.password !== 'Password123!' && !data.password.startsWith('demo')) {
-        throw AppError.unauthenticated('Invalid email or password');
-      }
+    // Firebase-only and demo identities do not have a native password.
+    if (!user.password_hash) {
+      throw AppError.unauthenticated('Invalid email or password');
+    }
+
+    const isValid = await verifyPassword(data.password, user.password_hash);
+    if (!isValid) {
+      throw AppError.unauthenticated('Invalid email or password');
     }
 
     const token = generateToken({

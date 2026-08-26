@@ -40,6 +40,9 @@ describe('Authentication & Cryptography', () => {
     // Tampered token should fail
     const tampered = token.slice(0, -5) + 'xxxxx';
     expect(verifyToken(tampered)).toBeNull();
+
+    const expired = generateToken(payload, -1);
+    expect(verifyToken(expired)).toBeNull();
   });
 
   it('should register a new citizen user and reject duplicate emails', async () => {
@@ -88,6 +91,15 @@ describe('Authentication & Cryptography', () => {
       authService.login({
         email: testEmail,
         password: 'WrongPassword!',
+      })
+    ).rejects.toThrow('Invalid email or password');
+  });
+
+  it('should reject native password login for Firebase-only and demo users', async () => {
+    await expect(
+      authService.login({
+        email: 'citizen@geoissue.org',
+        password: 'Password123!',
       })
     ).rejects.toThrow('Invalid email or password');
   });

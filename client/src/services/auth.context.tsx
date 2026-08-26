@@ -28,6 +28,22 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const firebaseFallbackCodes = new Set([
+  'auth/invalid-credential',
+  'auth/user-not-found',
+  'auth/operation-not-allowed',
+  'auth/configuration-not-found',
+]);
+
+function canUseNativeAuthFallback(error: unknown) {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    firebaseFallbackCodes.has(String(error.code))
+  );
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -65,13 +81,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
           // Sync with local backend
           const syncedUser = await api.syncMe({
-            firebase_uid: fbUser.uid,
-            email: fbUser.email || `${fbUser.uid}@geoissue.org`,
             display_name: fbUser.displayName || 'Citizen',
           });
           setUser(syncedUser);
         } catch (err) {
           console.warn('Firebase auth sync warning:', err);
+          localStorage.removeItem('geoissue_token');
+          setToken(null);
+          setUser(null);
+          await fbSignOut(fbAuth).catch(() => undefined);
         } finally {
           setIsLoading(false);
         }
@@ -117,15 +135,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         localStorage.setItem('geoissue_token', idToken);
         setToken(idToken);
         const synced = await api.syncMe({
-          firebase_uid: userCredential.user.uid,
-          email: userCredential.user.email || email,
           display_name: userCredential.user.displayName || email.split('@')[0],
         });
         setUser(synced);
         return;
       } catch (fbErr: any) {
         // If Firebase Auth fails due to user-not-found, try backend API direct auth
-        if (fbErr.code === 'auth/invalid-credential' || fbErr.code === 'auth/user-not-found') {
+        if (canUseNativeAuthFallback(fbErr)) {
+          await fbSignOut(fbAuth).catch(() => undefined);
           const result = await api.login({ email, password });
           localStorage.setItem('geoissue_token', result.token);
           setToken(result.token);
@@ -135,7 +152,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         throw fbErr;
       }
     } catch (err) {
-      console.error('Email sign-in error:', err);
+      console.warn('Email sign-in failed:', err);
+      localStorage.removeItem('geoissue_token');
+      setToken(null);
+      setUser(null);
+      await fbSignOut(fbAuth).catch(() => undefined);
       throw err;
     } finally {
       setIsLoading(false);
@@ -150,23 +171,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   ) => {
     setIsLoading(true);
     try {
+      let userCredential;
       try {
-        const userCredential = await createUserWithEmailAndPassword(fbAuth, email, password);
-        if (displayName) {
-          await updateProfile(userCredential.user, { displayName });
-        }
-        const idToken = await userCredential.user.getIdToken();
-        localStorage.setItem('geoissue_token', idToken);
-        setToken(idToken);
-        const synced = await api.syncMe({
-          firebase_uid: userCredential.user.uid,
-          email: userCredential.user.email || email,
-          display_name: displayName,
-        });
-        setUser(synced);
-        return;
-      } catch (fbErr: any) {
-        // Fall back to direct backend registration
+        userCredential = await createUserWithEmailAndPassword(fbAuth, email, password);
+      } catch (fbErr) {
+        if (!canUseNativeAuthFallback(fbErr)) throw fbErr;
+
         const result = await api.register({
           email,
           password,
@@ -176,9 +186,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         localStorage.setItem('geoissue_token', result.token);
         setToken(result.token);
         setUser(result.user);
+        return;
       }
+
+      if (displayName) {
+        await updateProfile(userCredential.user, { displayName });
+      }
+      const idToken = await userCredential.user.getIdToken();
+      localStorage.setItem('geoissue_token', idToken);
+      setToken(idToken);
+      const synced = await api.syncMe({ display_name: displayName });
+      setUser(synced);
     } catch (err) {
-      console.error('Registration error:', err);
+      console.warn('Registration failed:', err);
+      localStorage.removeItem('geoissue_token');
+      setToken(null);
+      setUser(null);
+      await fbSignOut(fbAuth).catch(() => undefined);
       throw err;
     } finally {
       setIsLoading(false);
@@ -193,13 +217,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.setItem('geoissue_token', idToken);
       setToken(idToken);
       const synced = await api.syncMe({
-        firebase_uid: result.user.uid,
-        email: result.user.email || `${result.user.uid}@geoissue.org`,
         display_name: result.user.displayName || 'Citizen',
       });
       setUser(synced);
     } catch (err) {
-      console.error('Google sign-in error:', err);
+      console.warn('Google sign-in failed:', err);
+      localStorage.removeItem('geoissue_token');
+      setToken(null);
+      setUser(null);
+      await fbSignOut(fbAuth).catch(() => undefined);
       throw err;
     } finally {
       setIsLoading(false);
@@ -217,16 +243,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setToken(authToken);
 
       const syncedUser = await api.syncMe({
-        firebase_uid: authToken.startsWith('mock:')
-          ? authToken.replace('mock:', '')
-          : `uid_${email.replace(/[^a-zA-Z0-9]/g, '_')}`,
-        email,
         display_name: displayName || email.split('@')[0],
       });
 
       setUser(syncedUser);
     } catch (err) {
-      console.error('Sign-in error:', err);
+      console.warn('Sign-in failed:', err);
       localStorage.removeItem('geoissue_token');
       setToken(null);
       setUser(null);
@@ -244,14 +266,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const signOut = async () => {
+    localStorage.removeItem('geoissue_token');
+    setToken(null);
+    setUser(null);
     try {
       await fbSignOut(fbAuth);
     } catch {
       // ignore
     }
-    localStorage.removeItem('geoissue_token');
-    setToken(null);
-    setUser(null);
   };
 
   const updateUserContext = (updatedUser: User) => {
