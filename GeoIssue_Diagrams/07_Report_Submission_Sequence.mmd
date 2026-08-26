@@ -1,0 +1,34 @@
+sequenceDiagram
+  actor U as User
+  participant B as React Browser
+  participant F as Firebase Auth
+  participant A as Express API
+  participant G as Nominatim / Image Storage
+  participant M as Matching Service
+  participant D as Neon PostgreSQL
+  U->>B: Sign in / create report
+  B->>F: Authenticate
+  F-->>B: Firebase ID token
+  U->>B: Select location + category + description + optional image
+  B->>A: POST /api/reports + Bearer token
+  A->>F: Verify ID token
+  F-->>A: Verified identity
+  A->>A: Validate input + authorize
+  opt Geocoding or image handling required
+    A->>G: Resolve place / store image
+    G-->>A: Address / image URL
+  end
+  A->>M: Find compatible nearby open issue
+  M->>D: Query candidate issues
+  D-->>M: Candidates
+  alt Existing issue matched
+    M-->>A: Existing issueId
+    A->>D: INSERT report linked to issue
+  else No acceptable match
+    M-->>A: No match
+    A->>D: INSERT issue + INSERT report
+  end
+  A->>D: Write history/audit if applicable
+  D-->>A: Commit success
+  A-->>B: reportId + issueId + match result
+  B-->>U: Show success; refresh map/My Reports

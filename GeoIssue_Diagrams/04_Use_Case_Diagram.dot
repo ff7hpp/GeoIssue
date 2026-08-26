@@ -1,0 +1,33 @@
+digraph G {
+
+    graph [fontname="DejaVu Sans", bgcolor="white", pad="0.25", nodesep="0.45", ranksep="0.60"];
+    node  [fontname="DejaVu Sans", shape=box, style="rounded,filled", fillcolor="#FAFAFA", color="#D4D4D8", fontcolor="#18181B", margin="0.16,0.10"];
+    edge  [fontname="DejaVu Sans", color="#71717A", fontcolor="#52525B", arrowsize="0.8"];
+
+rankdir=LR; labelloc="t"; label="GeoIssue — Use Case Diagram"; fontsize=20;
+node [shape=ellipse, fillcolor="#FFFFFF"];
+view [label="View public map/issues"];
+detail [label="View issue details"];
+register [label="Register / Login"];
+report [label="Create report"];
+location [label="Choose GPS / map location"];
+support [label="Support existing issue"];
+track [label="Track own reports"];
+edit [label="Edit/Delete own report
+when policy allows"];
+review [label="Review issue"];
+status [label="Change issue status"];
+priority [label="Change priority"];
+users [label="Manage users/roles"];
+categories [label="Manage categories"];
+audit [label="View audit logs"];
+node [shape=box, style="rounded,filled"];
+Visitor [label="Visitor"];
+User [label="User"];
+Reviewer [label="Reviewer"];
+Admin [label="Admin"];
+Visitor -> view; Visitor -> detail; Visitor -> register;
+User -> view; User -> detail; User -> report; User -> location; User -> support; User -> track; User -> edit;
+Reviewer -> view; Reviewer -> detail; Reviewer -> review; Reviewer -> status; Reviewer -> priority;
+Admin -> view; Admin -> detail; Admin -> review; Admin -> status; Admin -> priority; Admin -> users; Admin -> categories; Admin -> audit;
+}

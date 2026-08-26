@@ -1,0 +1,11 @@
+stateDiagram-v2
+  [*] --> submitted
+  submitted --> in_review: reviewer begins review
+  in_review --> accepted: valid / actionable
+  in_review --> rejected: invalid / duplicate / not actionable
+  accepted --> in_progress: work starts
+  in_progress --> resolved: completed + note/evidence
+  resolved --> in_review: PROPOSED reopen on verified recurrence
+  rejected --> in_review: PROPOSED reconsider with new evidence
+  resolved --> [*]
+  rejected --> [*]

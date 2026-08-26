@@ -1,0 +1,20 @@
+flowchart TB
+  A([Start]) --> B[Open map / browse issues]
+  B --> C{Authenticated?}
+  C -- No --> D[Login / Register] --> E[Report an Issue]
+  C -- Yes --> E
+  E --> F[Choose location: GPS / map click / place search]
+  F --> G{Location available?}
+  G -- No --> H[Fallback: manual map selection / coordinates] --> I[Enter category + description + optional image]
+  G -- Yes --> I
+  I --> J{Input valid?}
+  J -- No --> K[Show errors; preserve input] --> I
+  J -- Yes --> L[Submit report]
+  L --> M[Find nearby similar open issues]
+  M --> N{Candidate issue found?}
+  N -- Yes --> O[Attach report to existing issue]
+  N -- No --> P[Create new issue + attach report]
+  O --> Q[Persist in Neon transaction]
+  P --> Q
+  Q --> R[Return result; update map and My Reports]
+  R --> S([Done])

@@ -1,0 +1,14 @@
+flowchart TB
+  A[Validated new Report] --> B[Filter open Issues by same category]
+  B --> C[Compute distance to issue location]
+  C --> D{Within configured radius?
+PROPOSED default: 50 m}
+  D -- No --> E[Create new Issue]
+  D -- Yes --> F[Candidate issues]
+  F --> G{Candidate count}
+  G -- 0 --> E
+  G -- 1 --> H[Attach to only/nearest candidate]
+  G -- >1 --> I[Choose nearest or flag for Reviewer confirmation]
+  E --> J[Transactional write]
+  H --> J
+  I --> J

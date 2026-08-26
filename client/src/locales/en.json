@@ -1,0 +1,162 @@
+{
+  "app": {
+    "name": "GeoIssue",
+    "tagline": "Report. Track. Resolve.",
+    "description": "A modern civic-tech platform connecting citizens and municipalities to identify, prioritize, and resolve community problems."
+  },
+  "nav": {
+    "explore": "Explore Map",
+    "issues": "Issues",
+    "report": "New Report",
+    "myReports": "My Reports",
+    "admin": "Admin Portal",
+    "login": "Sign In",
+    "register": "Create Account",
+    "logout": "Sign Out",
+    "settings": "Settings",
+    "dashboard": "Dashboard"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "en": "English",
+    "ar": "العربية",
+    "tr": "Türkçe"
+  },
+  "status": {
+    "submitted": "Submitted",
+    "in_review": "Under Review",
+    "accepted": "Accepted",
+    "in_progress": "In Progress",
+    "resolved": "Resolved",
+    "rejected": "Declined"
+  },
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "urgent": "Urgent"
+  },
+  "explore": {
+    "searchPlaceholder": "Search issues by title or keyword...",
+    "allCategories": "All Categories",
+    "allStatuses": "All Statuses",
+    "activeOnly": "Active Only",
+    "issuesCount": "{{count}} Issues Found",
+    "viewMap": "View Map",
+    "viewList": "View List",
+    "noIssuesFound": "No issues found matching your criteria.",
+    "selectOnMap": "Click an issue on the map or list to view details."
+  },
+  "issue": {
+    "details": "Issue Details",
+    "canonicalProblem": "Unified Community Problem",
+    "reportsCount": "{{count}} citizen reports attached",
+    "supportersCount": "{{count}} supporters",
+    "supportAction": "Support Problem",
+    "supportedAction": "Supported",
+    "statusTimeline": "Resolution Timeline",
+    "citizenReports": "Attached Citizen Reports",
+    "reportBy": "Reported by {{name}}",
+    "noReports": "No reports attached yet.",
+    "location": "Location Coordinates",
+    "created": "Created {{date}}",
+    "updated": "Updated {{date}}",
+    "resolved": "Resolved {{date}}"
+  },
+  "reportWizard": {
+    "title": "Report a Community Issue",
+    "subtitle": "Help improve our city by submitting real-world problem observations.",
+    "step1": "1. Location",
+    "step2": "2. Details",
+    "step3": "3. Photo",
+    "step4": "4. Review",
+    "step5": "5. Confirmation",
+    "selectLocationInstruction": "Click on the map or use GPS to pinpoint the problem location precisely.",
+    "useGps": "Use Current GPS",
+    "gpsSuccess": "Location retrieved from device.",
+    "searchLocation": "Search street, neighborhood, or place...",
+    "selectedCoords": "Selected Location: {{lat}}, {{lon}}",
+    "categoryLabel": "Problem Category",
+    "categoryPlaceholder": "Choose category...",
+    "issueTitleLabel": "Issue Title (Optional)",
+    "issueTitlePlaceholder": "e.g. Deep pothole on 5th avenue",
+    "descriptionLabel": "Detailed Description",
+    "descriptionPlaceholder": "Describe what you see, how long it has been there, and any safety hazards...",
+    "photoLabel": "Attach Photo (Optional)",
+    "photoInstruction": "Upload an image of the problem from your device.",
+    "photoUrlPlaceholder": "Or paste direct image URL...",
+    "reviewTitle": "Review Your Report",
+    "reviewNotice": "Our system will automatically check if nearby citizens have already reported this problem (within 50m) and link your report to avoid duplication.",
+    "submitButton": "Submit Citizen Report",
+    "submitting": "Submitting Report...",
+    "back": "Back",
+    "next": "Continue",
+    "successTitle": "Report Submitted Successfully!",
+    "attachedToExisting": "Your report was attached to an existing active issue nearby ({{distance}}m away). This boosts its community priority without creating duplicate tickets!",
+    "newIssueCreated": "A new community issue has been created from your report. Track its review progress in My Reports.",
+    "viewIssue": "View Issue on Map",
+    "createAnother": "Submit Another Report"
+  },
+  "myReports": {
+    "title": "My Submitted Reports",
+    "subtitle": "Track all problem reports you have submitted and their municipal review status.",
+    "noReports": "You haven't submitted any reports yet.",
+    "reportNew": "Create First Report",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this report? This will remove your submission from the issue."
+  },
+  "admin": {
+    "portal": "Admin Operations Portal",
+    "subtitle": "Review citizen submissions, update status lifecycles, and prioritize public works.",
+    "tabs": {
+      "issues": "Issue Review Queue",
+      "categories": "Categories",
+      "users": "User Accounts"
+    },
+    "changeStatus": "Change Status",
+    "changePriority": "Change Priority",
+    "addNotePlaceholder": "Enter internal review note or action reason...",
+    "updateStatusAction": "Update Status",
+    "statusUpdatedSuccess": "Issue status updated successfully.",
+    "priorityUpdatedSuccess": "Issue priority updated.",
+    "createCategory": "Add New Category",
+    "categoryName": "Category Name",
+    "categorySlug": "URL Slug",
+    "categoryIcon": "Lucide Icon Name",
+    "save": "Save",
+    "userRole": "Role",
+    "accountStatus": "Account Status"
+  },
+  "auth": {
+    "signInTitle": "Welcome Back",
+    "signInSubtitle": "Sign in to report issues and track community solutions.",
+    "signUpTitle": "Join GeoIssue",
+    "signUpSubtitle": "Create an account to submit reports and support community improvements.",
+    "email": "Email Address",
+    "password": "Password",
+    "displayName": "Display Name / Citizen Name",
+    "signInButton": "Sign In",
+    "signUpButton": "Create Account",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "demoAccounts": "Quick Demo Sign-In:",
+    "demoAdmin": "Demo Admin",
+    "demoUser": "Demo Citizen"
+  },
+  "common": {
+    "loading": "Loading data...",
+    "error": "An error occurred",
+    "retry": "Try Again",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save Changes",
+    "delete": "Delete",
+    "optional": "Optional",
+    "required": "Required"
+  }
+}

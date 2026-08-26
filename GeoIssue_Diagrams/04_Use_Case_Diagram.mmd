@@ -1,0 +1,18 @@
+flowchart LR
+  Visitor[Visitor] --> V1((View public map/issues))
+  Visitor --> V2((View issue details))
+  Visitor --> V3((Register / Login))
+  User[User] --> U1((Create report))
+  User --> U2((Choose GPS / map location))
+  User --> U3((Support issue))
+  User --> U4((Track own reports))
+  User --> U5((Edit/Delete own report when policy allows))
+  Reviewer[Reviewer] --> R1((Review issue))
+  Reviewer --> R2((Change status))
+  Reviewer --> R3((Change priority))
+  Admin[Admin] --> A1((Manage users/roles))
+  Admin --> A2((Manage categories))
+  Admin --> A3((View audit logs))
+  Admin --> R1
+  Admin --> R2
+  Admin --> R3

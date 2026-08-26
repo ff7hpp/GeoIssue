@@ -1,0 +1,37 @@
+digraph G {
+
+    graph [fontname="DejaVu Sans", bgcolor="white", pad="0.25", nodesep="0.45", ranksep="0.60"];
+    node  [fontname="DejaVu Sans", shape=box, style="rounded,filled", fillcolor="#FAFAFA", color="#D4D4D8", fontcolor="#18181B", margin="0.16,0.10"];
+    edge  [fontname="DejaVu Sans", color="#71717A", fontcolor="#52525B", arrowsize="0.8"];
+
+rankdir=LR;
+labelloc="t"; label="GeoIssue — System Context"; fontsize=20;
+visitor [label="Visitor
+Browse public map and issues", fillcolor="#FFFFFF"];
+user [label="Registered User
+Create reports, support issues, track reports"];
+reviewer [label="Reviewer
+Review issues, change status and priority"];
+admin [label="Admin
+Manage users, roles, categories and audit logs"];
+geo [label="GeoIssue Platform", shape=box, penwidth=2, fillcolor="#F4F4F5"];
+firebase [label="Firebase Authentication
+Email/password identity"];
+map [label="OpenStreetMap / Leaflet
+Map tiles and client map UI"];
+nominatim [label="Nominatim
+Geocoding via backend"];
+neon [label="Neon PostgreSQL
+Persistent application data"];
+storage [label="Object/Image Storage
+Provider TBD", style="rounded,dashed,filled", fillcolor="#FFFFFF"];
+visitor -> geo [label="view"];
+user -> geo [label="use"];
+reviewer -> geo [label="review"];
+admin -> geo [label="administer"];
+geo -> firebase [dir=both, label="authenticate / verify token"];
+geo -> map [label="render map"];
+geo -> nominatim [dir=both, label="geocode"];
+geo -> neon [dir=both, label="read/write"];
+geo -> storage [dir=both, label="optional report image"];
+}

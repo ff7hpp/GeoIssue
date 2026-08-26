@@ -1,0 +1,21 @@
+flowchart LR
+  User[User / Visitor] --> P1((1. Authentication & Identity))
+  P1 <--> Firebase[Firebase Auth]
+  P1 --> DB[(Neon PostgreSQL)]
+  User --> P2((2. Public Issue Query))
+  P2 <--> DB
+  P2 --> User
+  User --> P3((3. Report Submission & Validation))
+  P3 --> P1
+  P3 <--> Nominatim[Nominatim]
+  P3 <--> Storage[Image Storage]
+  P3 --> P4((4. Issue Matching / Creation))
+  P4 <--> DB
+  P4 --> User
+  User --> P5((5. Support / Tracking))
+  P5 <--> DB
+  P5 --> User
+  Reviewer[Reviewer / Admin] --> P6((6. Review / Admin Workflow))
+  P6 --> P1
+  P6 <--> DB
+  P6 --> Reviewer

@@ -1,0 +1,39 @@
+digraph G {
+
+    graph [fontname="DejaVu Sans", bgcolor="white", pad="0.25", nodesep="0.45", ranksep="0.60"];
+    node  [fontname="DejaVu Sans", shape=box, style="rounded,filled", fillcolor="#FAFAFA", color="#D4D4D8", fontcolor="#18181B", margin="0.16,0.10"];
+    edge  [fontname="DejaVu Sans", color="#71717A", fontcolor="#52525B", arrowsize="0.8"];
+
+rankdir=TB; labelloc="t"; label="GeoIssue — Infrastructure / Deployment Topology"; fontsize=20;
+user [label="Browser / Mobile Browser"];
+dns [label="HTTPS + Domain / DNS", style="rounded,dashed,filled"];
+frontend [label="Frontend Hosting
+Static React build
+Provider TBD"];
+api [label="API Hosting
+Node.js / Express
+Provider TBD"];
+secrets [label="Environment Secrets
+Firebase Admin credentials • DB URL • storage keys"];
+ci [label="GitHub Repository + CI
+Lint • typecheck • unit • API • Playwright E2E"];
+firebase [label="Firebase Authentication"];
+neon [label="Neon PostgreSQL
+Migrations • constraints • indexes • backups"];
+nominatim [label="Nominatim
+Timeout + fallback"];
+storage [label="Image/Object Storage
+TBD"];
+logs [label="Application Logs / Monitoring
+Provider TBD", style="rounded,dashed,filled"];
+user -> dns -> frontend;
+frontend -> api [label="HTTPS /api"];
+api -> firebase;
+api -> neon;
+api -> nominatim;
+api -> storage;
+api -> logs;
+secrets -> api [style=dashed];
+ci -> frontend [label="deploy staging/prod", style=dashed];
+ci -> api [label="deploy staging/prod", style=dashed];
+}

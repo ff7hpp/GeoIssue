@@ -1,0 +1,24 @@
+digraph G {
+
+    graph [fontname="DejaVu Sans", bgcolor="white", pad="0.25", nodesep="0.45", ranksep="0.60"];
+    node  [fontname="DejaVu Sans", shape=box, style="rounded,filled", fillcolor="#FAFAFA", color="#D4D4D8", fontcolor="#18181B", margin="0.16,0.10"];
+    edge  [fontname="DejaVu Sans", color="#71717A", fontcolor="#52525B", arrowsize="0.8"];
+
+rankdir=LR; labelloc="t"; label="GeoIssue — ERD / Database Relationships"; fontsize=20;
+node [shape=record, style="filled", fillcolor="#FFFFFF", color="#D4D4D8", fontname="DejaVu Sans", fontsize=10];
+users [label="{users|id UUID PK\lfirebase_uid TEXT UNIQUE\lemail TEXT UNIQUE\ldisplay_name TEXT\lrole ENUM\llanguage TEXT\laccount_status ENUM\lcreated_at TIMESTAMPTZ\lupdated_at TIMESTAMPTZ\l}"];
+categories [label="{categories (PROPOSED)|id UUID PK\lname TEXT\lslug TEXT UNIQUE\licon TEXT NULL\lis_active BOOLEAN\lcreated_at TIMESTAMPTZ\l}"];
+issues [label="{issues|id UUID PK\lcategory_id UUID FK\ltitle TEXT\llatitude DECIMAL\llongitude DECIMAL\lstatus ENUM\lpriority ENUM\lreport_count INT\lcreated_at TIMESTAMPTZ\lupdated_at TIMESTAMPTZ\lresolved_at TIMESTAMPTZ NULL\l}"];
+reports [label="{reports|id UUID PK\lissue_id UUID FK\luser_id UUID FK\ldescription TEXT\llatitude DECIMAL\llongitude DECIMAL\limage_url TEXT NULL\lcreated_at TIMESTAMPTZ\lupdated_at TIMESTAMPTZ\l}"];
+supporters [label="{issue_supporters|issue_id UUID FK\luser_id UUID FK\lcreated_at TIMESTAMPTZ\lPK(issue_id,user_id)\l}"];
+history [label="{issue_status_history|id UUID PK\lissue_id UUID FK\lchanged_by_user_id UUID FK\lfrom_status ENUM NULL\lto_status ENUM\lnote TEXT NULL\lcreated_at TIMESTAMPTZ\l}"];
+audit [label="{audit_logs|id UUID PK\lactor_user_id UUID FK NULL\laction TEXT\lentity_type TEXT\lentity_id UUID NULL\lmetadata JSONB\lcreated_at TIMESTAMPTZ\l}"];
+categories -> issues [label="1 : N"];
+issues -> reports [label="1 : N"];
+users -> reports [label="1 : N"];
+issues -> supporters [label="1 : N"];
+users -> supporters [label="1 : N"];
+issues -> history [label="1 : N"];
+users -> history [label="1 : N"];
+users -> audit [label="1 : N"];
+}

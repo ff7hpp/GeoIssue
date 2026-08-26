@@ -1,0 +1,25 @@
+digraph G {
+
+    graph [fontname="DejaVu Sans", bgcolor="white", pad="0.25", nodesep="0.45", ranksep="0.60"];
+    node  [fontname="DejaVu Sans", shape=box, style="rounded,filled", fillcolor="#FAFAFA", color="#D4D4D8", fontcolor="#18181B", margin="0.16,0.10"];
+    edge  [fontname="DejaVu Sans", color="#71717A", fontcolor="#52525B", arrowsize="0.8"];
+
+rankdir=TB; labelloc="t"; label="GeoIssue — Report Submission Sequence"; fontsize=20;
+node [shape=box];
+actors [label="Browser → Firebase → Express API → Validation/Auth → Matching Service → Neon → Storage/Nominatim", fillcolor="#F4F4F5"];
+s1 [label="1. User signs in; browser receives Firebase ID token"];
+s2 [label="2. User chooses location and fills report form"];
+s3 [label="3. Browser calls POST /api/reports with Bearer token"];
+s4 [label="4. API verifies token and server-side authorization"];
+s5 [label="5. Validate category, description, coordinates and image metadata"];
+s6 [label="6. Optional geocoding / image upload"];
+s7 [label="7. Query nearby open issues with compatible category"];
+s8 [shape=diamond, label="Match?"];
+s9a [label="8A. Create report linked to existing issue"];
+s9b [label="8B. Create new issue, then report linked to it"];
+s10 [label="9. Insert status/history/audit entries when applicable"];
+s11 [label="10. Commit transaction"];
+s12 [label="11. Return reportId, issueId, matchedExistingIssue"];
+actors -> s1 -> s2 -> s3 -> s4 -> s5 -> s6 -> s7 -> s8;
+s8 -> s9a [label="yes"]; s8 -> s9b [label="no"]; s9a -> s10; s9b -> s10; s10 -> s11 -> s12;
+}
