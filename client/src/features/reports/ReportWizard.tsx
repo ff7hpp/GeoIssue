@@ -4,6 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../services/api';
 import { useAuth } from '../../services/auth.context';
+import { uploadFreeImage, compressImageToDataUrl } from '../../services/imageUpload';
 import { LocationPicker } from '../../components/map/LocationPicker';
 import { CategoryIcon } from '../../components/common/CategoryIcon';
 import { AuthModal } from '../auth/AuthModal';
@@ -53,6 +54,7 @@ export const ReportWizard: React.FC = () => {
   const [description, setDescription] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
 
   // Submission result
   const [submissionResult, setSubmissionResult] = useState<{
@@ -70,13 +72,20 @@ export const ReportWizard: React.FC = () => {
 
   const submitMutation = useMutation({
     mutationFn: async () => {
+      let finalImageUrl = imageUrl;
+      if (selectedImageFile) {
+        finalImageUrl = await uploadFreeImage(selectedImageFile, imagePreview || undefined);
+      } else if (imagePreview) {
+        finalImageUrl = imagePreview;
+      }
+
       return api.createReport({
         category_id: categoryId,
         description,
         latitude,
         longitude,
         title: title || undefined,
-        image_url: imagePreview || imageUrl || undefined,
+        image_url: finalImageUrl || undefined,
       });
     },
     onSuccess: (data) => {
@@ -123,43 +132,9 @@ export const ReportWizard: React.FC = () => {
     try {
       setIsCompressingImage(true);
       setImageFileName(file.name);
+      setSelectedImageFile(file);
       
-      const compressedDataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onerror = reject;
-        reader.onload = (e) => {
-          const img = new Image();
-          img.onerror = reject;
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const MAX_DIMENSION = 1280;
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height && width > MAX_DIMENSION) {
-              height = Math.round((height * MAX_DIMENSION) / width);
-              width = MAX_DIMENSION;
-            } else if (height > MAX_DIMENSION) {
-              width = Math.round((width * MAX_DIMENSION) / height);
-              height = MAX_DIMENSION;
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) {
-              resolve(reader.result as string);
-              return;
-            }
-            ctx.drawImage(img, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
-            resolve(dataUrl);
-          };
-          img.src = e.target?.result as string;
-        };
-        reader.readAsDataURL(file);
-      });
-
+      const compressedDataUrl = await compressImageToDataUrl(file);
       setImagePreview(compressedDataUrl);
       setImageUrl('');
     } catch (err) {
@@ -200,6 +175,7 @@ export const ReportWizard: React.FC = () => {
     setImagePreview(null);
     setImageUrl('');
     setImageFileName('');
+    setSelectedImageFile(null);
   };
 
   const selectedCategory = categories.find((c) => c.id === categoryId);

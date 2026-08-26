@@ -16,7 +16,9 @@ export interface DbUser {
   id: string;
   firebase_uid: string;
   email: string;
+  password_hash?: string | null;
   display_name: string | null;
+  avatar_url?: string | null;
   role: UserRole;
   language: Language;
   account_status: AccountStatus;

@@ -10,6 +10,7 @@ import supportRouter from './modules/support/support.routes.js';
 import commentsRouter from './modules/comments/comments.routes.js';
 import geocodeRouter from './modules/geocoding/geocode.routes.js';
 import adminRouter from './modules/admin/admin.routes.js';
+import authRouter from './modules/auth/auth.routes.js';
 
 export const app = express();
 
@@ -36,6 +37,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Domain Routes
+app.use('/api/auth', authRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/issues/:id/support', supportRouter);
 app.use('/api/issues/:id/comments', commentsRouter);

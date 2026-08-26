@@ -14,19 +14,52 @@ These instructions are the project source of truth for AI agents and future deve
 ## Repository layout
 
 ```text
-client/                              React 19 + Vite frontend
-client/src/App.tsx                   Main application state, report form, and map composition
-client/src/api.ts                    Frontend API client
-server/                              Express 5 API
-server/src/index.js                  HTTP server, CORS, Helmet, health endpoint
-server/src/routes/issues.routes.js   Issue CRUD and ownership checks
-server/src/routes/geocode.routes.js  Nominatim search/reverse-geocoding proxy
-server/src/repositories/             Data access abstraction
-server/src/db.js                     Optional Neon database connection
-server/src/scripts/migrate.js        Neon schema migration
-stitch_geoissue_reporting_system/    Design exports and visual references
-FULL_STACK_READINESS.md              Readiness assessment and P0/P1 backlog
-README.md                            Setup and API documentation
+client/                                   React 19 + Vite + TypeScript frontend
+client/src/app/router.tsx                 React Router route definitions
+client/src/components/                    Shared UI components (map, badges, layout)
+client/src/features/                      Page-level feature modules (issues, reports, admin, auth)
+client/src/locales/                       i18n translation files (ar, en, tr) and i18n config
+client/src/services/api.ts               Frontend API client (all fetch calls to the backend)
+client/src/services/auth.context.tsx     Hybrid Firebase + JWT auth state provider
+client/src/services/firebase.ts          Firebase SDK initialization (Auth only, free tier)
+client/src/services/imageUpload.ts       Client-side canvas image compression (no paid storage)
+client/src/styles/                        CSS design tokens and component styles
+client/src/types/index.ts                Shared TypeScript type definitions
+
+server/                                   Express 4 + TypeScript modular monolith backend
+server/src/app.ts                         Express application setup and route registration
+server/src/server.ts                      Server bootstrap and database initialization
+server/src/config/env.ts                 Environment variable validation
+server/src/config/firebase.ts            Firebase Admin SDK initialization
+server/src/db/pool.ts                     PostgreSQL pool and in-memory fallback store
+server/src/db/schema.sql                 Database schema (tables, indexes, constraints)
+server/src/db/migrations.ts             Migration runner script
+server/src/middleware/auth.middleware.ts  Authentication (Firebase + JWT + dev mock) and RBAC
+server/src/middleware/validate.middleware.ts  Zod request body validation
+server/src/middleware/error.middleware.ts    Global error handler
+server/src/modules/                       Feature modules (auth, issues, reports, comments, etc.)
+server/src/modules/*/routes.ts            Express route definitions per module
+server/src/modules/*/controller.ts        Request handlers per module
+server/src/modules/*/service.ts           Business logic per module
+server/src/modules/*/repository.ts        Database access per module
+server/src/shared/haversine.ts           Haversine distance formula (50m clustering)
+server/src/shared/stateMachine.ts        Issue lifecycle state machine and valid transitions
+server/src/shared/auth.utils.ts          Password hashing and JWT utilities
+server/src/shared/errors.ts             Typed AppError factory
+server/src/shared/types.ts              Backend-wide TypeScript type definitions
+server/src/tests/                         Vitest test suite (unit + smoke)
+
+docs/                                     Reference and archive documentation
+docs/design/DESIGN_SPEC.md              UI design tokens, color system, typography guide
+docs/archive/MVP_SPEC.md                Original MVP master prompt (historical)
+docs/archive/HANDOFF.md                 Original project handoff document (historical)
+docs/archive/tasks/                      Completed task logs (historical)
+
+GeoIssue_Diagrams/                        12 system architecture diagrams (SVG, PNG, MMD, DOT)
+stitch_geoissue_reporting_system/         Design exports and visual mockups (reference only)
+FULL_STACK_READINESS.md                   Readiness assessment and P0/P1 release blockers
+README.md                                 Setup, commands, and API documentation
+AGENTS.md                                 Agent source of truth (this file)
 ```
 
 ## Local setup and commands
@@ -49,14 +82,14 @@ Backend, in a second terminal:
 ```bash
 cd server
 npm install
-npm run dev       # nodemon, normally http://localhost:5000
+npm run dev       # nodemon, normally http://localhost:4000
 npm start
 npm run db:migrate  # requires a working DATABASE_URL
 ```
 
 Before running the app on a new laptop:
 
-1. Copy `server/.env.example` to `server/.env` and set `PORT`, `CLIENT_ORIGIN`, `ADMIN_USER_ID`, and optionally `DATABASE_URL`.
+1. Copy `server/.env.example` to `server/.env` and set `PORT`, `CLIENT_ORIGIN`, `JWT_SECRET`, and optionally `DATABASE_URL`.
 2. The MVP uses a local demo identity via the `x-user-id` header; no external auth provider is required.
 4. If `DATABASE_URL` is set, run `npm run db:migrate` from `server`; without it, the API intentionally falls back to temporary in-memory demo data.
 

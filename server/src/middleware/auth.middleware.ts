@@ -4,6 +4,8 @@ import { AppError } from '../shared/errors.js';
 import { DbUser, UserRole } from '../shared/types.js';
 import { usersRepository } from '../modules/users/users.repository.js';
 
+import { verifyToken } from '../shared/auth.utils.js';
+
 declare global {
   namespace Express {
     interface Request {
@@ -28,6 +30,20 @@ export async function authenticate(
     const token = authHeader.split('Bearer ')[1].trim();
     if (!token) {
       throw AppError.unauthenticated('Authorization token is empty');
+    }
+
+    // 1. Check if token is a GeoIssue signed JWT token
+    const jwtPayload = verifyToken(token);
+    if (jwtPayload) {
+      const user = await usersRepository.findById(jwtPayload.id);
+      if (!user) {
+        throw AppError.unauthenticated('User associated with token not found');
+      }
+      if (user.account_status === 'suspended') {
+        throw AppError.forbidden('Your account is currently suspended.');
+      }
+      req.user = user;
+      return next();
     }
 
     const firebaseAuth = getFirebaseAuth();

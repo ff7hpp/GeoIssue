@@ -7,13 +7,18 @@ CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     firebase_uid VARCHAR(128) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255),
     display_name VARCHAR(255),
+    avatar_url TEXT,
     role VARCHAR(32) NOT NULL DEFAULT 'user' CHECK (role IN ('visitor', 'user', 'admin')),
     language VARCHAR(8) NOT NULL DEFAULT 'en' CHECK (language IN ('en', 'ar', 'tr')),
     account_status VARCHAR(32) NOT NULL DEFAULT 'active' CHECK (account_status IN ('active', 'suspended', 'pending')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
 
 -- 2. CATEGORIES TABLE
 CREATE TABLE IF NOT EXISTS categories (

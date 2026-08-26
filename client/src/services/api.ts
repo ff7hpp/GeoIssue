@@ -121,9 +121,44 @@ export const api = {
     return res.data;
   },
 
-  // User & Report Routes
+  // Authentication & User Profile
+  async login(credentials: { email: string; password: string }) {
+    const res = await request<{ user: User; token: string }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+    return res.data;
+  },
+
+  async register(data: {
+    email: string;
+    password: string;
+    display_name: string;
+    language?: string;
+  }) {
+    const res = await request<{ user: User; token: string }>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res.data;
+  },
+
   async getMe() {
-    const res = await request<User>('/me');
+    const res = await request<User>('/auth/me');
+    return res.data;
+  },
+
+  async updateProfile(data: {
+    display_name?: string;
+    language?: string;
+    avatar_url?: string;
+    current_password?: string;
+    new_password?: string;
+  }) {
+    const res = await request<User>('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
     return res.data;
   },
 
