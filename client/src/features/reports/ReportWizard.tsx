@@ -25,6 +25,17 @@ import {
   Trash2,
 } from 'lucide-react';
 
+import { Category } from '../../types';
+
+const DEFAULT_CATEGORIES: Category[] = [
+  { id: 'c1000000-0000-0000-0000-000000000001', name: 'Road & Potholes', slug: 'road-potholes', icon: 'Construction', is_active: true, created_at: '' },
+  { id: 'c1000000-0000-0000-0000-000000000002', name: 'Street Lighting', slug: 'street-lighting', icon: 'Lightbulb', is_active: true, created_at: '' },
+  { id: 'c1000000-0000-0000-0000-000000000003', name: 'Waste & Sanitation', slug: 'waste-sanitation', icon: 'Trash2', is_active: true, created_at: '' },
+  { id: 'c1000000-0000-0000-0000-000000000004', name: 'Sidewalks & Walkways', slug: 'sidewalks', icon: 'Footprints', is_active: true, created_at: '' },
+  { id: 'c1000000-0000-0000-0000-000000000005', name: 'Water & Drainage', slug: 'water-drainage', icon: 'Droplets', is_active: true, created_at: '' },
+  { id: 'c1000000-0000-0000-0000-000000000006', name: 'Public Parks & Trees', slug: 'parks-trees', icon: 'Trees', is_active: true, created_at: '' },
+];
+
 export const ReportWizard: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -50,10 +61,12 @@ export const ReportWizard: React.FC = () => {
     distance_meters: number;
   } | null>(null);
 
-  const { data: categories = [] } = useQuery({
+  const { data: serverCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => api.getCategories(),
   });
+
+  const categories = serverCategories && serverCategories.length > 0 ? serverCategories : DEFAULT_CATEGORIES;
 
   const submitMutation = useMutation({
     mutationFn: async () => {
