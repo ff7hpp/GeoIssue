@@ -237,6 +237,12 @@ export const IssueDetail: React.FC = () => {
             <Calendar size={16} />
             <span>{new Date(issue.created_at).toLocaleDateString()}</span>
           </div>
+          {issue.assignee && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-primary)', fontWeight: 600 }}>
+              <User size={16} />
+              <span>Assigned: {issue.assignee.display_name || issue.assignee.email}</span>
+            </div>
+          )}
         </div>
       </div>
 

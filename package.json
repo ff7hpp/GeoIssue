@@ -4,7 +4,7 @@
   "private": true,
   "description": "GeoIssue — Report. Track. Resolve. Civic Issue Management Platform",
   "scripts": {
-    "dev": "npm run dev:server & npm run dev:client",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "npm --prefix client run dev",
     "dev:server": "npm --prefix server run dev",
     "build": "npm --prefix server run build && npm --prefix client run build",
@@ -20,5 +20,8 @@
     "postgresql"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
 }

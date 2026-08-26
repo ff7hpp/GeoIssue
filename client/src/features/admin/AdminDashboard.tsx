@@ -88,6 +88,16 @@ export const AdminDashboard: React.FC = () => {
     },
   });
 
+  // Assign issue mutation
+  const assignMutation = useMutation({
+    mutationFn: ({ id, assignee_id }: { id: string; assignee_id: string | null }) =>
+      api.assignAdminIssue(id, assignee_id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-issues'] });
+      queryClient.invalidateQueries({ queryKey: ['issues'] });
+    },
+  });
+
   // Category creation mutation
   const createCategoryMutation = useMutation({
     mutationFn: (data: { name: string; slug: string; icon: string }) =>
@@ -295,8 +305,35 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Operational Controls: Status & Priority Dropdowns */}
+                  {/* Operational Controls: Status, Priority, & Assignee Dropdowns */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    {/* Assignee Selector */}
+                    <select
+                      value={issue.assigned_to || ''}
+                      onChange={(e) =>
+                        assignMutation.mutate({
+                          id: issue.id,
+                          assignee_id: e.target.value || null,
+                        })
+                      }
+                      style={{
+                        padding: '6px 10px',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-default)',
+                        backgroundColor: 'var(--bg-surface)',
+                        fontSize: '0.8125rem',
+                      }}
+                    >
+                      <option value="">Unassigned</option>
+                      {users
+                        .filter((u) => u.role === 'admin')
+                        .map((u) => (
+                          <option key={u.id} value={u.id}>
+                            {u.display_name || u.email}
+                          </option>
+                        ))}
+                    </select>
+
                     {/* Priority Selector */}
                     <select
                       value={issue.priority}

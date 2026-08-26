@@ -276,6 +276,14 @@ export const api = {
     return res.data;
   },
 
+  async assignAdminIssue(id: string, assignee_id: string | null) {
+    const res = await request<{ success: boolean }>(`/admin/issues/${id}/assign`, {
+      method: 'PATCH',
+      body: JSON.stringify({ assignee_id }),
+    });
+    return res.data;
+  },
+
   async getAdminUsers(page = 1, limit = 20) {
     return request<User[]>(`/admin/users?page=${page}&limit=${limit}`);
   },

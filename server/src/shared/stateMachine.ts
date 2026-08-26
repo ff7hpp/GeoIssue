@@ -1,12 +1,12 @@
 import { IssueStatus } from './types.js';
 
 export const ALLOWED_STATUS_TRANSITIONS: Record<IssueStatus, IssueStatus[]> = {
-  submitted: ['in_review'],
-  in_review: ['accepted', 'rejected'],
-  accepted: ['in_progress'],
-  in_progress: ['resolved'],
-  resolved: [],
-  rejected: [],
+  submitted: ['in_review', 'accepted', 'in_progress', 'resolved', 'rejected'],
+  in_review: ['accepted', 'rejected', 'in_progress', 'resolved'],
+  accepted: ['in_progress', 'resolved', 'rejected'],
+  in_progress: ['resolved', 'rejected'],
+  resolved: ['in_progress'],
+  rejected: ['submitted'],
 };
 
 export const ACTIVE_ISSUE_STATUSES: IssueStatus[] = [

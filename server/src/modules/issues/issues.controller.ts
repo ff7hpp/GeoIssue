@@ -41,10 +41,19 @@ export const issuesController = {
       const issue = await issuesService.getIssueById(issueId, currentUserId);
       const reports = await reportsRepository.findByIssueId(issueId);
 
+      const isAdmin = req.user?.role === 'admin';
+      const sanitizedReports = reports.map(r => {
+        if (!isAdmin && r.user_id !== currentUserId) {
+          // Strip PII for non-admins unless it's their own report
+          return { ...r, user: { id: r.user_id, display_name: 'Citizen' } };
+        }
+        return r;
+      });
+
       res.json({
         data: {
           ...issue,
-          reports,
+          reports: sanitizedReports,
         },
       });
     } catch (err) {

@@ -28,6 +28,11 @@ export const adminService = {
     return issuesService.updateIssuePriority(issueId, priority);
   },
 
+  async assignIssue(issueId: string, assigneeId: string | null) {
+    // Optionally validate that assigneeId is a valid user with 'admin' role
+    return issuesRepository.assignIssue(issueId, assigneeId);
+  },
+
   async listAllUsers(page = 1, limit = 20) {
     return usersService.listAllUsers(page, limit);
   },

@@ -23,7 +23,7 @@ export const reportsRepository = {
       FROM reports r
       JOIN categories c ON r.category_id = c.id
       JOIN users u ON r.user_id = u.id
-      WHERE r.id = $1
+      WHERE r.id = $1 AND r.deleted_at IS NULL
     `;
     const res = await query(sql, [id]);
     return res.rows[0] || null;
@@ -56,7 +56,7 @@ export const reportsRepository = {
       FROM reports r
       JOIN categories c ON r.category_id = c.id
       JOIN users u ON r.user_id = u.id
-      WHERE r.issue_id = $1
+      WHERE r.issue_id = $1 AND r.deleted_at IS NULL
       ORDER BY r.created_at DESC
     `;
     const res = await query(sql, [issueId]);
@@ -70,7 +70,7 @@ export const reportsRepository = {
   ): Promise<{ reports: DbReport[]; total: number }> {
     if (isUsingMockDb) {
       const all = Array.from(mockStore.reports.values())
-        .filter((r) => r.user_id === userId)
+        .filter((r) => r.user_id === userId && !r.deleted_at)
         .map((r) => {
           const category = mockStore.categories.get(r.category_id);
           const issue = mockStore.issues.get(r.issue_id);
@@ -93,7 +93,7 @@ export const reportsRepository = {
     }
 
     const countRes = await query(
-      'SELECT COUNT(*) FROM reports WHERE user_id = $1',
+      'SELECT COUNT(*) FROM reports WHERE user_id = $1 AND deleted_at IS NULL',
       [userId]
     );
     const total = parseInt(countRes.rows[0].count, 10);
@@ -106,7 +106,7 @@ export const reportsRepository = {
       FROM reports r
       JOIN categories c ON r.category_id = c.id
       JOIN issues i ON r.issue_id = i.id
-      WHERE r.user_id = $1
+      WHERE r.user_id = $1 AND r.deleted_at IS NULL
       ORDER BY r.created_at DESC
       LIMIT $2 OFFSET $3
     `;
@@ -139,7 +139,7 @@ export const reportsRepository = {
       return { reports: all.slice(start, start + limit), total: all.length };
     }
 
-    const countRes = await query('SELECT COUNT(*) FROM reports');
+    const countRes = await query('SELECT COUNT(*) FROM reports WHERE deleted_at IS NULL');
     const total = parseInt(countRes.rows[0].count, 10);
     const offset = (page - 1) * limit;
 
@@ -152,6 +152,7 @@ export const reportsRepository = {
       JOIN categories c ON r.category_id = c.id
       JOIN issues i ON r.issue_id = i.id
       JOIN users u ON r.user_id = u.id
+      WHERE r.deleted_at IS NULL
       ORDER BY r.created_at DESC
       LIMIT $1 OFFSET $2
     `;
@@ -260,7 +261,7 @@ export const reportsRepository = {
     if (reportRes.rows.length === 0) return false;
     const issueId = reportRes.rows[0].issue_id;
 
-    await query('DELETE FROM reports WHERE id = $1', [id]);
+    await query('UPDATE reports SET deleted_at = NOW() WHERE id = $1', [id]);
     await query(
       'UPDATE issues SET report_count = GREATEST(0, report_count - 1), updated_at = NOW() WHERE id = $1',
       [issueId]

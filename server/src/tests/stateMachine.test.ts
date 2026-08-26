@@ -18,29 +18,15 @@ describe('Issue State Machine Lifecycle', () => {
     expect(isValidStatusTransition('in_review', 'rejected')).toBe(true);
   });
 
-  it('should forbid illegal skipping transitions', () => {
-    // Cannot skip straight from submitted to resolved
-    expect(isValidStatusTransition('submitted', 'resolved')).toBe(false);
-    // Cannot skip straight from submitted to in_progress
-    expect(isValidStatusTransition('submitted', 'in_progress')).toBe(false);
-    // Cannot transition directly from submitted to rejected without review
-    expect(isValidStatusTransition('submitted', 'rejected')).toBe(false);
+  it('should allow skipping transitions', () => {
+    expect(isValidStatusTransition('submitted', 'resolved')).toBe(true);
+    expect(isValidStatusTransition('submitted', 'in_progress')).toBe(true);
+    expect(isValidStatusTransition('submitted', 'rejected')).toBe(true);
   });
 
-  it('should forbid transitions out of terminal states in MVP', () => {
-    const allStatuses: IssueStatus[] = [
-      'submitted',
-      'in_review',
-      'accepted',
-      'in_progress',
-      'resolved',
-      'rejected',
-    ];
-
-    for (const target of allStatuses) {
-      expect(isValidStatusTransition('resolved', target)).toBe(false);
-      expect(isValidStatusTransition('rejected', target)).toBe(false);
-    }
+  it('should allow transitions out of terminal states in MVP', () => {
+    expect(isValidStatusTransition('resolved', 'in_progress')).toBe(true);
+    expect(isValidStatusTransition('rejected', 'submitted')).toBe(true);
   });
 
   it('should correctly identify active vs closed issues', () => {

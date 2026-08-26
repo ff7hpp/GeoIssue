@@ -31,8 +31,15 @@ export const AppHeader: React.FC = () => {
     return false;
   };
 
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
     <>
+      {role === 'admin' && isAdminRoute && (
+        <div style={{ backgroundColor: 'var(--status-resolved)', color: 'white', padding: '4px 16px', fontSize: '0.75rem', fontWeight: 600, textAlign: 'center', letterSpacing: '0.05em' }}>
+          ADMINISTRATOR PORTAL
+        </div>
+      )}
       <header
         style={{
           position: 'sticky',

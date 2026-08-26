@@ -22,6 +22,7 @@ export const issuesRepository = {
       return {
         ...issue,
         category,
+        assignee: issue.assigned_to ? mockStore.users.get(issue.assigned_to) : null,
         supporter_count: supportersCount,
       };
     }
@@ -29,10 +30,12 @@ export const issuesRepository = {
     const sql = `
       SELECT i.*,
         json_build_object('id', c.id, 'name', c.name, 'slug', c.slug, 'icon', c.icon) as category,
-        (SELECT COUNT(*)::int FROM issue_supporters WHERE issue_id = i.id) as supporter_count
+        (SELECT COUNT(*)::int FROM issue_supporters WHERE issue_id = i.id) as supporter_count,
+        CASE WHEN u.id IS NOT NULL THEN json_build_object('id', u.id, 'display_name', u.display_name, 'email', u.email, 'avatar_url', u.avatar_url) ELSE NULL END as assignee
       FROM issues i
       JOIN categories c ON i.category_id = c.id
-      WHERE i.id = $1
+      LEFT JOIN users u ON i.assigned_to = u.id
+      WHERE i.id = $1 AND i.deleted_at IS NULL
     `;
     const res = await query(sql, [id]);
     return res.rows[0] || null;
@@ -49,7 +52,7 @@ export const issuesRepository = {
     const limit = filters.limit || 20;
 
     if (isUsingMockDb) {
-      let all = Array.from(mockStore.issues.values()).map((issue) => {
+      let all = Array.from(mockStore.issues.values()).filter(i => !i.deleted_at).map((issue) => {
         const category = mockStore.categories.get(issue.category_id);
         let supportersCount = 0;
         for (const key of mockStore.issue_supporters) {
@@ -58,6 +61,7 @@ export const issuesRepository = {
         return {
           ...issue,
           category,
+          assignee: issue.assigned_to ? mockStore.users.get(issue.assigned_to) : null,
           supporter_count: supportersCount,
         };
       });
@@ -87,7 +91,7 @@ export const issuesRepository = {
       };
     }
 
-    const conditions: string[] = [];
+    const conditions: string[] = ['i.deleted_at IS NULL'];
     const values: any[] = [];
     let idx = 1;
 
@@ -119,9 +123,11 @@ export const issuesRepository = {
     const sql = `
       SELECT i.*,
         json_build_object('id', c.id, 'name', c.name, 'slug', c.slug, 'icon', c.icon) as category,
-        (SELECT COUNT(*)::int FROM issue_supporters WHERE issue_id = i.id) as supporter_count
+        (SELECT COUNT(*)::int FROM issue_supporters WHERE issue_id = i.id) as supporter_count,
+        CASE WHEN u.id IS NOT NULL THEN json_build_object('id', u.id, 'display_name', u.display_name, 'email', u.email, 'avatar_url', u.avatar_url) ELSE NULL END as assignee
       FROM issues i
       JOIN categories c ON i.category_id = c.id
+      LEFT JOIN users u ON i.assigned_to = u.id
       ${whereClause}
       ORDER BY i.created_at DESC
       LIMIT $${idx++} OFFSET $${idx++}
@@ -141,13 +147,14 @@ export const issuesRepository = {
 
     if (isUsingMockDb) {
       candidateIssues = Array.from(mockStore.issues.values()).filter(
-        (i) => i.category_id === categoryId && isIssueActive(i.status)
+        (i) => i.category_id === categoryId && isIssueActive(i.status) && !i.deleted_at
       );
     } else {
       const sql = `
         SELECT * FROM issues
         WHERE category_id = $1
           AND status IN ('submitted', 'in_review', 'accepted', 'in_progress')
+          AND deleted_at IS NULL
       `;
       const res = await query(sql, [categoryId]);
       candidateIssues = res.rows.map((row) => ({
@@ -281,6 +288,22 @@ export const issuesRepository = {
     const sql = `UPDATE issues SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`;
     const res = await query(sql, values);
     return res.rows[0] || null;
+  },
+
+  async assignIssue(issueId: string, assigneeId: string | null): Promise<void> {
+    if (isUsingMockDb) {
+      const issue = mockStore.issues.get(issueId);
+      if (issue) {
+        issue.assigned_to = assigneeId;
+        issue.updated_at = new Date().toISOString();
+        mockStore.issues.set(issueId, issue);
+      }
+      return;
+    }
+    await query('UPDATE issues SET assigned_to = $1, updated_at = NOW() WHERE id = $2', [
+      assigneeId,
+      issueId,
+    ]);
   },
 
   async addStatusHistory(data: {

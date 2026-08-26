@@ -1,6 +1,7 @@
 /* ==========================================================================
    Leaflet Map Styling & Dark Mode Overrides
    ========================================================================== */
+@import 'leaflet/dist/leaflet.css';
 
 .leaflet-container {
   width: 100%;

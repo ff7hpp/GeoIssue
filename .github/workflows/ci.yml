@@ -1,0 +1,60 @@
+name: GeoIssue CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+      - run: npm install
+        working-directory: ./server
+      - run: npm run test
+        working-directory: ./server
+        env:
+          JWT_SECRET: "test-secret"
+          # Mock DB is used if DATABASE_URL is missing
+
+  test-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+      - run: npm install
+        working-directory: ./client
+      - run: npm run lint
+        working-directory: ./client
+      - run: npm run build
+        working-directory: ./client
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+      - run: npm install
+        working-directory: ./server
+      - run: npm install
+        working-directory: ./client
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+        working-directory: ./client
+      - name: Run Playwright tests
+        run: npx playwright test
+        working-directory: ./client
+        env:
+          JWT_SECRET: "test-secret"

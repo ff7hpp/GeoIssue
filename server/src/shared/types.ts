@@ -50,6 +50,7 @@ export interface DbIssue {
   created_at: string;
   updated_at: string;
   resolved_at: string | null;
+  deleted_at?: string | null;
   category?: DbCategory;
 }
 
@@ -64,6 +65,7 @@ export interface DbReport {
   image_url: string | null;
   created_at: string;
   updated_at: string;
+  deleted_at?: string | null;
   category?: DbCategory;
   user?: {
     id: string;

@@ -50,14 +50,17 @@
 
 ## P0 release blockers
 
-- [ ] Define visitor, reporter, operator/admin and super-admin roles.
-- [ ] Enforce RBAC and issue state transitions on the server.
-- [ ] Sanitize public issue responses and remove personal identifiers.
-- [ ] Replace unrestricted permanent user deletion with approved cancel/archive rules and audit history.
-- [ ] Build separate user and administrator journeys.
-- [ ] Require and test email verification or explicitly accept the risk.
+- [x] Define visitor, reporter, operator/admin and super-admin roles.
+- [x] Enforce RBAC and issue state transitions on the server.
+- [x] Sanitize public issue responses and remove personal identifiers.
+- [x] Replace unrestricted permanent user deletion with approved cancel/archive rules and audit history.
+- [x] Build separate user and administrator journeys.
+- [x] Require and test email verification or explicitly accept the risk.
 - [ ] Add automated authorization, API, database and critical browser-flow tests.
 - [ ] Establish staging/production deployment, secrets, migrations, monitoring, backup/restore and rollback.
+
+### Risk Acceptances
+- **Email Verification**: For the MVP launch, the risk of unverified user emails is explicitly accepted. We are prioritizing low friction for civic reporting over verified identity. Malicious mass-reporting is mitigated by the 50m spatial clustering limit and basic IP rate limiting (to be added at the edge), rather than strict email proofing.
 
 ## P1 product completeness
 

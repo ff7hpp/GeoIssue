@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { app } from '../app.js';
-import { initDb } from '../db/pool.js';
-import { mockStore } from '../db/pool.js';
+import { initDb, mockStore } from '../db/pool.js';
+import { usersRepository } from '../modules/users/users.repository.js';
 import { authService } from '../modules/auth/auth.service.js';
 import { generateToken } from '../shared/auth.utils.js';
 
@@ -151,9 +151,7 @@ describe('API Smoke & Security Tests', () => {
     expect(profile.status).toBe(200);
     expect(profile.body.data.password_hash).toBeUndefined();
 
-    const stored = mockStore.users.get(registered.user.id)!;
-    stored.account_status = 'suspended';
-    mockStore.users.set(stored.id, stored);
+    await usersRepository.update(registered.user.id, { account_status: 'suspended' });
 
     const suspended = await makeRequest('GET', '/api/auth/me', {
       authorization: `Bearer ${registered.token}`,

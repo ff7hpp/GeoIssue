@@ -19,6 +19,10 @@ export const updatePrioritySchema = z.object({
   priority: z.enum(['low', 'medium', 'high', 'urgent']),
 });
 
+export const assignIssueSchema = z.object({
+  assignee_id: z.string().uuid().nullable(),
+});
+
 export const updateUserSchema = z.object({
   role: z.enum(['visitor', 'user', 'admin']).optional(),
   account_status: z.enum(['active', 'suspended', 'pending']).optional(),
@@ -92,6 +96,16 @@ export const adminController = {
         priority
       );
       res.json({ data: updated });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async assignIssue(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { assignee_id } = req.body;
+      await adminService.assignIssue(req.params.id as string, assignee_id);
+      res.json({ success: true });
     } catch (err) {
       next(err);
     }

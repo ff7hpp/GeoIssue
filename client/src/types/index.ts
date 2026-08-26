@@ -49,7 +49,10 @@ export interface Issue {
   created_at: string;
   updated_at: string;
   resolved_at: string | null;
+  assigned_to?: string | null;
   category?: Category;
+  user?: User;
+  assignee?: User;
   history?: IssueStatusHistory[];
   reports?: Report[];
 }

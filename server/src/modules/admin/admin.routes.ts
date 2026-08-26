@@ -3,6 +3,7 @@ import {
   adminController,
   updateStatusSchema,
   updatePrioritySchema,
+  assignIssueSchema,
   updateUserSchema,
   createCategorySchema,
   updateCategorySchema,
@@ -25,6 +26,11 @@ router.patch(
   '/issues/:id/priority',
   validateBody(updatePrioritySchema),
   adminController.updatePriority
+);
+router.patch(
+  '/issues/:id/assign',
+  validateBody(assignIssueSchema),
+  adminController.assignIssue
 );
 
 router.get('/users', adminController.listUsers);
