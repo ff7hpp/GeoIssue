@@ -46,7 +46,7 @@ GeoIssue/
 │   │   └── server.ts            # Server bootstrap
 │
 ├── docs/                        # Reference documentation
-├── GeoIssue_Diagrams/           # System architecture diagrams
+├── docs/reference/diagrams/     # System architecture diagrams
 ├── AGENTS.md                    # Agent instructions (source of truth)
 └── README.md                    # Project setup and overview
 ```

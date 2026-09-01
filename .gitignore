@@ -6,3 +6,4 @@ dist/
 *.log
 .playwright-cli/
 output/playwright/
+client/playwright-report/

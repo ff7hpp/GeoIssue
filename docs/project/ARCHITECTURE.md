@@ -1,4 +1,20 @@
-# Backend Architecture & Structure Guide
+# Application Architecture & Structure Guide
+
+## Frontend
+
+واجهة التطبيق موجودة في `client/src/`:
+
+- `app/`: تشغيل التطبيق والـ routes.
+- `components/`: مكونات صغيرة مشتركة مثل الهيدر، الخريطة، الحالات، والأزرار.
+- `features/`: صفحات المنتج الأساسية: المشاكل، البلاغات، الإدارة، وتسجيل الدخول.
+- `services/`: الاتصال بالـ API، المصادقة، والثيم.
+- `locales/`: نصوص اللغات العربية والإنجليزية والتركية.
+- `styles/`: التصميم العام، المتغيرات، الخريطة، وتنسيقات الصفحات.
+- `types/`: أنواع TypeScript المشتركة.
+
+ابدأ بـ `client/src/app/App.tsx` ثم `client/src/app/router.tsx` لفهم تركيب التطبيق والمسارات، وبعدها `client/src/features/issues/IssueExplore.tsx` و`client/src/services/api.ts`.
+
+## Backend
 
 هذا الدليل يشرح هيكلية الباك-إند (Express + TypeScript Modular Monolith):
 

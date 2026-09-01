@@ -87,8 +87,8 @@ Additional corrections: port 5000 -> 4000, ADMIN_USER_ID -> JWT_SECRET, added do
 
 - All `client/src/` and `server/src/` source files — no dead code found
 - `DEFAULT_CATEGORIES` duplication between `IssueExplore.tsx` and `pool.ts` — intentional (client UI fallback vs server seed data)
-- `GeoIssue_Diagrams/` — 12 architectural diagrams, useful reference
-- `stitch_geoissue_reporting_system/` — design mockups, useful reference
+- `docs/reference/diagrams/` — 12 architectural diagrams, useful reference
+- `docs/reference/design-exports/` — design mockups, useful reference
 - `README.md`, `FULL_STACK_READINESS.md`, `firebase.json`, `.firebaserc`, `.gitignore`
 
 ---

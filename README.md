@@ -63,7 +63,6 @@ GeoIssue/
 │   │   ├── services/           # API client, Auth Context, Theme Context
 │   │   ├── styles/             # Design tokens, global styles, map CSS
 │   │   └── types/              # Shared TypeScript definitions
-│   └── STRUCTURE.md            # Detailed frontend guide
 │
 ├── server/                      # Express + TypeScript Modular Monolith Backend
 │   ├── src/
@@ -75,11 +74,12 @@ GeoIssue/
 │   │   ├── tests/              # Vitest test suite (unit + smoke)
 │   │   ├── app.ts              # Express application setup & middleware pipeline
 │   │   └── server.ts           # Server bootstrap & DB connection
-│   └── STRUCTURE.md            # Detailed backend guide
 │
-├── GeoIssue_Diagrams/           # 12 System Architecture & Design Diagrams (SVG, PNG, MMD, DOT)
-├── FULL_STACK_READINESS.md      # Readiness assessment and release roadmap
-└── PROJECT_HANDOFF.md           # Architecture overview and handoff documentation
+├── docs/
+│   ├── project/                 # Active project docs and architecture guide
+│   ├── reference/               # Architecture diagrams and design exports
+│   └── ...
+└── README.md                     # Project setup and API overview
 ```
 
 ---
@@ -161,9 +161,9 @@ npm --prefix server test
 
 ## 7. Architecture & System Diagrams
 
-The repository's README collection is indexed in [`docs/readmes/`](./docs/readmes/).
+All detailed project documentation is indexed in [`docs/project/`](./docs/project/).
 
-The detailed system design diagrams are located in [`GeoIssue_Diagrams/`](./GeoIssue_Diagrams/):
+The detailed system design diagrams are located in [`docs/reference/diagrams/`](./docs/reference/diagrams/):
 1. `01_System_Context`
 2. `02_Container_Architecture`
 3. `03_Infrastructure_Deployment`
