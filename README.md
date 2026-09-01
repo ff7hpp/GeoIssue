@@ -161,6 +161,8 @@ npm --prefix server test
 
 ## 7. Architecture & System Diagrams
 
+The repository's README collection is indexed in [`docs/readmes/`](./docs/readmes/).
+
 The detailed system design diagrams are located in [`GeoIssue_Diagrams/`](./GeoIssue_Diagrams/):
 1. `01_System_Context`
 2. `02_Container_Architecture`

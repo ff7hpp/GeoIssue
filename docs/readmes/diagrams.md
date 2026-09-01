@@ -63,6 +63,6 @@ These are added to make the diagrams executable as a design, but were not fixed 
 
 ## Recommended folder location in the repository
 
-`GeoIssue/docs/diagrams/`
+`GeoIssue/GeoIssue_Diagrams/`
 
 This keeps architectural diagrams separate from application code while remaining version-controlled.

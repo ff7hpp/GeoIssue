@@ -23,9 +23,9 @@ Active documentation is kept at the repository root, not here:
 
 | File | Purpose |
 |---|---|
-| [`README.md`](../README.md) | Setup, commands, and API reference |
-| [`AGENTS.md`](../AGENTS.md) | Agent source of truth — read this before changing code |
-| [`FULL_STACK_READINESS.md`](../FULL_STACK_READINESS.md) | Release readiness, P0 blockers, layer assessment |
+| [`README.md`](../../README.md) | Setup, commands, and API reference |
+| [`AGENTS.md`](../../AGENTS.md) | Agent source of truth — read this before changing code |
+| [`FULL_STACK_READINESS.md`](../../FULL_STACK_READINESS.md) | Release readiness, P0 blockers, layer assessment |
 
 ## Design Reference
 
