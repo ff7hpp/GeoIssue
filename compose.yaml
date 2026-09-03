@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: geoissue-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: geoissue
+      POSTGRES_USER: geoissue
+      POSTGRES_PASSWORD: geoissue_local_dev
+    ports:
+      - "15432:5432"
+    volumes:
+      - geoissue-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geoissue -d geoissue"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  geoissue-postgres-data:

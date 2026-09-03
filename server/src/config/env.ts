@@ -1,5 +1,9 @@
+import path from 'path';
 import dotenv from 'dotenv';
-dotenv.config();
+
+// Support commands launched from either the repository root or server/.
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.resolve(process.cwd(), 'server/.env') });
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 const jwtSecret = process.env.JWT_SECRET;
