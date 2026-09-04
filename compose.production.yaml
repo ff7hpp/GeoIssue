@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: geoissue
+      POSTGRES_USER: geoissue
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/.env.production}
+    volumes:
+      - geoissue-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geoissue -d geoissue"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  api:
+    build:
+      context: .
+      target: api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://geoissue:${POSTGRES_PASSWORD}@postgres:5432/geoissue
+      CLIENT_ORIGIN: ${PUBLIC_ORIGIN:?Set PUBLIC_ORIGIN in deploy/.env.production}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in deploy/.env.production}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-geoissue-4bd94}
+      MATCH_RADIUS_METERS: ${MATCH_RADIUS_METERS:-50}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["sh", "-c", "node dist/db/migrations.js && node dist/server.js"]
+
+  web:
+    build:
+      context: .
+      target: web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      - api
+
+volumes:
+  geoissue-postgres-data:

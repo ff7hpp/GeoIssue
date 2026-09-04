@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import { rateLimit } from 'express-rate-limit';
 import { config } from './config/env.js';
 import { errorHandler } from './middleware/error.middleware.js';
 import categoriesRouter from './modules/categories/categories.routes.js';
@@ -15,10 +17,24 @@ import authRouter from './modules/auth/auth.routes.js';
 export const app = express();
 
 // Security & Parsing Middlewares
+if (config.nodeEnv === 'production') {
+  app.set('trust proxy', 1);
+}
+
+app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(
   cors({
-    origin: config.clientOrigin || '*',
+    origin: config.clientOrigins,
     credentials: true,
+  })
+);
+app.use(
+  '/api',
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: config.nodeEnv === 'production' ? 200 : 1000,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
   })
 );
 app.use(express.json({ limit: '10mb' }));

@@ -21,6 +21,8 @@ async function makeRequest(
       body,
       query: {},
       params: {},
+      socket: { remoteAddress: '127.0.0.1' },
+      connection: { remoteAddress: '127.0.0.1' },
     };
 
     if (url.includes('?')) {
@@ -35,6 +37,7 @@ async function makeRequest(
 
     let responseStatus = 200;
     let responseBody: any = null;
+    const responseHeaders = new Map<string, string | number | readonly string[]>();
 
     const res: any = {
       status(code: number) {
@@ -46,8 +49,15 @@ async function makeRequest(
         resolve({ status: responseStatus, body: responseBody });
         return this;
       },
-      setHeader() {},
-      getHeader() {},
+      setHeader(name: string, value: string | number | readonly string[]) {
+        responseHeaders.set(name.toLowerCase(), value);
+      },
+      getHeader(name: string) {
+        return responseHeaders.get(name.toLowerCase());
+      },
+      removeHeader(name: string) {
+        responseHeaders.delete(name.toLowerCase());
+      },
     };
 
     app(req, res, (err: any) => {

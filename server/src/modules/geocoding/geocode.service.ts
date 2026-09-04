@@ -25,7 +25,7 @@ export const geocodeService = {
     const trimmedQuery = query.trim();
     const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
       trimmedQuery
-    )}&format=json&addressdetails=1&limit=5`;
+    )}&format=json&addressdetails=1&countrycodes=tr&limit=5`;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), config.geocodingTimeout);

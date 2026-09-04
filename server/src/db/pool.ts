@@ -34,6 +34,11 @@ export async function initDb(): Promise<void> {
       isUsingMockDb = false;
       return;
     } catch (err) {
+      if (config.nodeEnv === 'production') {
+        console.error('Could not connect to the configured PostgreSQL database.');
+        throw new Error('Production database connection failed');
+      }
+
       console.warn(
         'Could not connect to PostgreSQL database URL. Falling back to in-memory local data store.',
         err

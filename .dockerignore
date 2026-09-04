@@ -1,0 +1,14 @@
+.git
+.github
+node_modules
+client/node_modules
+server/node_modules
+client/dist
+server/dist
+client/playwright-report
+client/test-results
+output
+*.log
+server/.env
+client/.env
+deploy/.env.production

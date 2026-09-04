@@ -3,8 +3,8 @@
 ## Scope
 
 - Product: civic issue reporting web application
-- Current environment: local React/Vite client, Express API, local demo identity middleware, Neon PostgreSQL, Leaflet/OpenStreetMap and Nominatim
-- Review date: 2026-08-21
+- Current environment: local React/Vite client, Express API, Firebase Authentication, Docker PostgreSQL, Leaflet/OpenStreetMap and Nominatim
+- Review date: 2026-09-04
 - Release verdict: **NOT READY for public production; suitable as a technical MVP/demo**
 
 ## Evidence legend
@@ -38,12 +38,12 @@
 | Database/storage | VERIFIED for local MVP | PostgreSQL 16 runs healthy in Docker, migrations created seven tables, two reports persisted across backend restart | Add and test backup/restore and migration recovery before production |
 | Authentication | VERIFIED for local demo; production Firebase MISSING | Demo citizen/admin sessions and invalid/expired/suspended token paths are exercised; Firebase Web config exists | Configure Firebase Admin credentials and exercise a real Firebase ID token before production |
 | Authorization | VERIFIED for current server policies | Server tests and live API checks prove user/admin separation and a regular user receives 403 on admin routes | Add broader cross-user browser coverage |
-| Security/privacy | VERIFIED for public issue DTO; remaining controls MISSING | Public list/detail responses omit internal user IDs, assignment IDs, deletion fields and assignee email; 33 tests pass | Add edge rate limits plus privacy and retention policies |
-| Tests/quality gates | VERIFIED for current automated scope | Six Vitest files pass 33 tests; three Playwright tests pass locally and in GitHub Actions for map load, demo sign-in/report entry and Arabic RTL mobile layout | Expand Playwright through final report submission |
-| Hosting/deployment/cloud | BLOCKED | Google Cloud project exists, but Billing is disabled and the user declined paid activation | Select a no-cost hosting option or explicitly enable Billing before provisioning |
+| Security/privacy | VERIFIED for current API controls; remaining controls MISSING | Public DTOs omit internal identifiers; Helmet, restricted CORS and API rate limits are enabled; 33 tests pass | Add retention policy, TLS and an edge/WAF policy |
+| Tests/quality gates | VERIFIED for current automated scope | Six Vitest files pass 33 tests; seven Playwright checks cover desktop, Arabic RTL, report entry, iPhone SE, iPhone 12, Pixel 7 and iPad layouts | Add a browser test for final report submission against a seeded staging database |
+| Hosting/deployment/cloud | IMPLEMENTED, NOT VERIFIED externally | Docker production composition isolates PostgreSQL/API and exposes Nginx only; a Google Cloud staging VM is being provisioned | Verify public HTTP, Firebase token acceptance, TLS, restart and rollback on the target VM |
 | Version control/CI/CD | VERIFIED | GitHub Actions run `33902397303` passed server tests/build/audit, client build/audit and Playwright | Add deployment only after a no-cost hosting decision |
 | Performance/cache/CDN/load balancing | IMPLEMENTED, NOT VERIFIED for production | Client build is about 203 KB gzip and warns about a chunk above 500 KB; geocode uses in-memory caching | Split the client bundle and add production metrics; CDN/load balancing are N/A at current MVP scale |
-| Reliability/backups/recovery | MISSING | Health endpoint and local persistence are verified | Add backup/restore test and production fail-closed database configuration |
+| Reliability/backups/recovery | IMPLEMENTED, NOT VERIFIED externally | Health endpoint, migrations and production fail-closed database configuration are present | Add and test backup/restore plus a rollback procedure on the target VM |
 | Observability/error tracking | MISSING | Console output only | Add request IDs, structured logs, RED metrics, error tracking, alerts and runbooks |
 | Languages/geography | MISSING as a coherent product rule | UI is Arabic; geocoding is restricted to Turkey and prefers Turkish/English | Decide target country and supported languages, then add real i18n |
 | Privacy/operations/docs | MISSING | README covers local setup | Add privacy/terms, data deletion/export, deployment, rollback, restore, key rotation and incident documentation |

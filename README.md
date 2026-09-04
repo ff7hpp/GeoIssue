@@ -148,7 +148,30 @@ Check the API independently at **`http://localhost:4000/api/health`**.
 
 ---
 
-## 5. Testing
+## 5. Docker Staging Deployment
+
+`compose.production.yaml` runs the client behind Nginx, proxies `/api` to the
+Express API, and keeps PostgreSQL private to the Docker network. It is a
+staging deployment template: configure TLS and a stable domain before calling
+an internet-facing deployment production-ready.
+
+```bash
+# On the deployment host, from the repository root.
+cp deploy/.env.production.example deploy/.env.production
+# Set strong unique POSTGRES_PASSWORD and JWT_SECRET values, PUBLIC_ORIGIN,
+# and WEB_PORT=80 in the local file. It is ignored by Git.
+docker compose --env-file deploy/.env.production -f compose.production.yaml up --build -d
+curl http://localhost/api/health
+```
+
+The production API refuses to start without `DATABASE_URL`, `JWT_SECRET`,
+`CLIENT_ORIGIN`, and `FIREBASE_PROJECT_ID`; it never falls back to the
+in-memory database in this mode. The local `compose.yaml` remains dedicated to
+development PostgreSQL on port `15432`.
+
+---
+
+## 6. Testing
 
 Run the automated backend test suite:
 
@@ -161,7 +184,7 @@ Run the browser smoke test after installing Playwright's Chromium runtime:
 ```bash
 cd client
 npx playwright install --with-deps chromium
-npx playwright test
+npm run test:e2e
 ```
 
 ### Test Coverage:
@@ -172,7 +195,7 @@ npx playwright test
 
 ---
 
-## 6. API Routes Reference
+## 7. API Routes Reference
 
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
@@ -199,7 +222,7 @@ npx playwright test
 
 ---
 
-## 7. Architecture & System Diagrams
+## 8. Architecture & System Diagrams
 
 All detailed project documentation is indexed in [`docs/project/`](./docs/project/).
 
