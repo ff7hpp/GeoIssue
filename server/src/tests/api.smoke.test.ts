@@ -86,6 +86,39 @@ describe('API Smoke & Security Tests', () => {
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.data)).toBe(true);
     expect(res.body.meta.page).toBe(1);
+
+    for (const issue of res.body.data) {
+      expect(issue.assigned_to).toBeUndefined();
+      expect(issue.deleted_at).toBeUndefined();
+      expect(issue.assignee?.id).toBeUndefined();
+      expect(issue.assignee?.email).toBeUndefined();
+      expect(issue.assignee?.avatar_url).toBeUndefined();
+    }
+  });
+
+  it('GET /api/issues/:id should hide report and history user identifiers publicly', async () => {
+    const list = await makeRequest('GET', '/api/issues');
+    const issueId = list.body.data[0]?.id;
+    if (!issueId) return;
+
+    const res = await makeRequest('GET', `/api/issues/${issueId}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data.assigned_to).toBeUndefined();
+    expect(res.body.data.deleted_at).toBeUndefined();
+
+    for (const report of res.body.data.reports) {
+      expect(report.user_id).toBeUndefined();
+      expect(report.deleted_at).toBeUndefined();
+      expect(report.user?.id).toBeUndefined();
+    }
+
+    for (const entry of res.body.data.history) {
+      expect(entry.changed_by_user_id).toBeUndefined();
+      expect(entry.changed_by?.id).toBeUndefined();
+      if (entry.changed_by) {
+        expect(['Administrator', 'Citizen']).toContain(entry.changed_by.display_name);
+      }
+    }
   });
 
   it('POST /api/reports without Authorization header should return 401 UNAUTHENTICATED', async () => {

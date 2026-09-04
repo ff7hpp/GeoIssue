@@ -3,6 +3,34 @@ import { issuesService } from './issues.service.js';
 import { reportsRepository } from '../reports/reports.repository.js';
 import { IssueStatus } from '../../shared/types.js';
 
+function sanitizeIssueForPublic(issue: any) {
+  const { assigned_to, deleted_at, assignee, history, ...publicIssue } = issue;
+
+  return {
+    ...publicIssue,
+    assignee: assignee
+      ? { display_name: assignee.display_name || 'Municipal staff' }
+      : null,
+    ...(history
+      ? {
+          history: history.map((entry: any) => {
+            const { changed_by_user_id, changed_by, ...publicEntry } = entry;
+            return {
+              ...publicEntry,
+              changed_by: changed_by
+                ? {
+                    display_name:
+                      changed_by.role === 'admin' ? 'Administrator' : 'Citizen',
+                    role: changed_by.role,
+                  }
+                : undefined,
+            };
+          }),
+        }
+      : {}),
+  };
+}
+
 export const issuesController = {
   async list(req: Request, res: Response, next: NextFunction) {
     try {
@@ -21,7 +49,7 @@ export const issuesController = {
       });
 
       res.json({
-        data: issues,
+        data: issues.map(sanitizeIssueForPublic),
         meta: {
           page,
           limit,
@@ -42,17 +70,19 @@ export const issuesController = {
       const reports = await reportsRepository.findByIssueId(issueId);
 
       const isAdmin = req.user?.role === 'admin';
-      const sanitizedReports = reports.map(r => {
-        if (!isAdmin && r.user_id !== currentUserId) {
-          // Strip PII for non-admins unless it's their own report
-          return { ...r, user: { id: r.user_id, display_name: 'Citizen' } };
-        }
-        return r;
+      const sanitizedReports = reports.map((report) => {
+        if (isAdmin) return report;
+
+        const { user_id, deleted_at, user, ...publicReport } = report;
+        return {
+          ...publicReport,
+          user: { display_name: 'Citizen' },
+        };
       });
 
       res.json({
         data: {
-          ...issue,
+          ...(isAdmin ? issue : sanitizeIssueForPublic(issue)),
           reports: sanitizedReports,
         },
       });

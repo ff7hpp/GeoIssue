@@ -87,7 +87,7 @@ export const AppHeader: React.FC = () => {
             >
               <MapPin size={20} />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className="site-brand-copy" style={{ display: 'flex', flexDirection: 'column' }}>
               <span style={{ lineHeight: 1.1 }}>{t('app.name')}</span>
               <span className="site-tagline"
                 style={{
@@ -169,7 +169,7 @@ export const AppHeader: React.FC = () => {
 
             {/* User Profile / Auth Action */}
             {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div className="header-user-controls" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <div
                   style={{
                     display: 'flex',
@@ -278,6 +278,32 @@ export const AppHeader: React.FC = () => {
                 <span>{t('nav.admin')}</span>
               </Link>
             )}
+            {user && (
+              <>
+                <div
+                  className="mobile-user-summary"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 12px',
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.8125rem',
+                  }}
+                >
+                  <User size={16} />
+                  <span>{user.display_name || user.email.split('@')[0]}</span>
+                </div>
+                <button
+                  onClick={() => { signOut(); setIsMobileMenuOpen(false); }}
+                  className="btn btn-subtle"
+                  style={{ justifyContent: 'flex-start' }}
+                >
+                  <LogOut size={18} />
+                  <span>{t('nav.logout')}</span>
+                </button>
+              </>
+            )}
             {!user && (
               <button
                 onClick={() => { setIsAuthOpen(true); setIsMobileMenuOpen(false); }}
@@ -312,6 +338,14 @@ export const AppHeader: React.FC = () => {
           }
           .site-brand {
             flex: 0 0 auto;
+          }
+          .header-user-controls {
+            display: none !important;
+          }
+        }
+        @media (max-width: 479px) {
+          .site-brand-copy {
+            display: none !important;
           }
         }
       `}</style>

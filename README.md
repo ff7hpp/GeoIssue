@@ -87,16 +87,46 @@ GeoIssue/
 ## 4. Getting Started
 
 ### Prerequisites
-- Node.js 18+ and npm
+- Node.js 20+ and npm
+- Docker Desktop with Docker Compose
+- WSL2 with Ubuntu (recommended on Windows)
 
 ### Installation
 ```bash
 # Install server dependencies
-npm --prefix server install
+npm ci --prefix server
 
 # Install client dependencies
-npm --prefix client install
+npm ci --prefix client
 ```
+
+Create local environment files from the committed examples. Keep both `.env`
+files local; they are ignored by Git.
+
+```bash
+cp server/.env.example server/.env
+cp client/.env.example client/.env
+```
+
+Set `DATABASE_URL` in `server/.env` to the local PostgreSQL service. This
+repository publishes the container's PostgreSQL port on host port `15432` to
+avoid conflicts with an existing local PostgreSQL installation.
+
+### Local PostgreSQL
+
+```bash
+# Start PostgreSQL and wait until its status is healthy
+docker compose up -d postgres
+docker compose ps
+
+# Create/update tables and seed reference data
+npm run migrate --prefix server
+```
+
+The database is stored in the named Docker volume
+`geoissue_geoissue-postgres-data`, so stopping the application does not remove
+its data. Do not remove the volume unless you intentionally want to erase the
+local database.
 
 ### Running the Application
 
@@ -114,6 +144,8 @@ npm --prefix client run dev
 
 Visit **`http://localhost:5173`** in your browser.
 
+Check the API independently at **`http://localhost:4000/api/health`**.
+
 ---
 
 ## 5. Testing
@@ -122,6 +154,14 @@ Run the automated backend test suite:
 
 ```bash
 npm --prefix server test
+```
+
+Run the browser smoke test after installing Playwright's Chromium runtime:
+
+```bash
+cd client
+npx playwright install --with-deps chromium
+npx playwright test
 ```
 
 ### Test Coverage:

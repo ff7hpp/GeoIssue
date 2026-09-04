@@ -7,3 +7,4 @@ dist/
 .playwright-cli/
 output/playwright/
 client/playwright-report/
+client/test-results/
