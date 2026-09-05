@@ -7,7 +7,7 @@
     "description": "Vatandaşları ve belediyeleri buluşturarak kentsel sorunları tespit eden, önceliklendiren ve çözen modern bir sivil teknoloji platformu."
   },
   "nav": {
-    "explore": "Haritayı Keşfet",
+    "explore": "Sorunları Keşfet",
     "issues": "Sorunlar",
     "report": "Yeni Bildirim",
     "myReports": "Bildirimlerim",
@@ -50,6 +50,8 @@
     "issuesCount": "{{count}} Sorun Bulundu",
     "viewMap": "Harita Görünümü",
     "viewList": "Liste Görünümü",
+    "viewAll": "Tümünü Görüntüle",
+    "displayOptions": "Görünüm seçenekleri",
     "noIssuesFound": "Arama kriterlerinize uygun sorun bulunamadı.",
     "selectOnMap": "Detayları görüntülemek için haritadan veya listeden bir soruna tıklayın."
   },

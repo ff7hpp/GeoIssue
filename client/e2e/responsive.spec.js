@@ -10,20 +10,27 @@ for (const viewport of viewports) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.goto("/");
     await expect(page.locator(".app-container")).toBeVisible();
+    await expect(page.getByRole("button", { name: "View All" })).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByRole("button", { name: "View Map" })).toBeVisible();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
     ).toBe(true);
     if (viewport.mobile) {
       await expect(page.getByRole("button", { name: "Toggle navigation menu" })).toBeVisible();
+      await page.getByRole("button", { name: "View List" }).click();
+      await expect(page.locator(".issue-sidebar")).toBeVisible();
+      await expect(page.locator(".map-view-container")).toBeHidden();
       await page.getByRole("button", { name: "View Map" }).click();
       await expect(page.locator(".leaflet-container")).toBeVisible();
-      await expect(page.getByRole("button", { name: "View List" })).toBeVisible();
+      await expect(page.locator(".issue-sidebar")).toBeHidden();
+      await page.getByRole("button", { name: "View All" }).click();
+      await expect(page.locator(".issue-sidebar")).toBeVisible();
+      await expect(page.locator(".map-view-container")).toBeVisible();
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
       ).toBe(true);
     } else {
-      await expect(page.getByRole("link", { name: "Explore Map" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Explore Issues" })).toBeVisible();
     }
   });
 }

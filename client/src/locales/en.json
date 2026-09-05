@@ -7,7 +7,7 @@
     "description": "A modern civic-tech platform connecting citizens and municipalities to identify, prioritize, and resolve community problems."
   },
   "nav": {
-    "explore": "Explore Map",
+    "explore": "Explore Issues",
     "issues": "Issues",
     "report": "New Report",
     "myReports": "My Reports",
@@ -50,6 +50,8 @@
     "issuesCount": "{{count}} Issues Found",
     "viewMap": "View Map",
     "viewList": "View List",
+    "viewAll": "View All",
+    "displayOptions": "Display options",
     "noIssuesFound": "No issues found matching your criteria.",
     "selectOnMap": "Click an issue on the map or list to view details."
   },

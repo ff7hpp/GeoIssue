@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { ChevronRight, FileText, List as ListIcon, Map as MapIcon, Search, Users } from "lucide-react";
+import { ChevronRight, FileText, Layers, List as ListIcon, Map as MapIcon, Search, Users } from "lucide-react";
 import { api } from "../../services/api";
 import { LeafletMap } from "../../components/map/LeafletMap";
 import { CategoryIcon } from "../../components/common/CategoryIcon";
@@ -76,10 +76,20 @@ const IssueExplore = () => {
             {statuses.map((status) => <option key={status} value={status}>{t(`status.${status}`)}</option>)}
           </select>
 
-          <button type="button" className="btn btn-secondary view-mode-toggle" onClick={() => setViewMode(viewMode === "map" ? "list" : "map")} aria-label={viewMode === "map" ? t("explore.viewList") : t("explore.viewMap")}>
-            {viewMode === "map" ? <ListIcon size={16} /> : <MapIcon size={16} />}
-            <span>{viewMode === "map" ? t("explore.viewList") : t("explore.viewMap")}</span>
-          </button>
+          <div className="view-mode-group" role="group" aria-label={t("explore.displayOptions")}>
+            <button type="button" className={`btn view-mode-toggle${viewMode === "both" ? " btn-secondary" : " btn-subtle"}`} onClick={() => setViewMode("both")} aria-pressed={viewMode === "both"}>
+              <Layers size={16} />
+              <span>{t("explore.viewAll")}</span>
+            </button>
+            <button type="button" className={`btn view-mode-toggle${viewMode === "list" ? " btn-secondary" : " btn-subtle"}`} onClick={() => setViewMode("list")} aria-pressed={viewMode === "list"}>
+              <ListIcon size={16} />
+              <span>{t("explore.viewList")}</span>
+            </button>
+            <button type="button" className={`btn view-mode-toggle${viewMode === "map" ? " btn-secondary" : " btn-subtle"}`} onClick={() => setViewMode("map")} aria-pressed={viewMode === "map"}>
+              <MapIcon size={16} />
+              <span>{t("explore.viewMap")}</span>
+            </button>
+          </div>
         </div>
       </div>
 
