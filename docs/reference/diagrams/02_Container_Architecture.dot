@@ -6,7 +6,7 @@ digraph G {
 
 rankdir=TB; labelloc="t"; label="GeoIssue — Container / Application Architecture"; fontsize=20;
 subgraph cluster_client { label="Client"; color="#E4E4E7"; style="rounded";
-  ui [label="React + Vite + TypeScript
+  ui [label="React + Vite + JavaScript
 Routes, components, map, forms, dashboards"];
   authsdk [label="Firebase Client SDK
 Sign in / register / token acquisition"];

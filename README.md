@@ -32,7 +32,7 @@ When multiple citizens report the same problem (e.g. 50 citizens reporting the s
 ## 2. Technology Stack
 
 ### Frontend
-- **Framework**: React 18 + Vite + TypeScript
+- **Framework**: React 18 + Vite + JavaScript
 - **Routing**: React Router v7
 - **Server State**: TanStack Query (React Query)
 - **Maps**: Leaflet + React-Leaflet + OpenStreetMap
@@ -41,7 +41,7 @@ When multiple citizens report the same problem (e.g. 50 citizens reporting the s
 - **Styling**: Vanilla CSS Design Tokens (Apple / Linear / Vercel minimal aesthetic)
 
 ### Backend
-- **Framework**: Node.js + Express + TypeScript (Modular Monolith)
+- **Framework**: Node.js + Express + JavaScript (Modular Monolith)
 - **Database**: Neon PostgreSQL / pg Pool (with in-memory fallback store for offline testing)
 - **Auth**: Firebase Authentication + Firebase Admin token verification + Local Demo User fallback
 - **Geocoding**: Nominatim proxy with timeout resilience and graceful fallback
@@ -54,7 +54,7 @@ When multiple citizens report the same problem (e.g. 50 citizens reporting the s
 
 ```text
 GeoIssue/
-├── client/                      # React 18 + Vite + TypeScript Frontend
+├── client/                      # React 18 + Vite + JavaScript Frontend
 │   ├── src/
 │   │   ├── app/                # App root & React Router setup
 │   │   ├── components/         # Reusable UI (Header, Badges, Map, LocationPicker)
@@ -62,9 +62,9 @@ GeoIssue/
 │   │   ├── locales/            # i18n translations (ar, en, tr) & RTL handling
 │   │   ├── services/           # API client, Auth Context, Theme Context
 │   │   ├── styles/             # Design tokens, global styles, map CSS
-│   │   └── types/              # Shared TypeScript definitions
+│   │   └── types/              # Shared runtime contracts
 │
-├── server/                      # Express + TypeScript Modular Monolith Backend
+├── server/                      # Express + JavaScript Modular Monolith Backend
 │   ├── src/
 │   │   ├── config/             # Environment & Firebase configuration
 │   │   ├── db/                 # PostgreSQL pool, schema.sql, and migrations
@@ -72,8 +72,8 @@ GeoIssue/
 │   │   ├── modules/            # Feature modules (issues, reports, admin, users, etc.)
 │   │   ├── shared/             # Haversine formula, state machine, types, errors
 │   │   ├── tests/              # Vitest test suite (unit + smoke)
-│   │   ├── app.ts              # Express application setup & middleware pipeline
-│   │   └── server.ts           # Server bootstrap & DB connection
+│   │   ├── app.js              # Express application setup & middleware pipeline
+│   │   └── server.js           # Server bootstrap & DB connection
 │
 ├── docs/
 │   ├── project/                 # Active project docs and architecture guide
@@ -188,10 +188,10 @@ npm run test:e2e
 ```
 
 ### Test Coverage:
-- **`haversine.test.ts`**: Verifies exact distance computation, 50m threshold bounds, and spherical coordinates.
-- **`stateMachine.test.ts`**: Verifies the strict lifecycle (`submitted -> in_review -> accepted -> in_progress -> resolved / rejected`).
-- **`permissions.test.ts`**: Verifies server-side role enforcement (Visitor, User, Admin).
-- **`api.smoke.test.ts`**: Verifies HTTP 401 unauthenticated and 403 forbidden security responses.
+- **`haversine.test.js`**: Verifies exact distance computation, 50m threshold bounds, and spherical coordinates.
+- **`stateMachine.test.js`**: Verifies the strict lifecycle (`submitted -> in_review -> accepted -> in_progress -> resolved / rejected`).
+- **`permissions.test.js`**: Verifies server-side role enforcement (Visitor, User, Admin).
+- **`api.smoke.test.js`**: Verifies HTTP 401 unauthenticated and 403 forbidden security responses.
 
 ---
 

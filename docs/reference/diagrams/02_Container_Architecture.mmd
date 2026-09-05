@@ -1,9 +1,9 @@
 flowchart TB
   subgraph Client
-    UI[React + Vite + TypeScript]
+    UI[React + Vite + JavaScript]
     AuthSDK[Firebase Client SDK]
   end
-  subgraph API[Node.js + Express + TypeScript]
+  subgraph API[Node.js + Express + JavaScript]
     Routes --> Middleware[Auth / Validation / Authorization / Rate Limit / Error Handling]
     Middleware --> Controllers --> Services[Domain Services]
     Services --> Repositories[Repositories / Data Access]

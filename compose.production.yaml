@@ -30,7 +30,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["sh", "-c", "node dist/db/migrations.js && node dist/server.js"]
+    command: ["sh", "-c", "node src/db/migrations.js && node src/server.js"]
 
   web:
     build:

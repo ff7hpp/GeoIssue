@@ -14,39 +14,39 @@ These instructions are the project source of truth for AI agents and future deve
 ## Repository layout
 
 ```text
-client/                                   React 19 + Vite + TypeScript frontend
-client/src/app/router.tsx                 React Router route definitions
+client/                                   React 19 + Vite + JavaScript frontend
+client/src/app/router.jsx                 React Router route definitions
 client/src/components/                    Shared UI components (map, badges, layout)
 client/src/features/                      Page-level feature modules (issues, reports, admin, auth)
 client/src/locales/                       i18n translation files (ar, en, tr) and i18n config
-client/src/services/api.ts               Frontend API client (all fetch calls to the backend)
-client/src/services/auth.context.tsx     Hybrid Firebase + JWT auth state provider
-client/src/services/firebase.ts          Firebase SDK initialization (Auth only, free tier)
-client/src/services/imageUpload.ts       Client-side canvas image compression (no paid storage)
+client/src/services/api.js               Frontend API client (all fetch calls to the backend)
+client/src/services/auth.context.jsx     Hybrid Firebase + JWT auth state provider
+client/src/services/firebase.js          Firebase SDK initialization (Auth only, free tier)
+client/src/services/imageUpload.js       Client-side canvas image compression (no paid storage)
 client/src/styles/                        CSS design tokens and component styles
-client/src/types/index.ts                Shared TypeScript type definitions
+client/src/types/index.js                Shared JavaScript type definitions
 
-server/                                   Express 4 + TypeScript modular monolith backend
-server/src/app.ts                         Express application setup and route registration
-server/src/server.ts                      Server bootstrap and database initialization
-server/src/config/env.ts                 Environment variable validation
-server/src/config/firebase.ts            Firebase Admin SDK initialization
-server/src/db/pool.ts                     PostgreSQL pool and in-memory fallback store
+server/                                   Express 4 + JavaScript modular monolith backend
+server/src/app.js                         Express application setup and route registration
+server/src/server.js                      Server bootstrap and database initialization
+server/src/config/env.js                 Environment variable validation
+server/src/config/firebase.js            Firebase Admin SDK initialization
+server/src/db/pool.js                     PostgreSQL pool and in-memory fallback store
 server/src/db/schema.sql                 Database schema (tables, indexes, constraints)
-server/src/db/migrations.ts             Migration runner script
-server/src/middleware/auth.middleware.ts  Authentication (Firebase + JWT + dev mock) and RBAC
-server/src/middleware/validate.middleware.ts  Zod request body validation
-server/src/middleware/error.middleware.ts    Global error handler
+server/src/db/migrations.js             Migration runner script
+server/src/middleware/auth.middleware.js  Authentication (Firebase + JWT + dev mock) and RBAC
+server/src/middleware/validate.middleware.js  Zod request body validation
+server/src/middleware/error.middleware.js    Global error handler
 server/src/modules/                       Feature modules (auth, issues, reports, comments, etc.)
-server/src/modules/*/routes.ts            Express route definitions per module
-server/src/modules/*/controller.ts        Request handlers per module
-server/src/modules/*/service.ts           Business logic per module
-server/src/modules/*/repository.ts        Database access per module
-server/src/shared/haversine.ts           Haversine distance formula (50m clustering)
-server/src/shared/stateMachine.ts        Issue lifecycle state machine and valid transitions
-server/src/shared/auth.utils.ts          Password hashing and JWT utilities
-server/src/shared/errors.ts             Typed AppError factory
-server/src/shared/types.ts              Backend-wide TypeScript type definitions
+server/src/modules/*/routes.js            Express route definitions per module
+server/src/modules/*/controller.js        Request handlers per module
+server/src/modules/*/service.js           Business logic per module
+server/src/modules/*/repository.js        Database access per module
+server/src/shared/haversine.js           Haversine distance formula (50m clustering)
+server/src/shared/stateMachine.js        Issue lifecycle state machine and valid transitions
+server/src/shared/auth.utils.js          Password hashing and JWT utilities
+server/src/shared/errors.js             Typed AppError factory
+server/src/shared/types.js              Backend-wide JavaScript type definitions
 server/src/tests/                         Vitest test suite (unit + smoke)
 
 docs/                                     Documentation and reference material
@@ -108,7 +108,7 @@ Before running the app on a new laptop:
 
 ## Engineering rules
 
-- Keep changes small, focused, and consistent with the existing plain JavaScript/JSX architecture. Do not introduce TypeScript, a new state library, or a new framework without an explicit request.
+- Keep changes small, focused, and consistent with the existing plain JavaScript/JSX architecture. Do not introduce JavaScript, a new state library, or a new framework without an explicit request.
 - Reuse the existing `issueApi`, repository layer, route validation, auth middleware, and CSS tokens before adding parallel abstractions.
 - Validate and authorize on the server even when the client already validates. Never trust client-supplied ownership, status, reporter, or user identity.
 - Use parameterized Neon queries/tagged template queries. Do not build SQL with string interpolation from request data.

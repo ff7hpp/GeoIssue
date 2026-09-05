@@ -32,8 +32,8 @@ The following are directly supported by the uploaded handoff:
 - Report and Issue are separate concepts.
 - Roles: Visitor, User, Reviewer, Admin.
 - Core flow: map → report → validate identity/input → find nearby similar issue → attach or create → review → process → close.
-- Frontend: React + Vite + TypeScript.
-- Backend: Node.js + Express + TypeScript.
+- Frontend: React + Vite + JavaScript.
+- Backend: Node.js + Express + JavaScript.
 - Auth: Firebase Authentication + Firebase Admin verification.
 - Database: Neon PostgreSQL.
 - Map: Leaflet + OpenStreetMap.

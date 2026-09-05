@@ -24,7 +24,7 @@
 <g id="node1" class="node">
 <title>ui</title>
 <path fill="#fafafa" stroke="#d4d4d8" d="M348.5,-624C348.5,-624 27.5,-624 27.5,-624 21.5,-624 15.5,-618 15.5,-612 15.5,-612 15.5,-592 15.5,-592 15.5,-586 21.5,-580 27.5,-580 27.5,-580 348.5,-580 348.5,-580 354.5,-580 360.5,-586 360.5,-592 360.5,-592 360.5,-612 360.5,-612 360.5,-618 354.5,-624 348.5,-624"/>
-<text text-anchor="middle" x="188" y="-605.8" font-family="DejaVu Sans" font-size="14.00" fill="#18181b">React + Vite + TypeScript</text>
+<text text-anchor="middle" x="188" y="-605.8" font-family="DejaVu Sans" font-size="14.00" fill="#18181b">React + Vite + JavaScript</text>
 <text text-anchor="middle" x="188" y="-590.8" font-family="DejaVu Sans" font-size="14.00" fill="#18181b">Routes, components, map, forms, dashboards</text>
 </g>
 <!-- authsdk -->
