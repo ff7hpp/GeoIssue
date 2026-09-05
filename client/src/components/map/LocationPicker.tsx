@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
+import React, { useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Circle, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Navigation, Search, MapPin, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -29,8 +29,8 @@ function MapClickHandler({
 function MapCenterController({ center }: { center: [number, number] }) {
   const map = useMap();
   useEffect(() => {
-    map.flyTo(center, map.getZoom(), { duration: 0.5 });
-  }, [center, map]);
+    map.setView(center, map.getZoom(), { animate: false });
+  }, [center[0], center[1], map]);
   return null;
 }
 
@@ -45,6 +45,9 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [isLocatingGps, setIsLocatingGps] = useState(false);
   const [addressLabel, setAddressLabel] = useState<string | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [accuracy, setAccuracy] = useState<number | null>(null);
+  const selectionVersion = useRef(0);
 
   const pickerIcon = L.divIcon({
     className: 'custom-picker-pin-wrapper',
@@ -61,11 +64,15 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     iconAnchor: [20, 40],
   });
 
-  const handleSelectLocation = async (lat: number, lon: number) => {
-    onChange(lat, lon);
+  const handleSelectLocation = async (lat: number, lon: number, gpsAccuracy?: number) => {
+    const version = ++selectionVersion.current;
+    setAccuracy(gpsAccuracy ?? null);
+    setAddressLabel(null);
+    setLocationError(null);
+    onChange(lat, lon, '');
     try {
       const addr = await api.reverseGeocode(lat, lon);
-      if (addr) {
+      if (addr && version === selectionVersion.current) {
         setAddressLabel(addr);
         onChange(lat, lon, addr);
       }
@@ -75,8 +82,9 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   };
 
   const handleUseGps = () => {
+    setLocationError(null);
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
+      setLocationError(t('location.unsupported'));
       return;
     }
 
@@ -84,13 +92,13 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setIsLocatingGps(false);
-        handleSelectLocation(pos.coords.latitude, pos.coords.longitude);
+        handleSelectLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
       },
       (err) => {
         setIsLocatingGps(false);
-        console.warn('GPS location error:', err.message);
+        setLocationError(t(err.code === 1 ? 'location.denied' : err.code === 3 ? 'location.timeout' : 'location.unavailable'));
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -103,7 +111,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
       const results = await api.searchGeocode(searchQuery);
       setSearchResults(results);
     } catch (err) {
-      console.warn('Search geocode error:', err);
+      setLocationError(t('location.searchFailed'));
     } finally {
       setIsSearching(false);
     }
@@ -118,6 +126,8 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+      {locationError && <p className="field-error" role="alert">{locationError}</p>}
+      {accuracy !== null && <p role="status">{t('location.accuracy', { meters: Math.round(accuracy) })}</p>}
       {/* Search & GPS Controls Bar */}
       <div style={{ display: 'flex', gap: '8px', position: 'relative' }}>
         <form onSubmit={handleSearch} style={{ flex: 1, position: 'relative' }}>
@@ -167,6 +177,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
           className="btn btn-secondary"
           disabled={isLocatingGps}
           title={t('reportWizard.useGps')}
+          aria-label={t('reportWizard.useGps')}
           style={{ padding: '8px 14px', fontSize: '0.875rem', gap: '6px' }}
         >
           {isLocatingGps ? <Loader2 size={16} className="animate-spin" /> : <Navigation size={16} />}
@@ -235,6 +246,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
         <MapContainer
           center={[latitude, longitude]}
           zoom={15}
+          zoomAnimation={false}
           style={{ width: '100%', height: '100%' }}
         >
           <TileLayer
@@ -244,6 +256,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
           <MapCenterController center={[latitude, longitude]} />
           <MapClickHandler onSelect={handleSelectLocation} />
           <Marker position={[latitude, longitude]} icon={pickerIcon} />
+          {accuracy !== null && <Circle center={[latitude, longitude]} radius={accuracy} pathOptions={{ color: '#2563eb' }} />}
         </MapContainer>
       </div>
 

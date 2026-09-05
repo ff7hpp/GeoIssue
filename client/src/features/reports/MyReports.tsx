@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { api } from '../../services/api';
+import { errorMessage } from '../../services/errorMessage';
 import { useAuth } from '../../services/auth.context';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { PriorityBadge } from '../../components/common/PriorityBadge';
@@ -32,8 +33,8 @@ export const MyReports: React.FC = () => {
   const [editDescription, setEditDescription] = useState<string>('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const { data: reportsData, isLoading } = useQuery({
-    queryKey: ['my-reports'],
+  const { data: reportsData, isLoading, error } = useQuery({
+    queryKey: ['my-reports', user?.id],
     queryFn: () => api.getMyReports(),
     enabled: !!user,
   });
@@ -87,6 +88,7 @@ export const MyReports: React.FC = () => {
 
   return (
     <div className="app-container" style={{ padding: 'var(--space-6) var(--space-4)', maxWidth: '900px' }}>
+      {(error || updateMutation.error || deleteMutation.error) && <p className="field-error" role="alert">{errorMessage(error || updateMutation.error || deleteMutation.error)}</p>}
       {/* Header */}
       <div
         style={{

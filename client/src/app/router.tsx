@@ -6,9 +6,11 @@ import { ReportWizard } from '../features/reports/ReportWizard';
 import { MyReports } from '../features/reports/MyReports';
 import { AdminDashboard } from '../features/admin/AdminDashboard';
 import { useAuth } from '../services/auth.context';
+import { LoadingState } from '../components/common/LoadingState';
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { role } = useAuth();
+  const { role, isLoading } = useAuth();
+  if (isLoading) return <LoadingState />;
   if (role !== 'admin') {
     return <Navigate to="/" replace />;
   }

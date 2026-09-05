@@ -41,14 +41,22 @@ export const IssueExplore: React.FC = () => {
 
   const categories = serverCategories && serverCategories.length > 0 ? serverCategories : DEFAULT_CATEGORIES;
 
-  const { data: issuesData, isLoading } = useQuery({
+  const { data: issuesData, isLoading, isError } = useQuery({
     queryKey: ['issues', selectedStatus, selectedCategoryId, searchQuery],
-    queryFn: () => api.getIssues({
+    queryFn: async () => {
+      const filters = {
       status: selectedStatus || undefined,
       category_id: selectedCategoryId || undefined,
       search: searchQuery || undefined,
-      limit: 50,
-    }),
+        limit: 100,
+      };
+      const first = await api.getIssues(filters);
+      for (let page = 2; page <= (first.meta?.totalPages || 1); page++) {
+        const next = await api.getIssues({ ...filters, page });
+        first.data.push(...next.data);
+      }
+      return first;
+    },
   });
 
   const issues = issuesData?.data || [];
@@ -91,7 +99,7 @@ export const IssueExplore: React.FC = () => {
         {showList && (
           <aside className="issue-sidebar" aria-label={t('explore.issuesCount', { count: issues.length })}>
             <div className="issue-count">{t('explore.issuesCount', { count: issues.length })}</div>
-            {isLoading ? <LoadingState /> : issues.length === 0 ? (
+            {isError ? <p role="alert">Unable to load issues. Please try again.</p> : isLoading ? <LoadingState /> : issues.length === 0 ? (
               <div className="empty-panel">
                 <EmptyState title={t('explore.noIssuesFound')} description="Try clearing search filters or report a new problem in your area." />
               </div>
@@ -103,7 +111,7 @@ export const IssueExplore: React.FC = () => {
 
         {showMap && (
           <div className="map-view-container">
-            <LeafletMap issues={issues} selectedIssue={selectedIssue} onSelectIssue={setSelectedIssue} />
+            <LeafletMap issues={issues} selectedIssue={issues.find(i => i.id === selectedIssue?.id)} onSelectIssue={setSelectedIssue} />
           </div>
         )}
       </div>

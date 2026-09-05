@@ -226,6 +226,8 @@ npm run test:e2e
 
 All detailed project documentation is indexed in [`docs/project/`](./docs/project/).
 
+The verified current authentication, report, GPS, image, API, database, Explore, and map flows are in [`docs/project/CORE_FLOW_VERIFICATION.md`](./docs/project/CORE_FLOW_VERIFICATION.md). It includes runnable local database fixture commands and a verification boundary between PostgreSQL and memory-fallback runs.
+
 The detailed system design diagrams are located in [`docs/reference/diagrams/`](./docs/reference/diagrams/):
 1. `01_System_Context`
 2. `02_Container_Architecture`

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../services/auth.context';
+import { errorMessage } from '../../services/errorMessage';
 import { useTranslation } from 'react-i18next';
 import { X, ShieldAlert, UserCheck, Mail, Lock, User as UserIcon } from 'lucide-react';
 
@@ -42,7 +43,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+      setError(err?.code === 'UNAUTHENTICATED' ? t('errors.credentials') : errorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -55,7 +56,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       await signInWithGoogle();
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Google sign-in failed');
+      setError(errorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -68,7 +69,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       await signInWithDemo(role);
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Demo sign in failed');
+      setError(errorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -91,9 +92,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     >
       <div
         className="card animate-fade-in"
+        role="dialog"
+        aria-modal="true"
+        aria-label={mode === 'login' ? t('auth.signInTitle') : t('auth.signUpTitle')}
         style={{
           width: '100%',
           maxWidth: '440px',
+          maxHeight: 'calc(100dvh - 32px)',
+          overflowY: 'auto',
           backgroundColor: 'var(--bg-surface-elevated)',
           padding: 'var(--space-6)',
           position: 'relative',
@@ -119,6 +125,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {error && (
           <div
+            role="alert"
             style={{
               padding: '10px 14px',
               backgroundColor: 'var(--status-rejected-bg)',
@@ -195,6 +202,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div style={{ position: 'relative' }}>
                 <input
                   type="text"
+                  required
+                  autoComplete="name"
+                  aria-label={t('auth.displayName')}
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="e.g. Layla Al-Hassan"
@@ -228,6 +238,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div style={{ position: 'relative' }}>
               <input
                 type="email"
+                autoComplete="email"
+                aria-label={t('auth.email')}
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -261,6 +273,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div style={{ position: 'relative' }}>
               <input
                 type="password"
+                minLength={mode === 'register' ? 6 : undefined}
+                autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+                aria-label={t('auth.password')}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

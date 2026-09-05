@@ -20,6 +20,10 @@ export async function compressImageToDataUrl(
   file: File,
   options: ImageUploadOptions = {}
 ): Promise<string> {
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    throw new Error('imageType');
+  }
+  if (file.size > 10 * 1024 * 1024) throw new Error('imageSize');
   const maxDim = options.maxDimension || 1280;
   const quality = options.quality || 0.82;
 
@@ -46,13 +50,17 @@ export async function compressImageToDataUrl(
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         if (!ctx) {
-          resolve(reader.result as string);
+          reject(new Error('imageProcess'));
           return;
         }
 
         // Draw and compress to JPEG
         ctx.drawImage(img, 0, 0, width, height);
         const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        if (dataUrl.length > 3 * 1024 * 1024) {
+          reject(new Error('imageSize'));
+          return;
+        }
         resolve(dataUrl);
       };
       img.src = e.target?.result as string;

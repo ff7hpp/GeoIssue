@@ -130,6 +130,7 @@ export const IssueDetail: React.FC = () => {
       <div
         style={{
           display: 'flex',
+          flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'space-between',
           marginBottom: 'var(--space-6)',

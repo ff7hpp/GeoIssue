@@ -183,7 +183,7 @@ export const AppHeader: React.FC = () => {
                   }}
                 >
                   <User size={14} style={{ color: 'var(--text-secondary)' }} />
-                  <span style={{ fontWeight: 500 }}>
+                  <span style={{ fontWeight: 500, maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {user.display_name || user.email.split('@')[0]}
                   </span>
                   {role === 'admin' && (
@@ -322,6 +322,9 @@ export const AppHeader: React.FC = () => {
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
 
       <style>{`
+        @media (min-width: 768px) and (max-width: 1100px) {
+          .header-user-controls > div { display: none !important; }
+        }
         @media (min-width: 768px) {
           .desktop-nav {
             display: flex !important;

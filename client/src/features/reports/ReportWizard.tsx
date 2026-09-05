@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../services/api';
+import { errorMessage } from '../../services/errorMessage';
 import { useAuth } from '../../services/auth.context';
 import { uploadFreeImage, compressImageToDataUrl } from '../../services/imageUpload';
 import { LocationPicker } from '../../components/map/LocationPicker';
@@ -41,6 +42,9 @@ export const ReportWizard: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [imageError, setImageError] = useState('');
 
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -89,6 +93,8 @@ export const ReportWizard: React.FC = () => {
       });
     },
     onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['issues'] });
+      queryClient.invalidateQueries({ queryKey: ['my-reports'] });
       setSubmissionResult(data);
       setCurrentStep(5);
     },
@@ -98,14 +104,11 @@ export const ReportWizard: React.FC = () => {
     if (currentStep === 1) {
       setCurrentStep(2);
     } else if (currentStep === 2) {
-      if (!categoryId) {
-        alert(t('reportWizard.categoryPlaceholder'));
-        return;
-      }
-      if (!description.trim() || description.length < 5) {
-        alert('Please enter a description of at least 5 characters');
-        return;
-      }
+      const errors: Record<string, string> = {};
+      if (!categoryId) errors.category = t('reportWizard.categoryPlaceholder');
+      if (description.trim().length < 5) errors.description = t('errors.description');
+      setFieldErrors(errors);
+      if (Object.keys(errors).length) return;
       setCurrentStep(3);
     } else if (currentStep === 3) {
       setCurrentStep(4);
@@ -129,17 +132,19 @@ export const ReportWizard: React.FC = () => {
   const [imageFileName, setImageFileName] = useState<string>('');
 
   const compressAndSetImage = async (file: File) => {
+    setImageError('');
+    handleRemoveImage();
     try {
       setIsCompressingImage(true);
-      setImageFileName(file.name);
-      setSelectedImageFile(file);
       
       const compressedDataUrl = await compressImageToDataUrl(file);
+      setImageFileName(file.name);
+      setSelectedImageFile(file);
       setImagePreview(compressedDataUrl);
       setImageUrl('');
     } catch (err) {
-      console.error('Image compression failed:', err);
-      alert('Failed to process image. Please try another file.');
+      const key = err instanceof Error && ['imageType', 'imageSize'].includes(err.message) ? err.message : 'imageProcess';
+      setImageError(t(`errors.${key}`));
     } finally {
       setIsCompressingImage(false);
     }
@@ -156,7 +161,7 @@ export const ReportWizard: React.FC = () => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file) {
       compressAndSetImage(file);
     }
   };
@@ -297,7 +302,7 @@ export const ReportWizard: React.FC = () => {
               onChange={(lat, lon, addr) => {
                 setLatitude(lat);
                 setLongitude(lon);
-                if (addr) setAddress(addr);
+                setAddress(addr || '');
               }}
             />
           </div>
@@ -316,6 +321,7 @@ export const ReportWizard: React.FC = () => {
               <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, marginBottom: '8px' }}>
                 {t('reportWizard.categoryLabel')} *
               </label>
+              {fieldErrors.category && <p className="field-error" role="alert">{fieldErrors.category}</p>}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
                 {categories.map((cat) => {
                   const isSelected = categoryId === cat.id;
@@ -359,6 +365,7 @@ export const ReportWizard: React.FC = () => {
               </label>
               <input
                 type="text"
+                maxLength={255}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t('reportWizard.issueTitlePlaceholder')}
@@ -378,6 +385,10 @@ export const ReportWizard: React.FC = () => {
                 {t('reportWizard.descriptionLabel')} *
               </label>
               <textarea
+                aria-label={t('reportWizard.descriptionLabel')}
+                aria-invalid={!!fieldErrors.description}
+                aria-describedby="description-error"
+                maxLength={2000}
                 required
                 rows={4}
                 value={description}
@@ -392,6 +403,7 @@ export const ReportWizard: React.FC = () => {
                   resize: 'vertical',
                 }}
               />
+              {fieldErrors.description && <p id="description-error" className="field-error" role="alert">{fieldErrors.description}</p>}
             </div>
           </div>
         )}
@@ -399,6 +411,7 @@ export const ReportWizard: React.FC = () => {
         {/* STEP 3: OPTIONAL PHOTO */}
         {currentStep === 3 && (
           <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            {imageError && <p className="field-error" role="alert">{imageError}</p>}
             <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Camera size={20} style={{ color: 'var(--accent-primary)' }} />
               <span>{t('reportWizard.step3')}</span>
@@ -489,7 +502,8 @@ export const ReportWizard: React.FC = () => {
                 >
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
+                    disabled={isCompressingImage}
                     onChange={handleImageFileChange}
                     style={{
                       position: 'absolute',
@@ -648,7 +662,7 @@ export const ReportWizard: React.FC = () => {
                   fontSize: '0.875rem',
                 }}
               >
-                {(submitMutation.error as any)?.message || 'Failed to submit report'}
+                {errorMessage(submitMutation.error)}
               </div>
             )}
           </div>
@@ -725,6 +739,10 @@ export const ReportWizard: React.FC = () => {
                   setTitle('');
                   setImagePreview(null);
                   setImageUrl('');
+                  setSelectedImageFile(null);
+                  setImageFileName('');
+                  setImageError('');
+                  setFieldErrors({});
                   setSubmissionResult(null);
                   setCurrentStep(1);
                 }}
@@ -761,7 +779,7 @@ export const ReportWizard: React.FC = () => {
             <button
               type="button"
               onClick={handleNext}
-              disabled={submitMutation.isPending}
+              disabled={submitMutation.isPending || isCompressingImage}
               className="btn btn-primary"
               style={{ padding: '10px 20px' }}
             >

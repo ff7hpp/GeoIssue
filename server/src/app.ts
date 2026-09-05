@@ -13,6 +13,7 @@ import commentsRouter from './modules/comments/comments.routes.js';
 import geocodeRouter from './modules/geocoding/geocode.routes.js';
 import adminRouter from './modules/admin/admin.routes.js';
 import authRouter from './modules/auth/auth.routes.js';
+import { isUsingMockDb } from './db/pool.js';
 
 export const app = express();
 
@@ -45,6 +46,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     data: {
       status: 'healthy',
+      database: isUsingMockDb ? 'memory' : 'postgresql',
       timestamp: new Date().toISOString(),
       service: 'GeoIssue API',
       version: '1.0.0',

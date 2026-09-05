@@ -21,8 +21,23 @@ interface LeafletMapProps {
 function MapRecenter({ center, zoom }: { center: [number, number]; zoom?: number }) {
   const map = useMap();
   useEffect(() => {
-    map.flyTo(center, zoom || map.getZoom(), { duration: 0.8 });
-  }, [center, zoom, map]);
+    map.setView(center, zoom || map.getZoom(), { animate: false });
+  }, [center[0], center[1], zoom, map]);
+  return null;
+}
+
+function MapViewport({ issues }: { issues: Issue[] }) {
+  const map = useMap();
+  const coordinates = JSON.stringify(issues.map(i => [Number(i.latitude), Number(i.longitude)]));
+  useEffect(() => {
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
+  useEffect(() => {
+    const points = JSON.parse(coordinates) as [number, number][];
+    if (points.length) map.fitBounds(L.latLngBounds(points), { padding: [32, 32], maxZoom: 15, animate: false });
+  }, [coordinates, map]);
   return null;
 }
 
@@ -35,6 +50,10 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
   height = '100%',
 }) => {
   const { t } = useTranslation();
+  const validIssues = issues.filter(issue =>
+    issue.latitude != null && issue.longitude != null &&
+    Number.isFinite(Number(issue.latitude)) && Number.isFinite(Number(issue.longitude)) &&
+    Math.abs(Number(issue.latitude)) <= 90 && Math.abs(Number(issue.longitude)) <= 180);
 
   const createIssueIcon = (issue: Issue, isSelected: boolean) => {
     const statusClass = `marker-${issue.status}`;
@@ -69,12 +88,14 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
         zoom={zoom}
         style={{ width: '100%', height: '100%' }}
         zoomControl={true}
+        zoomAnimation={false}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        <MapViewport issues={validIssues} />
         {selectedIssue && (
           <MapRecenter
             center={[Number(selectedIssue.latitude), Number(selectedIssue.longitude)]}
@@ -82,7 +103,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
           />
         )}
 
-        {issues.map((issue) => {
+        {validIssues.map((issue) => {
           const isSelected = selectedIssue?.id === issue.id;
           const pos: [number, number] = [
             Number(issue.latitude),
@@ -92,14 +113,17 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
           return (
             <Marker
               key={issue.id}
+              title={issue.title}
+              alt={issue.title}
               position={pos}
               icon={createIssueIcon(issue, isSelected)}
               eventHandlers={{
                 click: () => onSelectIssue && onSelectIssue(issue),
               }}
             >
-              <Popup>
-                <div style={{ padding: '14px', minWidth: '240px', maxWidth: '300px' }}>
+              <Popup maxWidth={260}>
+                <div style={{ padding: '8px', maxWidth: '240px', overflowWrap: 'anywhere' }}>
+                  <p>{issue.category?.name}</p>
                   <div
                     style={{
                       display: 'flex',

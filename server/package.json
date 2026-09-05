@@ -10,7 +10,8 @@
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "test": "vitest run",
-    "migrate": "tsx src/db/migrations.ts"
+    "migrate": "tsx src/db/migrations.ts",
+    "seed:dev": "tsx src/db/seed-development.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

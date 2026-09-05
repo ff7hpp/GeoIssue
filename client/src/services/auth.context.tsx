@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { User, UserRole } from '../types';
+import { useQueryClient } from '@tanstack/react-query';
 import { api, registerAuthTokenProvider } from './api';
 import {
   auth as fbAuth,
@@ -47,19 +48,24 @@ function canUseNativeAuthFallback(error: unknown) {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(
     localStorage.getItem('geoissue_token')
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const authOperation = useRef(false);
+  const authRevision = useRef(0);
 
   // Register token provider with API client
   useEffect(() => {
     registerAuthTokenProvider(async () => {
+      const revision = authRevision.current;
       // If user is signed in with Firebase, get fresh token
       if (fbAuth.currentUser) {
         try {
           const freshToken = await fbAuth.currentUser.getIdToken();
+          if (revision !== authRevision.current) return null;
           localStorage.setItem('geoissue_token', freshToken);
           return freshToken;
         } catch {
@@ -73,9 +79,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // Listen to Firebase Auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(fbAuth, async (fbUser) => {
+      // Explicit sign-in/register owns profile synchronization until it finishes.
+      if (authOperation.current) return;
+      const revision = authRevision.current;
       if (fbUser) {
         try {
           const idToken = await fbUser.getIdToken();
+          if (revision !== authRevision.current) return;
           localStorage.setItem('geoissue_token', idToken);
           setToken(idToken);
 
@@ -83,8 +93,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           const syncedUser = await api.syncMe({
             display_name: fbUser.displayName || 'Citizen',
           });
-          setUser(syncedUser);
+          if (revision === authRevision.current) setUser(syncedUser);
         } catch (err) {
+          if (revision !== authRevision.current) return;
           console.warn('Firebase auth sync warning:', err);
           localStorage.removeItem('geoissue_token');
           setToken(null);
@@ -112,10 +123,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   async function loadUserProfile(authToken: string) {
+    const revision = authRevision.current;
     try {
       const profile = await api.getMe();
-      setUser(profile);
+      if (revision === authRevision.current) setUser(profile);
     } catch (err) {
+      if (revision !== authRevision.current) return;
       console.warn('Failed to load user profile with current token:', err);
       localStorage.removeItem('geoissue_token');
       setToken(null);
@@ -126,6 +139,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }
 
   const signInWithEmail = async (email: string, password: string) => {
+    authRevision.current++;
+    authOperation.current = true;
     setIsLoading(true);
     try {
       // Try Firebase Auth first
@@ -159,6 +174,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await fbSignOut(fbAuth).catch(() => undefined);
       throw err;
     } finally {
+      authOperation.current = false;
       setIsLoading(false);
     }
   };
@@ -169,6 +185,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     displayName: string,
     language = 'en'
   ) => {
+    authRevision.current++;
+    authOperation.current = true;
     setIsLoading(true);
     try {
       let userCredential;
@@ -205,11 +223,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await fbSignOut(fbAuth).catch(() => undefined);
       throw err;
     } finally {
+      authOperation.current = false;
       setIsLoading(false);
     }
   };
 
   const signInWithGoogle = async () => {
+    authRevision.current++;
+    authOperation.current = true;
     setIsLoading(true);
     try {
       const result = await signInWithPopup(fbAuth, googleProvider);
@@ -228,6 +249,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await fbSignOut(fbAuth).catch(() => undefined);
       throw err;
     } finally {
+      authOperation.current = false;
       setIsLoading(false);
     }
   };
@@ -237,8 +259,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     email: string,
     displayName?: string
   ) => {
+    authRevision.current++;
+    authOperation.current = true;
     setIsLoading(true);
     try {
+      await fbSignOut(fbAuth);
       localStorage.setItem('geoissue_token', authToken);
       setToken(authToken);
 
@@ -254,6 +279,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(null);
       throw err;
     } finally {
+      authOperation.current = false;
       setIsLoading(false);
     }
   };
@@ -266,6 +292,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const signOut = async () => {
+    authRevision.current++;
+    authOperation.current = true;
+    await queryClient.cancelQueries();
+    queryClient.clear();
     localStorage.removeItem('geoissue_token');
     setToken(null);
     setUser(null);
@@ -273,6 +303,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await fbSignOut(fbAuth);
     } catch {
       // ignore
+    } finally {
+      authOperation.current = false;
+      localStorage.removeItem('geoissue_token');
+      setToken(null);
+      setUser(null);
     }
   };
 

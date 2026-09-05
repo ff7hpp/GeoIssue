@@ -273,3 +273,5 @@ img, svg, video {
 .animate-fade-in {
   animation: fadeIn var(--transition-normal) forwards;
 }
+/* Inline feedback shares the existing status tokens. */
+.field-error { color: var(--status-rejected); font-size: 0.8125rem; margin: 6px 0; overflow-wrap: anywhere; }

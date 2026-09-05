@@ -6,6 +6,7 @@
 - [Full-stack readiness](FULL_STACK_READINESS.md)
 - [Project study guide](PROJECT_STUDY_GUIDE.md)
 - [Architecture diagrams](DIAGRAMS.md)
+- [Current core flow and verification](CORE_FLOW_VERIFICATION.md)
 - [Cleanup history](../archive/CLEANUP_REPORT.md)
 
 ## Documentation layout
