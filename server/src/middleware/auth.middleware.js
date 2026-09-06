@@ -35,6 +35,9 @@ function resolveDevelopmentIdentity(token) {
   }
   return null;
 }
+function looksLikeJwt(token) {
+  return token.split(".").length === 3;
+}
 async function authenticate(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
@@ -65,6 +68,9 @@ async function authenticate(req, res, next) {
     if (developmentIdentity) {
       ({ uid, email, displayName, role } = developmentIdentity);
     } else {
+      if (!looksLikeJwt(token)) {
+        throw AppError.unauthenticated("Invalid authentication token");
+      }
       const firebaseAuth = getFirebaseAuth();
       if (!firebaseAuth) {
         throw AppError.unauthenticated("Invalid authentication token");
@@ -128,6 +134,7 @@ async function optionalAuth(req, res, next) {
     if (developmentIdentity) {
       uid = developmentIdentity.uid;
     } else {
+      if (!looksLikeJwt(token)) return next();
       const firebaseAuth = getFirebaseAuth();
       if (!firebaseAuth) return next();
       try {
