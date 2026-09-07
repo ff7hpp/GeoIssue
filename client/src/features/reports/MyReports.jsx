@@ -71,12 +71,13 @@ const MyReports = () => {
     />
       </div>;
   }
-  return <div className="app-container" style={{ padding: "var(--space-6) var(--space-4)", maxWidth: "900px" }}>
+  return <div className="app-container my-reports-page" style={{ padding: "var(--space-6) var(--space-4)", maxWidth: "900px" }}>
       {(error || updateMutation.error || deleteMutation.error) && <p className="field-error" role="alert">{errorMessage(error || updateMutation.error || deleteMutation.error)}</p>}
       {
     /* Header */
   }
       <div
+    className="my-reports-header"
     style={{
       display: "flex",
       flexWrap: "wrap",
@@ -95,10 +96,12 @@ const MyReports = () => {
           </p>
         </div>
 
-        <Link to="/reports/new" className="btn btn-primary" style={{ gap: "6px" }}>
-          <PlusCircle size={16} />
-          <span>{t("nav.report")}</span>
-        </Link>
+        <div className="my-reports-header-actions">
+          <Link to="/reports/new" className="btn btn-primary" style={{ gap: "6px" }}>
+            <PlusCircle size={16} />
+            <span>{t("nav.report")}</span>
+          </Link>
+        </div>
       </div>
 
       {isLoading ? <LoadingState /> : reports.length === 0 ? <EmptyState
@@ -121,6 +124,7 @@ const MyReports = () => {
       /* Linked Problem Header */
     }
                 <div
+      className="my-report-footer"
       style={{
         display: "flex",
         flexWrap: "wrap",
@@ -272,7 +276,7 @@ const MyReports = () => {
         gap: "8px"
       }}
     >
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div className="my-report-meta" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                       <MapPin size={13} style={{ color: "var(--accent-primary)" }} />
                       {Number(report.latitude).toFixed(4)}, {Number(report.longitude).toFixed(4)}
@@ -283,7 +287,7 @@ const MyReports = () => {
                     </span>
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <div className="my-report-controls" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                     {!isEditing && <button
       onClick={() => handleStartEdit(report)}
       className="btn-icon"

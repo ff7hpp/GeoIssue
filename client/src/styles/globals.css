@@ -208,6 +208,51 @@ img, svg, video {
   color: var(--text-primary);
 }
 
+/* My reports actions stay grouped instead of sitting on page/card edges. */
+.my-reports-header-actions {
+  display: inline-flex;
+  padding: 4px;
+  border: 1px solid var(--border-default);
+  border-radius: calc(var(--radius-md) + 4px);
+  background: color-mix(in srgb, var(--bg-surface) 82%, transparent);
+  box-shadow: var(--shadow-sm);
+}
+
+.my-report-controls {
+  padding: 3px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+}
+
+@media (max-width: 640px) {
+  .my-reports-header {
+    align-items: stretch !important;
+  }
+
+  .my-reports-header-actions {
+    width: 100%;
+  }
+
+  .my-reports-header-actions .btn {
+    width: 100%;
+  }
+
+  .my-report-footer {
+    align-items: stretch !important;
+    flex-direction: column;
+  }
+
+  .my-report-meta {
+    flex-wrap: wrap;
+    gap: 8px !important;
+  }
+
+  .my-report-controls {
+    align-self: flex-end;
+  }
+}
+
 /* Card Surface */
 .card {
   background-color: var(--bg-surface);
