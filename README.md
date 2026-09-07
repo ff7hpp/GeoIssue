@@ -119,14 +119,33 @@ avoid conflicts with an existing local PostgreSQL installation.
 docker compose up -d postgres
 docker compose ps
 
-# Create/update tables and seed reference data
+# One-time initialization only: create/update tables and seed reference data
 npm run migrate --prefix server
+
+# Insert 30 idempotent, mapped development reports
+npm run seed:dev --prefix server
 ```
 
 The database is stored in the named Docker volume
 `geoissue_geoissue-postgres-data`, so stopping the application does not remove
 its data. Do not remove the volume unless you intentionally want to erase the
-local database.
+local database. `seed:dev` is non-production only: it preserves existing data,
+uses stable fixture IDs, and verifies all 30 fixture reports after every run.
+
+### Authentication and location requirements
+
+Email/password registration and login use the server's JWT API by default.
+Set `VITE_EMAIL_AUTH_PROVIDER=firebase` only when Firebase email/password auth
+is intentionally enabled; Google sign-in remains available whenever every
+`VITE_FIREBASE_*` value is configured. Keep the
+server `JWT_SECRET`, database URL, and Firebase Admin credentials in the local
+`server/.env` file; never put them in the client environment.
+
+Browser geolocation requires a secure context: use `http://localhost` during
+local development and HTTPS after deployment. The report map requests a fresh,
+high-accuracy browser fix, shows its reported accuracy radius, and always lets
+the user search for or click a manual pin. Device/browser accuracy remains an
+estimate, not a guarantee.
 
 ### Running the Application
 
@@ -145,6 +164,36 @@ npm --prefix client run dev
 Visit **`http://localhost:5173`** in your browser.
 
 Check the API independently at **`http://localhost:4000/api/health`**.
+
+### Windows + WSL2 startup
+
+Use one Node environment consistently. Do not share a single `node_modules`
+installation between Windows and Linux because Rollup and esbuild install
+platform-specific binaries. For a WSL-only workflow, keep the checkout under
+the WSL filesystem (for example `~/projects/GeoIssue`) and run `npm ci` there.
+
+1. Enable Docker Desktop's Ubuntu integration under **Settings → Resources →
+   WSL Integration**, then open Ubuntu.
+2. From the repository root run `docker compose up -d postgres` and confirm
+   `docker compose ps` reports PostgreSQL healthy.
+3. Run `npm ci --prefix server` and `npm ci --prefix client`. Run migrations
+   only when the schema changed; run `seed:dev` only for the initial fixture
+   setup, never as a routine startup step.
+4. Run `npm run dev`, then verify `http://localhost:4000/api/health` reports
+   `database: postgresql` before opening `http://localhost:5173`.
+
+`localhost` works only on the same computer. From a phone or another LAN
+device, use the Windows/WSL host LAN address; Vite is already bound to
+`0.0.0.0` and proxies `/api` to `VITE_API_PROXY_TARGET`. Browser geolocation on a LAN IP
+normally requires trusted HTTPS; a self-signed certificate works only after
+the device trusts it. `localhost` is treated as a secure development context,
+but another device's `localhost` refers to that device, not this project.
+
+The **Demo Citizen** and **Demo Admin** buttons use fixed development-only
+identity tokens handled by the backend and persisted user records. They are
+disabled when `NODE_ENV=production`; do not expose a development server to the
+internet or reuse these tokens as production credentials. Email/password
+registration and login use hashed database credentials and signed JWTs.
 
 ---
 

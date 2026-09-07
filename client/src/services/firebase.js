@@ -10,15 +10,18 @@ import {
   onAuthStateChanged
 } from "firebase/auth";
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCFOq7LNCENcz5QHDerUiwN84uEII-AEPk",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "geoissue-4bd94.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "geoissue-4bd94",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "geoissue-4bd94.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "916627529016",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:916627529016:web:0a188e1ed885f405cbf5cd"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
+const isConfiguredValue = (value) => typeof value === "string" && value.length > 0 && !value.startsWith("your_");
+const isFirebaseConfigured = Object.values(firebaseConfig).every(isConfiguredValue);
+const isFirebaseEmailAuthEnabled = isFirebaseConfigured && import.meta.env.VITE_EMAIL_AUTH_PROVIDER === "firebase";
+const app = isFirebaseConfigured ? !getApps().length ? initializeApp(firebaseConfig) : getApp() : null;
+const auth = app ? getAuth(app) : null;
 const googleProvider = new GoogleAuthProvider();
 export {
   app,
@@ -26,6 +29,8 @@ export {
   createUserWithEmailAndPassword,
   fbSignOut,
   firebaseConfig,
+  isFirebaseEmailAuthEnabled,
+  isFirebaseConfigured,
   googleProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,

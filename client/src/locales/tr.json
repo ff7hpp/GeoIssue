@@ -1,6 +1,6 @@
 {
   "errors": {"description":"Açıklama en az 5 boşluk olmayan karakter içermelidir.","imageType":"JPEG, PNG veya WebP seçin.","imageSize":"10 MB altında resim seçin. Sıkıştırılmış resim 3 MB altında olmalıdır.","imageProcess":"Resim işlenemedi. Başka dosya seçin.","credentials":"E-posta veya parola yanlış.","duplicate":"Bu e-posta zaten kayıtlı. Giriş yapın.","password":"Parola en az 6 karakter içermelidir.","network":"Bağlantı başarısız. Bağlantınızı kontrol edip tekrar deneyin.","generic":"İstek tamamlanamadı. Tekrar deneyin.","session":"Devam etmek için tekrar giriş yapın."},
-  "location": {"unsupported":"Konum desteklenmiyor. Haritada bir nokta seçin.","denied":"Konum izni reddedildi. Haritada bir nokta seçin.","timeout":"Konum isteği zaman aşımına uğradı. Tekrar deneyin veya haritada seçin.","unavailable":"Konum alınamadı. Haritada bir nokta seçin.","searchFailed":"Konum araması başarısız. Haritada bir nokta seçin.","accuracy":"Tahmini doğruluk: ±{{meters}} m. Gerekirse işaretçiyi ayarlayın."},
+  "location": {"unsupported":"Konum desteklenmiyor. Haritada bir nokta seçin.","secureContext":"Konum için HTTPS veya localhost gerekir. Haritada bir nokta seçin.","permissionPrompt":"GPS kullanmak için tarayıcıda konum izni verin.","invalidCoordinates":"Geçersiz koordinatlar alındı. Haritada bir nokta seçin.","selectRequired":"Devam etmeden önce GPS, arama veya harita ile bir konum seçin.","noSelection":"Konum seçilmedi. Harita yalnızca başlangıç görünümünü gösteriyor.","denied":"Konum izni reddedildi. Haritada bir nokta seçin.","timeout":"Konum isteği zaman aşımına uğradı. Tekrar deneyin veya haritada seçin.","unavailable":"Konum alınamadı. Haritada bir nokta seçin.","searchFailed":"Konum araması başarısız. Haritada bir nokta seçin.","accuracy":"Tahmini doğruluk: ±{{meters}} m. Gerekirse işaretçiyi ayarlayın."},
   "app": {
     "name": "GeoIssue",
     "tagline": "Bildir. Takip Et. Çöz.",
@@ -86,7 +86,7 @@
     "step3": "3. Fotoğraf",
     "step4": "4. İnceleme",
     "step5": "5. Onay",
-    "selectLocationInstruction": "Sorunun konumunu hassas şekilde belirlemek için haritaya tıklayın veya GPS kullanın.",
+    "selectLocationInstruction": "Sorunun konumunu seçmek için haritaya tıklayın, arayın veya GPS kullanın.",
     "useGps": "Mevcut GPS Konumumu Kullan",
     "gpsSuccess": "Konum cihazdan başarıyla alındı.",
     "searchLocation": "Sokak, mahalle veya mekan ara...",

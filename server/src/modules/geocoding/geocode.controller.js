@@ -2,7 +2,7 @@ import { geocodeService } from "./geocode.service.js";
 const geocodeController = {
   async search(req, res, next) {
     try {
-      const q = req.query.q || "";
+      const q = typeof req.query.q === "string" ? req.query.q.slice(0, 200) : "";
       const results = await geocodeService.search(q);
       res.json({ data: results });
     } catch (err) {
@@ -11,9 +11,16 @@ const geocodeController = {
   },
   async reverse(req, res, next) {
     try {
-      const lat = parseFloat(req.query.lat);
-      const lon = parseFloat(req.query.lon);
-      if (isNaN(lat) || isNaN(lon)) {
+      const lat = Number(req.query.lat);
+      const lon = Number(req.query.lon);
+      if (
+        !Number.isFinite(lat) ||
+        !Number.isFinite(lon) ||
+        lat < -90 ||
+        lat > 90 ||
+        lon < -180 ||
+        lon > 180
+      ) {
         return res.status(400).json({
           error: {
             code: "VALIDATION_ERROR",

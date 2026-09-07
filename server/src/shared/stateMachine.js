@@ -12,6 +12,7 @@ const ACTIVE_ISSUE_STATUSES = [
   "accepted",
   "in_progress"
 ];
+const PUBLIC_ISSUE_STATUSES = ["accepted", "in_progress", "resolved"];
 function isValidStatusTransition(currentStatus, targetStatus) {
   const allowed = ALLOWED_STATUS_TRANSITIONS[currentStatus];
   return allowed ? allowed.includes(targetStatus) : false;
@@ -22,6 +23,7 @@ function isIssueActive(status) {
 export {
   ACTIVE_ISSUE_STATUSES,
   ALLOWED_STATUS_TRANSITIONS,
+  PUBLIC_ISSUE_STATUSES,
   isIssueActive,
   isValidStatusTransition
 };

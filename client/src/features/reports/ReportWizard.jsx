@@ -43,6 +43,7 @@ const ReportWizard = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [latitude, setLatitude] = useState(39.9255);
   const [longitude, setLongitude] = useState(32.8662);
+  const [locationSelected, setLocationSelected] = useState(false);
   const [address, setAddress] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [title, setTitle] = useState("");
@@ -82,6 +83,11 @@ const ReportWizard = () => {
   });
   const handleNext = () => {
     if (currentStep === 1) {
+      if (!locationSelected) {
+        setFieldErrors({ location: t("location.selectRequired") });
+        return;
+      }
+      setFieldErrors({});
       setCurrentStep(2);
     } else if (currentStep === 2) {
       const errors = {};
@@ -265,14 +271,18 @@ const ReportWizard = () => {
             <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginBottom: "var(--space-4)" }}>
               {t("reportWizard.selectLocationInstruction")}
             </p>
+            {fieldErrors.location && <p className="field-error" role="alert">{fieldErrors.location}</p>}
 
             <LocationPicker
     latitude={latitude}
     longitude={longitude}
+    hasSelection={locationSelected}
     onChange={(lat, lon, addr) => {
       setLatitude(lat);
       setLongitude(lon);
       setAddress(addr || "");
+      setLocationSelected(true);
+      setFieldErrors((current) => ({ ...current, location: void 0 }));
     }}
   />
           </div>}

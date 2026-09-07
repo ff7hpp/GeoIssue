@@ -19,7 +19,7 @@ const DEFAULT_CATEGORIES = [
   { id: "c1000000-0000-0000-0000-000000000005", name: "Water & Drainage", slug: "water-drainage", icon: "Droplets", is_active: true, created_at: "" },
   { id: "c1000000-0000-0000-0000-000000000006", name: "Public Parks & Trees", slug: "parks-trees", icon: "Trees", is_active: true, created_at: "" }
 ];
-const statuses = ["submitted", "in_review", "accepted", "in_progress", "resolved", "rejected"];
+const statuses = ["accepted", "in_progress", "resolved"];
 const IssueExplore = () => {
   const { t } = useTranslation();
   const [selectedIssue, setSelectedIssue] = useState(null);
@@ -50,6 +50,7 @@ const IssueExplore = () => {
     }
   });
   const issues = issuesData?.data || [];
+  const issueCountLabel = isLoading ? t("common.loading") : isError ? t("common.error") : t("explore.issuesCount", { count: issues.length });
   const showMap = viewMode !== "list";
   const showList = viewMode !== "map";
   return <div className={`explore-page view-${viewMode}`}>
@@ -94,8 +95,8 @@ const IssueExplore = () => {
       </div>
 
       <div className="explore-content">
-        {showList && <aside className="issue-sidebar" aria-label={t("explore.issuesCount", { count: issues.length })}>
-            <div className="issue-count">{t("explore.issuesCount", { count: issues.length })}</div>
+        {showList && <aside className="issue-sidebar" aria-label={issueCountLabel}>
+            <div className="issue-count">{issueCountLabel}</div>
             {isError ? <p role="alert">Unable to load issues. Please try again.</p> : isLoading ? <LoadingState /> : issues.length === 0 ? <div className="empty-panel">
                 <EmptyState title={t("explore.noIssuesFound")} description="Try clearing search filters or report a new problem in your area." />
               </div> : <div>{issues.map((issue) => <IssueCard key={issue.id} issue={issue} selected={selectedIssue?.id === issue.id} onSelect={() => setSelectedIssue(issue)} />)}</div>}

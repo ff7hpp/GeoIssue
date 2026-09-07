@@ -4,6 +4,7 @@ import { initDb } from "../db/pool.js";
 import { usersRepository } from "../modules/users/users.repository.js";
 import { authService } from "../modules/auth/auth.service.js";
 import { generateToken } from "../shared/auth.utils.js";
+import { issuesRepository } from "../modules/issues/issues.repository.js";
 async function makeRequest(method, url, headers = {}, body) {
   return new Promise((resolve) => {
     const req = {
@@ -82,12 +83,34 @@ describe("API Smoke & Security Tests", () => {
     expect(Array.isArray(res.body.data)).toBe(true);
     expect(res.body.meta.page).toBe(1);
     for (const issue of res.body.data) {
+      expect(["accepted", "in_progress", "resolved"]).toContain(issue.status);
       expect(issue.assigned_to).toBeUndefined();
       expect(issue.deleted_at).toBeUndefined();
       expect(issue.assignee?.id).toBeUndefined();
       expect(issue.assignee?.email).toBeUndefined();
       expect(issue.assignee?.avatar_url).toBeUndefined();
     }
+  });
+  it("GET /api/geocode/reverse should reject malformed or out-of-range coordinates", async () => {
+    for (const query of ["lat=39abc&lon=32", "lat=91&lon=32", "lat=39&lon=181"]) {
+      const res = await makeRequest("GET", `/api/geocode/reverse?${query}`);
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe("VALIDATION_ERROR");
+    }
+  });
+  it("keeps unreviewed and rejected issues out of public list and detail routes", async () => {
+    const { issues } = await issuesRepository.list({ status: "in_review", limit: 1 });
+    const privateIssue = issues[0];
+    if (!privateIssue) return;
+    const publicList = await makeRequest("GET", "/api/issues?status=in_review");
+    expect(publicList.status).toBe(200);
+    expect(publicList.body.data).toHaveLength(0);
+    const publicDetail = await makeRequest("GET", `/api/issues/${privateIssue.id}`);
+    expect(publicDetail.status).toBe(404);
+    const adminDetail = await makeRequest("GET", `/api/issues/${privateIssue.id}`, {
+      authorization: "Bearer dev-admin"
+    });
+    expect(adminDetail.status).toBe(200);
   });
   it("GET /api/issues/:id should hide report and history user identifiers publicly", async () => {
     const list = await makeRequest("GET", "/api/issues");

@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   isValidStatusTransition,
-  isIssueActive
+  isIssueActive,
+  PUBLIC_ISSUE_STATUSES
 } from "../shared/stateMachine.js";
 describe("Issue State Machine Lifecycle", () => {
   it("should allow valid happy path status progression", () => {
@@ -29,5 +30,11 @@ describe("Issue State Machine Lifecycle", () => {
     expect(isIssueActive("in_progress")).toBe(true);
     expect(isIssueActive("resolved")).toBe(false);
     expect(isIssueActive("rejected")).toBe(false);
+  });
+  it("should expose only reviewed lifecycle states publicly", () => {
+    expect(PUBLIC_ISSUE_STATUSES).toEqual(["accepted", "in_progress", "resolved"]);
+    expect(PUBLIC_ISSUE_STATUSES).not.toContain("submitted");
+    expect(PUBLIC_ISSUE_STATUSES).not.toContain("in_review");
+    expect(PUBLIC_ISSUE_STATUSES).not.toContain("rejected");
   });
 });

@@ -1,10 +1,10 @@
 import { issuesRepository } from "./issues.repository.js";
 import { supportRepository } from "../support/support.repository.js";
 import { AppError } from "../../shared/errors.js";
-import { isValidStatusTransition } from "../../shared/stateMachine.js";
+import { isValidStatusTransition, PUBLIC_ISSUE_STATUSES } from "../../shared/stateMachine.js";
 const issuesService = {
   async listIssues(filters) {
-    return issuesRepository.list(filters);
+    return issuesRepository.list({ ...filters, allowedStatuses: PUBLIC_ISSUE_STATUSES });
   },
   async getIssueById(id, currentUserId) {
     const issue = await issuesRepository.findById(id);

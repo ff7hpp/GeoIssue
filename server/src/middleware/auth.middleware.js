@@ -38,6 +38,15 @@ function resolveDevelopmentIdentity(token) {
 function looksLikeJwt(token) {
   return token.split(".").length === 3;
 }
+function looksLikeLocalJwt(token) {
+  if (!looksLikeJwt(token)) return false;
+  try {
+    const header = JSON.parse(Buffer.from(token.split(".")[0], "base64url").toString("utf8"));
+    return header.alg === "HS256" && header.typ === "JWT";
+  } catch {
+    return false;
+  }
+}
 async function authenticate(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
@@ -59,6 +68,9 @@ async function authenticate(req, res, next) {
       }
       req.user = user2;
       return next();
+    }
+    if (looksLikeLocalJwt(token)) {
+      throw AppError.unauthenticated("Invalid authentication token");
     }
     const developmentIdentity = resolveDevelopmentIdentity(token);
     let uid;
@@ -129,6 +141,7 @@ async function optionalAuth(req, res, next) {
       }
       return next();
     }
+    if (looksLikeLocalJwt(token)) return next();
     const developmentIdentity = resolveDevelopmentIdentity(token);
     let uid;
     if (developmentIdentity) {

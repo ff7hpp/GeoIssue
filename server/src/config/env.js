@@ -5,7 +5,7 @@ dotenv.config({ path: path.resolve(process.cwd(), "server/.env") });
 const nodeEnv = process.env.NODE_ENV || "development";
 const jwtSecret = process.env.JWT_SECRET;
 const databaseUrl = process.env.DATABASE_URL || "";
-const clientOrigin = process.env.CLIENT_ORIGIN || "http://localhost:5173";
+const clientOrigin = process.env.CLIENT_ORIGIN || "http://localhost:5173,http://127.0.0.1:5173";
 const firebaseProjectId = process.env.FIREBASE_PROJECT_ID || "";
 if (nodeEnv === "production") {
   const missing = [

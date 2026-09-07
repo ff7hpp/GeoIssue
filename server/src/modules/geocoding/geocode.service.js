@@ -24,14 +24,24 @@ const geocodeService = {
       }
       const data = await res.json();
       if (!Array.isArray(data)) return [];
-      return data.map((item) => ({
-        place_id: item.place_id,
-        display_name: item.display_name,
-        lat: parseFloat(item.lat),
-        lon: parseFloat(item.lon),
-        type: item.type,
-        address: item.address
-      }));
+      return data
+        .map((item) => ({
+          place_id: item.place_id,
+          display_name: item.display_name,
+          lat: Number(item.lat),
+          lon: Number(item.lon),
+          type: item.type,
+          address: item.address
+        }))
+        .filter(
+          (item) =>
+            Number.isFinite(item.lat) &&
+            Number.isFinite(item.lon) &&
+            item.lat >= -90 &&
+            item.lat <= 90 &&
+            item.lon >= -180 &&
+            item.lon <= 180
+        );
     } catch (err) {
       if (err.name === "AbortError") {
         console.warn("Geocoding request timed out");

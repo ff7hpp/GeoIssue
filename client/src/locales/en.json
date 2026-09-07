@@ -1,6 +1,6 @@
 {
   "errors": {"description":"Description must contain at least 5 non-space characters.","imageType":"Choose JPEG, PNG or WebP.","imageSize":"Choose an image under 10 MB. Compressed image must be under 3 MB.","imageProcess":"Unable to process this image. Choose another file.","credentials":"Incorrect email or password.","duplicate":"This email already has an account. Please sign in.","password":"Password must contain at least 6 characters.","network":"Connection failed. Check your connection and try again.","generic":"Unable to complete this request. Please try again.","session":"Please sign in again to continue."},
-  "location": {"unsupported":"Location is not supported. Select a point on the map.","denied":"Location permission denied. Select a point on the map.","timeout":"Location request timed out. Retry or select a point on the map.","unavailable":"Location unavailable. Select a point on the map.","searchFailed":"Location search failed. Select a point on the map.","accuracy":"Estimated accuracy: ±{{meters}} m. Adjust the pin if needed."},
+  "location": {"unsupported":"Location is not supported. Select a point on the map.","secureContext":"Location needs HTTPS or localhost. Select a point on the map.","permissionPrompt":"Allow location access in your browser to use GPS.","invalidCoordinates":"Received invalid coordinates. Select a point on the map.","selectRequired":"Choose a location with GPS, search, or the map before continuing.","noSelection":"No location selected. The map is showing its initial viewport only.","denied":"Location permission denied. Select a point on the map.","timeout":"Location request timed out. Retry or select a point on the map.","unavailable":"Location unavailable. Select a point on the map.","searchFailed":"Location search failed. Select a point on the map.","accuracy":"Estimated accuracy: ±{{meters}} m. Adjust the pin if needed."},
   "app": {
     "name": "GeoIssue",
     "tagline": "Report. Track. Resolve.",
@@ -86,7 +86,7 @@
     "step3": "3. Photo",
     "step4": "4. Review",
     "step5": "5. Confirmation",
-    "selectLocationInstruction": "Click on the map or use GPS to pinpoint the problem location precisely.",
+    "selectLocationInstruction": "Click the map, search, or use GPS to choose the problem location.",
     "useGps": "Use Current GPS",
     "gpsSuccess": "Location retrieved from device.",
     "searchLocation": "Search street, neighborhood, or place...",

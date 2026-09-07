@@ -52,6 +52,9 @@ const issuesRepository = {
       if (filters.status) {
         all = all.filter((i) => i.status === filters.status);
       }
+      if (filters.allowedStatuses) {
+        all = all.filter((i) => filters.allowedStatuses.includes(i.status));
+      }
       if (filters.categoryId) {
         all = all.filter((i) => i.category_id === filters.categoryId);
       }
@@ -76,6 +79,10 @@ const issuesRepository = {
     if (filters.status) {
       conditions.push(`i.status = $${idx++}`);
       values.push(filters.status);
+    }
+    if (filters.allowedStatuses) {
+      conditions.push(`i.status = ANY($${idx++}::text[])`);
+      values.push(filters.allowedStatuses);
     }
     if (filters.categoryId) {
       conditions.push(`i.category_id = $${idx++}`);

@@ -1,5 +1,7 @@
 import { issuesService } from "./issues.service.js";
 import { reportsRepository } from "../reports/reports.repository.js";
+import { PUBLIC_ISSUE_STATUSES } from "../../shared/stateMachine.js";
+import { AppError } from "../../shared/errors.js";
 function sanitizeIssueForPublic(issue) {
   const { assigned_to, deleted_at, assignee, history, ...publicIssue } = issue;
   return {
@@ -54,6 +56,10 @@ const issuesController = {
       const issue = await issuesService.getIssueById(issueId, currentUserId);
       const reports = await reportsRepository.findByIssueId(issueId);
       const isAdmin = req.user?.role === "admin";
+      const isReporter = reports.some((report) => report.user_id === req.user?.id);
+      if (!PUBLIC_ISSUE_STATUSES.includes(issue.status) && !isAdmin && !isReporter) {
+        throw AppError.notFound("Issue not found");
+      }
       const sanitizedReports = reports.map((report) => {
         if (isAdmin) return report;
         const { user_id, deleted_at, user, ...publicReport } = report;

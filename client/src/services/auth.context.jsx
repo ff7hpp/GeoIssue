@@ -9,14 +9,17 @@ import {
   googleProvider,
   updateProfile,
   fbSignOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  isFirebaseEmailAuthEnabled,
+  isFirebaseConfigured
 } from "./firebase";
 const AuthContext = createContext(void 0);
 const firebaseFallbackCodes = /* @__PURE__ */ new Set([
   "auth/invalid-credential",
   "auth/user-not-found",
   "auth/operation-not-allowed",
-  "auth/configuration-not-found"
+  "auth/configuration-not-found",
+  "auth/network-request-failed"
 ]);
 function canUseNativeAuthFallback(error) {
   return typeof error === "object" && error !== null && "code" in error && firebaseFallbackCodes.has(String(error.code));
@@ -35,7 +38,7 @@ const AuthProvider = ({
   useEffect(() => {
     registerAuthTokenProvider(async () => {
       const revision = authRevision.current;
-      if (fbAuth.currentUser) {
+      if (isFirebaseConfigured && fbAuth?.currentUser) {
         try {
           const freshToken = await fbAuth.currentUser.getIdToken();
           if (revision !== authRevision.current) return null;
@@ -48,6 +51,16 @@ const AuthProvider = ({
     });
   }, []);
   useEffect(() => {
+    if (!isFirebaseConfigured) {
+      const savedToken = localStorage.getItem("geoissue_token");
+      if (savedToken) {
+        loadUserProfile(savedToken);
+      } else {
+        setUser(null);
+        setIsLoading(false);
+      }
+      return;
+    }
     const unsubscribe = onAuthStateChanged(fbAuth, async (fbUser) => {
       if (authOperation.current) return;
       const revision = authRevision.current;
@@ -105,6 +118,13 @@ const AuthProvider = ({
     authOperation.current = true;
     setIsLoading(true);
     try {
+      if (!isFirebaseEmailAuthEnabled) {
+        const result = await api.login({ email, password });
+        localStorage.setItem("geoissue_token", result.token);
+        setToken(result.token);
+        setUser(result.user);
+        return;
+      }
       try {
         const userCredential = await signInWithEmailAndPassword(fbAuth, email, password);
         const idToken = await userCredential.user.getIdToken();
@@ -131,7 +151,7 @@ const AuthProvider = ({
       localStorage.removeItem("geoissue_token");
       setToken(null);
       setUser(null);
-      await fbSignOut(fbAuth).catch(() => void 0);
+      if (isFirebaseConfigured) await fbSignOut(fbAuth).catch(() => void 0);
       throw err;
     } finally {
       authOperation.current = false;
@@ -143,6 +163,18 @@ const AuthProvider = ({
     authOperation.current = true;
     setIsLoading(true);
     try {
+      if (!isFirebaseEmailAuthEnabled) {
+        const result = await api.register({
+          email,
+          password,
+          display_name: displayName,
+          language
+        });
+        localStorage.setItem("geoissue_token", result.token);
+        setToken(result.token);
+        setUser(result.user);
+        return;
+      }
       let userCredential;
       try {
         userCredential = await createUserWithEmailAndPassword(fbAuth, email, password);
@@ -172,7 +204,7 @@ const AuthProvider = ({
       localStorage.removeItem("geoissue_token");
       setToken(null);
       setUser(null);
-      await fbSignOut(fbAuth).catch(() => void 0);
+      if (isFirebaseConfigured) await fbSignOut(fbAuth).catch(() => void 0);
       throw err;
     } finally {
       authOperation.current = false;
@@ -184,6 +216,9 @@ const AuthProvider = ({
     authOperation.current = true;
     setIsLoading(true);
     try {
+      if (!isFirebaseConfigured) {
+        throw new Error("Google sign-in requires configured Firebase client environment variables");
+      }
       const result = await signInWithPopup(fbAuth, googleProvider);
       const idToken = await result.user.getIdToken();
       localStorage.setItem("geoissue_token", idToken);
@@ -197,7 +232,7 @@ const AuthProvider = ({
       localStorage.removeItem("geoissue_token");
       setToken(null);
       setUser(null);
-      await fbSignOut(fbAuth).catch(() => void 0);
+      if (isFirebaseConfigured) await fbSignOut(fbAuth).catch(() => void 0);
       throw err;
     } finally {
       authOperation.current = false;
@@ -209,7 +244,7 @@ const AuthProvider = ({
     authOperation.current = true;
     setIsLoading(true);
     try {
-      await fbSignOut(fbAuth);
+      if (isFirebaseConfigured) await fbSignOut(fbAuth);
       localStorage.setItem("geoissue_token", authToken);
       setToken(authToken);
       const syncedUser = await api.syncMe({
@@ -242,7 +277,7 @@ const AuthProvider = ({
     setToken(null);
     setUser(null);
     try {
-      await fbSignOut(fbAuth);
+      if (isFirebaseConfigured) await fbSignOut(fbAuth);
     } catch {
     } finally {
       authOperation.current = false;

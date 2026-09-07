@@ -24,6 +24,7 @@ function MapCenterController({ center }) {
 const LocationPicker = ({
   latitude,
   longitude,
+  hasSelection,
   onChange
 }) => {
   const { t } = useTranslation();
@@ -34,6 +35,7 @@ const LocationPicker = ({
   const [addressLabel, setAddressLabel] = useState(null);
   const [locationError, setLocationError] = useState(null);
   const [accuracy, setAccuracy] = useState(null);
+  const [permissionState, setPermissionState] = useState(null);
   const selectionVersion = useRef(0);
   const pickerIcon = L.divIcon({
     className: "custom-picker-pin-wrapper",
@@ -50,26 +52,48 @@ const LocationPicker = ({
     iconAnchor: [20, 40]
   });
   const handleSelectLocation = async (lat, lon, gpsAccuracy) => {
+    const numericLat = Number(lat);
+    const numericLon = Number(lon);
+    if (!Number.isFinite(numericLat) || !Number.isFinite(numericLon) || Math.abs(numericLat) > 90 || Math.abs(numericLon) > 180) {
+      setLocationError(t("location.invalidCoordinates"));
+      return;
+    }
     const version = ++selectionVersion.current;
-    setAccuracy(gpsAccuracy ?? null);
+    setAccuracy(Number.isFinite(Number(gpsAccuracy)) && Number(gpsAccuracy) >= 0 ? Number(gpsAccuracy) : null);
     setAddressLabel(null);
     setLocationError(null);
-    onChange(lat, lon, "");
+    onChange(numericLat, numericLon, "");
     try {
-      const addr = await api.reverseGeocode(lat, lon);
+      const addr = await api.reverseGeocode(numericLat, numericLon);
       if (addr && version === selectionVersion.current) {
         setAddressLabel(addr);
-        onChange(lat, lon, addr);
+        onChange(numericLat, numericLon, addr);
       }
     } catch (err) {
       console.warn("Reverse geocode failed:", err);
     }
   };
-  const handleUseGps = () => {
+  const handleUseGps = async () => {
     setLocationError(null);
+    if (typeof window === "undefined" || !window.isSecureContext) {
+      setLocationError(t("location.secureContext"));
+      return;
+    }
     if (!navigator.geolocation) {
       setLocationError(t("location.unsupported"));
       return;
+    }
+    if (navigator.permissions?.query) {
+      try {
+        const permission = await navigator.permissions.query({ name: "geolocation" });
+        setPermissionState(permission.state);
+        if (permission.state === "denied") {
+          setLocationError(t("location.denied"));
+          return;
+        }
+      } catch {
+        // Permission API is optional; getCurrentPosition will still request access.
+      }
     }
     setIsLocatingGps(true);
     navigator.geolocation.getCurrentPosition(
@@ -81,7 +105,7 @@ const LocationPicker = ({
         setIsLocatingGps(false);
         setLocationError(t(err.code === 1 ? "location.denied" : err.code === 3 ? "location.timeout" : "location.unavailable"));
       },
-      { enableHighAccuracy: true, timeout: 1e4, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
   const handleSearch = async (e) => {
@@ -105,6 +129,7 @@ const LocationPicker = ({
   };
   return <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
       {locationError && <p className="field-error" role="alert">{locationError}</p>}
+      {permissionState === "prompt" && <p role="status">{t("location.permissionPrompt")}</p>}
       {accuracy !== null && <p role="status">{t("location.accuracy", { meters: Math.round(accuracy) })}</p>}
       {
     /* Search & GPS Controls Bar */
@@ -233,8 +258,8 @@ const LocationPicker = ({
   />
           <MapCenterController center={[latitude, longitude]} />
           <MapClickHandler onSelect={handleSelectLocation} />
-          <Marker position={[latitude, longitude]} icon={pickerIcon} />
-          {accuracy !== null && <Circle center={[latitude, longitude]} radius={accuracy} pathOptions={{ color: "#2563eb" }} />}
+          {hasSelection && <Marker position={[latitude, longitude]} icon={pickerIcon} />}
+          {hasSelection && accuracy !== null && <Circle center={[latitude, longitude]} radius={accuracy} pathOptions={{ color: "#2563eb" }} />}
         </MapContainer>
       </div>
 
@@ -255,14 +280,14 @@ const LocationPicker = ({
     }}
   >
         <MapPin size={16} style={{ color: "var(--accent-primary)", flexShrink: 0 }} />
-        <div>
+        {hasSelection ? <div>
           <div style={{ fontWeight: 600, color: "var(--text-primary)" }}>
             {latitude.toFixed(6)}, {longitude.toFixed(6)}
           </div>
           {addressLabel && <div style={{ fontSize: "0.75rem", marginTop: "2px", color: "var(--text-tertiary)" }}>
               {addressLabel}
             </div>}
-        </div>
+        </div> : <span>{t("location.noSelection")}</span>}
       </div>
 
       <style>{`
