@@ -1,0 +1,66 @@
+- generic [ref=f3e3]:
+  - banner [ref=f3e4]:
+    - generic [ref=f3e5]:
+      - link "GeoIssue Report. Track. Resolve." [ref=f3e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f3e11]:
+          - generic [ref=f3e12]: GeoIssue
+          - generic [ref=f3e13]: Report. Track. Resolve.
+      - navigation [ref=f3e14]:
+        - link "Explore Map" [ref=f3e15] [cursor=pointer]:
+          - /url: /
+        - link "My Reports" [ref=f3e21] [cursor=pointer]:
+          - /url: /my-reports
+      - generic [ref=f3e26]:
+        - link "New Report" [active] [ref=f3e27] [cursor=pointer]:
+          - /url: /reports/new
+        - button "Change language" [ref=f3e32] [cursor=pointer]:
+          - generic [ref=f3e36]: English
+        - button "Toggle visual theme" [ref=f3e38] [cursor=pointer]:
+          - generic [ref=f3e41]: System
+        - generic [ref=f3e42]:
+          - generic [ref=f3e43]: GeoIssue QA Resident
+          - button "Sign out" [ref=f3e48] [cursor=pointer]
+  - main [ref=f3e52]:
+    - generic [ref=f3e53]:
+      - generic [ref=f3e54]:
+        - heading "Report a Community Issue" [level=1] [ref=f3e55]
+        - paragraph [ref=f3e56]: Help improve our city by submitting real-world problem observations.
+      - generic [ref=f3e57]:
+        - generic [ref=f3e58]:
+          - generic [ref=f3e59]: "1"
+          - generic [ref=f3e60]: 1. Location
+        - generic [ref=f3e61]:
+          - generic [ref=f3e62]: "2"
+          - generic [ref=f3e63]: 2. Details
+        - generic [ref=f3e64]:
+          - generic [ref=f3e65]: "3"
+          - generic [ref=f3e66]: 3. Photo
+        - generic [ref=f3e67]:
+          - generic [ref=f3e68]: "4"
+          - generic [ref=f3e69]: 4. Review
+      - generic [ref=f3e71]:
+        - generic [ref=f3e72]:
+          - heading "1. Location" [level=3] [ref=f3e73]
+          - paragraph [ref=f3e78]: Click on the map or use GPS to pinpoint the problem location precisely.
+          - generic [ref=f3e79]:
+            - generic [ref=f3e80]:
+              - textbox "Search street, neighborhood, or place..." [ref=f3e82]
+              - button "Use Current GPS" [ref=f3e86] [cursor=pointer]:
+                - generic [ref=f3e89]: GPS
+            - generic [ref=f3e91]:
+              - button [ref=f3e92] [cursor=pointer]
+              - generic:
+                - generic [ref=f3e96]:
+                  - button "Zoom in" [ref=f3e97] [cursor=pointer]: +
+                  - button "Zoom out" [ref=f3e98] [cursor=pointer]: −
+                - generic [ref=f3e99]:
+                  - link "Leaflet" [ref=f3e100] [cursor=pointer]:
+                    - /url: https://leafletjs.com
+                  - text: "| ©"
+                  - link "OpenStreetMap" [ref=f3e105] [cursor=pointer]:
+                    - /url: https://www.openstreetmap.org/copyright
+            - generic [ref=f3e106]: 39.925500, 32.866200
+        - generic [ref=f3e112]:
+          - button "Back" [disabled]
+          - button "Continue" [ref=f3e113] [cursor=pointer]
