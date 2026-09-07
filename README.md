@@ -5,6 +5,29 @@
 
 Inspired by Apple, Linear, and Vercel design principles — built as a clean, modular full-stack application with strict **Report ≠ Issue** domain segregation, Haversine geographic deduplication, full multilingual support (**English**, **العربية** with RTL layout mirroring, and **Türkçe**), and Light/Dark/System theme parity.
 
+## What is GeoIssue?
+
+GeoIssue is a civic reporting app. A resident can choose a real location on the map,
+describe a local problem, attach an optional photo, and submit it. The backend validates
+the request, stores it in PostgreSQL, and exposes it through a protected API. Similar
+reports can be grouped into one canonical issue instead of creating duplicate tickets.
+
+![GeoIssue report map](output/playwright/geoissue-report.png)
+
+### Quick start
+
+```bash
+npm ci --prefix server
+npm ci --prefix client
+docker compose up -d postgres
+npm run migrate --prefix server
+npm run seed:dev --prefix server   # first setup only; idempotent 30-report fixture
+npm run dev
+```
+
+Open `http://localhost:5173`. The API health check is `http://localhost:4000/api/health`.
+Keep `server/.env` and `client/.env` local; never commit secrets.
+
 ---
 
 ## 1. Domain Architecture: Report ≠ Issue
