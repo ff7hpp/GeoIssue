@@ -218,11 +218,25 @@ img, svg, video {
   box-shadow: var(--shadow-sm);
 }
 
+.my-reports-header {
+  flex-direction: column;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+}
+
 .my-report-controls {
   padding: 3px;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-full);
   background: var(--bg-surface);
+}
+
+.my-report-footer {
+  justify-content: flex-start !important;
+}
+
+.my-report-controls {
+  margin-inline-start: var(--space-2);
 }
 
 @media (max-width: 640px) {
@@ -249,7 +263,8 @@ img, svg, video {
   }
 
   .my-report-controls {
-    align-self: flex-end;
+    align-self: flex-start;
+    margin-inline-start: 0;
   }
 }
 

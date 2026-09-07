@@ -124,7 +124,6 @@ const MyReports = () => {
       /* Linked Problem Header */
     }
                 <div
-      className="my-report-footer"
       style={{
         display: "flex",
         flexWrap: "wrap",
@@ -264,6 +263,7 @@ const MyReports = () => {
       /* Footer Controls: Coords, Date, Edit, Delete */
     }
                 <div
+      className="my-report-footer"
       style={{
         display: "flex",
         flexWrap: "wrap",
