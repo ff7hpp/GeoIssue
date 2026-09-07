@@ -1,330 +1,34 @@
 # GeoIssue
 
-> **Report. Track. Resolve.**
-> Modern Civic-Tech Platform for Reporting, Grouping, and Resolving Community Problems.
+GeoIssue is a simple civic app for reporting local problems such as potholes,
+street-light failures, water leaks, and traffic issues.
 
-Inspired by Apple, Linear, and Vercel design principles — built as a clean, modular full-stack application with strict **Report ≠ Issue** domain segregation, Haversine geographic deduplication, full multilingual support (**English**, **العربية** with RTL layout mirroring, and **Türkçe**), and Light/Dark/System theme parity.
-
-## What is GeoIssue?
-
-GeoIssue is a civic reporting app. A resident can choose a real location on the map,
-describe a local problem, attach an optional photo, and submit it. The backend validates
-the request, stores it in PostgreSQL, and exposes it through a protected API. Similar
-reports can be grouped into one canonical issue instead of creating duplicate tickets.
+Users choose a location on the map, describe the problem, and follow its status.
+Reports are stored in PostgreSQL and served through a Node.js API.
 
 ![GeoIssue report map](output/playwright/geoissue-report.png)
 
-### Quick start
+## Built with
+
+- React and Vite
+- Node.js and Express
+- PostgreSQL
+- Leaflet and OpenStreetMap
+- Docker and WSL support
+
+## Run locally
 
 ```bash
 npm ci --prefix server
 npm ci --prefix client
 docker compose up -d postgres
 npm run migrate --prefix server
-npm run seed:dev --prefix server   # first setup only; idempotent 30-report fixture
-npm run dev
-```
-
-Open `http://localhost:5173`. The API health check is `http://localhost:4000/api/health`.
-Keep `server/.env` and `client/.env` local; never commit secrets.
-
----
-
-## 1. Domain Architecture: Report ≠ Issue
-
-- **Report**: An individual citizen submission containing exact observed coordinates, description, category, and optional photo.
-- **Issue**: The canonical, unified real-world problem.
-
-When multiple citizens report the same problem (e.g. 50 citizens reporting the same pothole within 50 meters), GeoIssue uses the **Haversine formula** to attach reports to the single canonical Issue, elevating its priority without creating duplicate tickets.
-
-```
-[Citizen 1: Report] ──┐
-[Citizen 2: Report] ──┼──> [Haversine Match ≤ 50m] ──> [Single Canonical Issue]
-[Citizen 3: Report] ──┘
-```
-
-### Issue Lifecycle:
-```
-[submitted] ──> [in_review] ──> [accepted] ──> [in_progress] ──> [resolved]
-     │                                │
-     └───> [rejected] <───────────────┘
-```
-
----
-
-## 2. Technology Stack
-
-### Frontend
-- **Framework**: React 18 + Vite + JavaScript
-- **Routing**: React Router v7
-- **Server State**: TanStack Query (React Query)
-- **Maps**: Leaflet + React-Leaflet + OpenStreetMap
-- **Internationalization**: i18next + react-i18next with dynamic RTL/LTR document direction
-- **Icons**: Lucide React
-- **Styling**: Vanilla CSS Design Tokens (Apple / Linear / Vercel minimal aesthetic)
-
-### Backend
-- **Framework**: Node.js + Express + JavaScript (Modular Monolith)
-- **Database**: Neon PostgreSQL / pg Pool (with in-memory fallback store for offline testing)
-- **Auth**: Firebase Authentication + Firebase Admin token verification + Local Demo User fallback
-- **Geocoding**: Nominatim proxy with timeout resilience and graceful fallback
-- **Validation**: Zod runtime schema validation
-- **Testing**: Vitest (Haversine calculations, State machine transitions, Role permissions, Smoke tests)
-
----
-
-## 3. Project Structure
-
-```text
-GeoIssue/
-├── client/                      # React 18 + Vite + JavaScript Frontend
-│   ├── src/
-│   │   ├── app/                # App root & React Router setup
-│   │   ├── components/         # Reusable UI (Header, Badges, Map, LocationPicker)
-│   │   ├── features/           # Pages (Explore, IssueDetail, ReportWizard, MyReports, Admin)
-│   │   ├── locales/            # i18n translations (ar, en, tr) & RTL handling
-│   │   ├── services/           # API client, Auth Context, Theme Context
-│   │   ├── styles/             # Design tokens, global styles, map CSS
-│   │   └── types/              # Shared runtime contracts
-│
-├── server/                      # Express + JavaScript Modular Monolith Backend
-│   ├── src/
-│   │   ├── config/             # Environment & Firebase configuration
-│   │   ├── db/                 # PostgreSQL pool, schema.sql, and migrations
-│   │   ├── middleware/         # Auth, Zod validation, and error handling
-│   │   ├── modules/            # Feature modules (issues, reports, admin, users, etc.)
-│   │   ├── shared/             # Haversine formula, state machine, types, errors
-│   │   ├── tests/              # Vitest test suite (unit + smoke)
-│   │   ├── app.js              # Express application setup & middleware pipeline
-│   │   └── server.js           # Server bootstrap & DB connection
-│
-├── docs/
-│   ├── project/                 # Active project docs and architecture guide
-│   ├── reference/               # Architecture diagrams and design exports
-│   └── ...
-└── README.md                     # Project setup and API overview
-```
-
----
-
-## 4. Getting Started
-
-### Prerequisites
-- Node.js 20+ and npm
-- Docker Desktop with Docker Compose
-- WSL2 with Ubuntu (recommended on Windows)
-
-### Installation
-```bash
-# Install server dependencies
-npm ci --prefix server
-
-# Install client dependencies
-npm ci --prefix client
-```
-
-Create local environment files from the committed examples. Keep both `.env`
-files local; they are ignored by Git.
-
-```bash
-cp server/.env.example server/.env
-cp client/.env.example client/.env
-```
-
-Set `DATABASE_URL` in `server/.env` to the local PostgreSQL service. This
-repository publishes the container's PostgreSQL port on host port `15432` to
-avoid conflicts with an existing local PostgreSQL installation.
-
-### Local PostgreSQL
-
-```bash
-# Start PostgreSQL and wait until its status is healthy
-docker compose up -d postgres
-docker compose ps
-
-# One-time initialization only: create/update tables and seed reference data
-npm run migrate --prefix server
-
-# Insert 30 idempotent, mapped development reports
 npm run seed:dev --prefix server
-```
-
-The database is stored in the named Docker volume
-`geoissue_geoissue-postgres-data`, so stopping the application does not remove
-its data. Do not remove the volume unless you intentionally want to erase the
-local database. `seed:dev` is non-production only: it preserves existing data,
-uses stable fixture IDs, and verifies all 30 fixture reports after every run.
-
-### Authentication and location requirements
-
-Email/password registration and login use the server's JWT API by default.
-Set `VITE_EMAIL_AUTH_PROVIDER=firebase` only when Firebase email/password auth
-is intentionally enabled; Google sign-in remains available whenever every
-`VITE_FIREBASE_*` value is configured. Keep the
-server `JWT_SECRET`, database URL, and Firebase Admin credentials in the local
-`server/.env` file; never put them in the client environment.
-
-Browser geolocation requires a secure context: use `http://localhost` during
-local development and HTTPS after deployment. The report map requests a fresh,
-high-accuracy browser fix, shows its reported accuracy radius, and always lets
-the user search for or click a manual pin. Device/browser accuracy remains an
-estimate, not a guarantee.
-
-### Running the Application
-
-```bash
-# Run both frontend & backend concurrently (from root):
 npm run dev
-
-# Or run separately:
-# Terminal 1: Express API server (http://localhost:4000)
-npm --prefix server run dev
-
-# Terminal 2: Vite React client (http://localhost:5173)
-npm --prefix client run dev
 ```
 
-Visit **`http://localhost:5173`** in your browser.
+Open `http://localhost:5173`.
 
-Check the API independently at **`http://localhost:4000/api/health`**.
-
-### Windows + WSL2 startup
-
-Use one Node environment consistently. Do not share a single `node_modules`
-installation between Windows and Linux because Rollup and esbuild install
-platform-specific binaries. For a WSL-only workflow, keep the checkout under
-the WSL filesystem (for example `~/projects/GeoIssue`) and run `npm ci` there.
-
-1. Enable Docker Desktop's Ubuntu integration under **Settings → Resources →
-   WSL Integration**, then open Ubuntu.
-2. From the repository root run `docker compose up -d postgres` and confirm
-   `docker compose ps` reports PostgreSQL healthy.
-3. Run `npm ci --prefix server` and `npm ci --prefix client`. Run migrations
-   only when the schema changed; run `seed:dev` only for the initial fixture
-   setup, never as a routine startup step.
-4. Run `npm run dev`, then verify `http://localhost:4000/api/health` reports
-   `database: postgresql` before opening `http://localhost:5173`.
-
-`localhost` works only on the same computer. From a phone or another LAN
-device, use the Windows/WSL host LAN address; Vite is already bound to
-`0.0.0.0` and proxies `/api` to `VITE_API_PROXY_TARGET`. Browser geolocation on a LAN IP
-normally requires trusted HTTPS; a self-signed certificate works only after
-the device trusts it. `localhost` is treated as a secure development context,
-but another device's `localhost` refers to that device, not this project.
-
-The **Demo Citizen** and **Demo Admin** buttons use fixed development-only
-identity tokens handled by the backend and persisted user records. They are
-disabled when `NODE_ENV=production`; do not expose a development server to the
-internet or reuse these tokens as production credentials. Email/password
-registration and login use hashed database credentials and signed JWTs.
-
----
-
-## 5. Docker Staging Deployment
-
-`compose.production.yaml` runs the client behind Nginx, proxies `/api` to the
-Express API, and keeps PostgreSQL private to the Docker network. It is a
-staging deployment template: configure TLS and a stable domain before calling
-an internet-facing deployment production-ready.
-
-```bash
-# On the deployment host, from the repository root.
-cp deploy/.env.production.example deploy/.env.production
-# Set strong unique POSTGRES_PASSWORD and JWT_SECRET values, PUBLIC_ORIGIN,
-# and WEB_PORT=80 in the local file. It is ignored by Git.
-docker compose --env-file deploy/.env.production -f compose.production.yaml up --build -d
-curl http://localhost/api/health
-```
-
-The production API refuses to start without `DATABASE_URL`, `JWT_SECRET`,
-`CLIENT_ORIGIN`, and `FIREBASE_PROJECT_ID`; it never falls back to the
-in-memory database in this mode. The local `compose.yaml` remains dedicated to
-development PostgreSQL on port `15432`.
-
----
-
-## 6. Testing
-
-Run the automated backend test suite:
-
-```bash
-npm --prefix server test
-```
-
-Run the browser smoke test after installing Playwright's Chromium runtime:
-
-```bash
-cd client
-npx playwright install --with-deps chromium
-npm run test:e2e
-```
-
-## 7. Low-cost public deployment (Neon + Render + Vercel)
-
-The repository includes `render.yaml`, `deploy/Dockerfile.api`, and
-`vercel.json` for a public demo without the Google VM. Create a Neon project
-and keep its connection string private. In Render, create the Blueprint from
-this repository and set `DATABASE_URL` to the Neon pooled connection string
-and `CLIENT_ORIGIN` to the final Vercel URL. In Vercel, import the repository,
-deploy the `A` branch, and set `VITE_API_URL` to the Render API URL followed by
-`/api`, plus the existing Firebase `VITE_*` values. Add the Vercel domain to
-Firebase Authentication's authorized domains.
-
-Neon and Vercel Hobby have free limits, and Render's free service may sleep
-when idle. Check each provider's usage page; do not add a payment method for
-this demo. The Google VM remains stopped.
-
-### Test Coverage:
-- **`haversine.test.js`**: Verifies exact distance computation, 50m threshold bounds, and spherical coordinates.
-- **`stateMachine.test.js`**: Verifies the strict lifecycle (`submitted -> in_review -> accepted -> in_progress -> resolved / rejected`).
-- **`permissions.test.js`**: Verifies server-side role enforcement (Visitor, User, Admin).
-- **`api.smoke.test.js`**: Verifies HTTP 401 unauthenticated and 403 forbidden security responses.
-
----
-
-## 7. API Routes Reference
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/health` | Public | Service health and version |
-| `GET` | `/api/categories` | Public | List active categories |
-| `GET` | `/api/issues` | Public | Filterable issue list with pagination |
-| `GET` | `/api/issues/:id` | Public | Issue details with report count & timeline |
-| `POST` | `/api/issues/:id/support` | User | Upvote / support issue |
-| `DELETE` | `/api/issues/:id/support` | User | Remove support |
-| `GET` | `/api/me` | User | Current user profile |
-| `POST` | `/api/me/sync` | User | First-login Firebase UID sync |
-| `GET` | `/api/me/reports` | User | Authenticated citizen's reports |
-| `POST` | `/api/reports` | User | Submit new report with Haversine matching |
-| `PUT` | `/api/reports/:id` | Owner/Admin | Edit report description |
-| `DELETE` | `/api/reports/:id` | Owner/Admin | Delete citizen report |
-| `GET` | `/api/geocode?q=` | Public | Nominatim search proxy |
-| `GET` | `/api/admin/issues` | Admin | Operational issue review queue |
-| `PATCH` | `/api/admin/issues/:id/status` | Admin | Change issue lifecycle status + record note |
-| `PATCH` | `/api/admin/issues/:id/priority` | Admin | Update issue priority |
-| `GET` | `/api/admin/users` | Admin | List all user accounts |
-| `PATCH` | `/api/admin/users/:id` | Admin | Update user role and status |
-| `POST` | `/api/admin/categories` | Admin | Add new category |
-| `PATCH` | `/api/admin/categories/:id` | Admin | Edit category / toggle active |
-
----
-
-## 8. Architecture & System Diagrams
-
-All detailed project documentation is indexed in [`docs/project/`](./docs/project/).
-
-The verified current authentication, report, GPS, image, API, database, Explore, and map flows are in [`docs/project/CORE_FLOW_VERIFICATION.md`](./docs/project/CORE_FLOW_VERIFICATION.md). It includes runnable local database fixture commands and a verification boundary between PostgreSQL and memory-fallback runs.
-
-The detailed system design diagrams are located in [`docs/reference/diagrams/`](./docs/reference/diagrams/):
-1. `01_System_Context`
-2. `02_Container_Architecture`
-3. `03_Infrastructure_Deployment`
-4. `04_Use_Case_Diagram`
-5. `05_User_Report_Activity_Flow`
-6. `06_Data_Flow_DFD_Level_1`
-7. `07_Report_Submission_Sequence`
-8. `08_ERD_Database_Relationships`
-9. `09_Issue_State_Machine`
-10. `10_Report_Issue_Matching_Flow`
-11. `11_Role_Interaction_Flow`
-12. `12_Implementation_Dependency_Plan`
+Keep local `.env` files private. For architecture, API details, database notes,
+authentication, deployment, and the study guide, see
+[`docs/project/README.md`](docs/project/README.md).
