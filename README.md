@@ -187,6 +187,21 @@ npx playwright install --with-deps chromium
 npm run test:e2e
 ```
 
+## 7. Low-cost public deployment (Neon + Render + Vercel)
+
+The repository includes `render.yaml`, `deploy/Dockerfile.api`, and
+`vercel.json` for a public demo without the Google VM. Create a Neon project
+and keep its connection string private. In Render, create the Blueprint from
+this repository and set `DATABASE_URL` to the Neon pooled connection string
+and `CLIENT_ORIGIN` to the final Vercel URL. In Vercel, import the repository,
+deploy the `A` branch, and set `VITE_API_URL` to the Render API URL followed by
+`/api`, plus the existing Firebase `VITE_*` values. Add the Vercel domain to
+Firebase Authentication's authorized domains.
+
+Neon and Vercel Hobby have free limits, and Render's free service may sleep
+when idle. Check each provider's usage page; do not add a payment method for
+this demo. The Google VM remains stopped.
+
 ### Test Coverage:
 - **`haversine.test.js`**: Verifies exact distance computation, 50m threshold bounds, and spherical coordinates.
 - **`stateMachine.test.js`**: Verifies the strict lifecycle (`submitted -> in_review -> accepted -> in_progress -> resolved / rejected`).

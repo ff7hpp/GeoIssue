@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "buildCommand": "npm ci --prefix client && npm run build --prefix client",
+  "outputDirectory": "client/dist",
+  "installCommand": "npm ci"
+}
