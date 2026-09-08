@@ -1,5 +1,8 @@
-import { adminService } from "./admin.service.js";
 import { z } from "zod";
+import { issuesService } from "../issues/issues.service.js";
+import { issuesRepository } from "../issues/issues.repository.js";
+import { usersService } from "../users/users.service.js";
+import { categoriesService } from "../categories/categories.service.js";
 const updateStatusSchema = z.object({
   status: z.enum([
     "submitted",
@@ -40,7 +43,7 @@ const adminController = {
       const status = req.query.status;
       const categoryId = req.query.category_id;
       const search = req.query.search;
-      const { issues, total } = await adminService.listAllIssues({
+      const { issues, total } = await issuesRepository.list({
         page,
         limit,
         status,
@@ -64,7 +67,7 @@ const adminController = {
     try {
       const adminUserId = req.user.id;
       const { status, note } = req.body;
-      const updated = await adminService.updateIssueStatus(
+      const updated = await issuesService.updateIssueStatus(
         req.params.id,
         status,
         adminUserId,
@@ -78,7 +81,7 @@ const adminController = {
   async updatePriority(req, res, next) {
     try {
       const { priority } = req.body;
-      const updated = await adminService.updateIssuePriority(
+      const updated = await issuesService.updateIssuePriority(
         req.params.id,
         priority
       );
@@ -90,7 +93,7 @@ const adminController = {
   async assignIssue(req, res, next) {
     try {
       const { assignee_id } = req.body;
-      await adminService.assignIssue(req.params.id, assignee_id);
+      await issuesRepository.assignIssue(req.params.id, assignee_id);
       res.json({ success: true });
     } catch (err) {
       next(err);
@@ -100,7 +103,7 @@ const adminController = {
     try {
       const page = req.query.page ? parseInt(req.query.page, 10) : 1;
       const limit = req.query.limit ? parseInt(req.query.limit, 10) : 20;
-      const { users, total } = await adminService.listAllUsers(page, limit);
+      const { users, total } = await usersService.listAllUsers(page, limit);
       res.json({
         data: users,
         meta: {
@@ -116,7 +119,7 @@ const adminController = {
   },
   async updateUser(req, res, next) {
     try {
-      const updated = await adminService.updateUser(req.params.id, req.body);
+      const updated = await usersService.updateUserRoleOrStatus(req.params.id, req.body);
       res.json({ data: updated });
     } catch (err) {
       next(err);
@@ -124,7 +127,7 @@ const adminController = {
   },
   async createCategory(req, res, next) {
     try {
-      const category = await adminService.createCategory(req.body);
+      const category = await categoriesService.createCategory(req.body);
       res.status(201).json({ data: category });
     } catch (err) {
       next(err);
@@ -132,7 +135,7 @@ const adminController = {
   },
   async updateCategory(req, res, next) {
     try {
-      const category = await adminService.updateCategory(
+      const category = await categoriesService.updateCategory(
         req.params.id,
         req.body
       );

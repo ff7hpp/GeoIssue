@@ -32,7 +32,6 @@ GeoIssue/
 │   │   ├── locales/             # i18n translations (ar, en, tr) & RTL handling
 │   │   ├── services/            # api.js, auth.context.jsx, imageUpload.js
 │   │   ├── styles/              # CSS tokens and globals
-│   │   └── types/               # Shared JavaScript definitions
 │
 ├── server/                      # Express + JavaScript Modular Monolith Backend
 │   ├── src/
@@ -107,7 +106,7 @@ Follow these steps in order. Do not skip steps, as each builds on the mental mod
 * **Checkpoint:** You should be able to trace the full lifecycle of an authentication request.
 
 ### Step 8: Authorization & RBAC (Role-Based Access Control)
-* **Files to read:** `server/src/middleware/auth.middleware.js` (specifically `requireRole`), `server/src/shared/types.js`
+* **Files to read:** `server/src/middleware/auth.middleware.js` (specifically `requireRole`)
 * **What they do:** Enforces that only users with specific roles can hit certain endpoints. `UserRole` values are `'visitor' | 'user' | 'admin'`.
 * **Connections:** Used heavily in `admin.routes.js`.
 * **Key functions/types:** `requireRole('admin')`.
@@ -158,7 +157,7 @@ Follow these steps in order. Do not skip steps, as each builds on the mental mod
 * **Files to read:** `client/src/features/admin/AdminDashboard.jsx`, `server/src/shared/stateMachine.js`, `server/src/modules/admin/admin.routes.js`, `server/src/modules/admin/admin.controller.js`
 * **What they do:** Admins can view a queue of issues and change their status (e.g., `submitted` -> `in_progress`) or priority (`low`, `medium`, `high`, `urgent`). 
 * **Connections:** `PATCH /api/admin/issues/:id/status` hits `adminController.updateStatus`. `PATCH /api/admin/issues/:id/priority` hits `adminController.updatePriority`. The backend enforces that statuses can only change according to strictly defined legal transitions in `stateMachine.js`. Status changes insert an audit log into `issue_status_history`.
-* **Key functions/types:** `isValidTransition()`, `adminService.updateStatus()`, `adminService.updatePriority()`.
+* **Key functions/types:** `isValidStatusTransition()`, `issuesService.updateIssueStatus()`, `issuesService.updateIssuePriority()`.
 * **Checkpoint:** You must understand why an issue cannot go from `resolved` back to `submitted`.
 
 ### Step 16: Admin User Management

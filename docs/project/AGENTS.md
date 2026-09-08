@@ -24,7 +24,6 @@ client/src/services/auth.context.jsx     Hybrid Firebase + JWT auth state provid
 client/src/services/firebase.js          Firebase SDK initialization (Auth only, free tier)
 client/src/services/imageUpload.js       Client-side canvas image compression (no paid storage)
 client/src/styles/                        CSS design tokens and component styles
-client/src/types/index.js                Shared JavaScript type definitions
 
 server/                                   Express 4 + JavaScript modular monolith backend
 server/src/app.js                         Express application setup and route registration
@@ -46,7 +45,6 @@ server/src/shared/haversine.js           Haversine distance formula (50m cluster
 server/src/shared/stateMachine.js        Issue lifecycle state machine and valid transitions
 server/src/shared/auth.utils.js          Password hashing and JWT utilities
 server/src/shared/errors.js             Typed AppError factory
-server/src/shared/types.js              Backend-wide JavaScript type definitions
 server/src/tests/                         Vitest test suite (unit + smoke)
 
 docs/                                     Documentation and reference material

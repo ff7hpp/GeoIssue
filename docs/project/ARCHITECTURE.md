@@ -10,7 +10,6 @@
 - `services/`: الاتصال بالـ API، المصادقة، والثيم.
 - `locales/`: نصوص اللغات العربية والإنجليزية والتركية.
 - `styles/`: التصميم العام، المتغيرات، الخريطة، وتنسيقات الصفحات.
-- `types/`: أنواع JavaScript المشتركة.
 
 ابدأ بـ `client/src/app/App.jsx` ثم `client/src/app/router.jsx` لفهم تركيب التطبيق والمسارات، وبعدها `client/src/features/issues/IssueExplore.jsx` و`client/src/services/api.js`.
 
@@ -47,7 +46,6 @@ server/src/
 │   ├── haversine.js    # خوارزمية حساب المسافة الجغرافية والتجميع (50 متر)
 │   ├── stateMachine.js # آلة حالات دورة حياة المشكلة وقواعد الانتقال
 │   ├── errors.js       # كلاسات الأخطاء المخصصة (AppError, UnauthorizedError...)
-│   └── types.js        # تعريفات JavaScript العامة للنماذج
 │
 ├── tests/               # الاختبارات الآلية (Vitest)
 │   ├── haversine.test.js    # اختبار دقة حساب المسافات
