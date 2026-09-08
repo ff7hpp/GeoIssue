@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
-const PriorityBadge = ({ priority }) => {
+const PriorityBadge = ({ priority, supporterCount }) => {
   const { t } = useTranslation();
+  const hasSupporterCount = supporterCount !== void 0 && supporterCount !== null;
   const getStyle = () => {
     switch (priority) {
       case "urgent":
@@ -15,6 +16,7 @@ const PriorityBadge = ({ priority }) => {
     }
   };
   return <span
+    className="priority-badge"
     style={{
       ...getStyle(),
       padding: "2px 8px",
@@ -22,10 +24,12 @@ const PriorityBadge = ({ priority }) => {
       fontSize: "0.75rem",
       fontWeight: 600,
       textTransform: "uppercase",
-      letterSpacing: "0.04em"
+      letterSpacing: "0.04em",
+      whiteSpace: "nowrap"
     }}
   >
       {t(`priority.${priority}`)}
+      {hasSupporterCount && ` · ${t("issue.supportersCount", { count: Number(supporterCount) || 0 })}`}
     </span>;
 };
 export {

@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { api } from "../../services/api";
 import { useAuth } from "../../services/auth.context";
 import { StatusBadge } from "../../components/common/StatusBadge";
+import { PriorityBadge } from "../../components/common/PriorityBadge";
 import { CategoryIcon } from "../../components/common/CategoryIcon";
 import { LoadingState } from "../../components/common/LoadingState";
 import { EmptyState } from "../../components/common/EmptyState";
@@ -53,13 +54,6 @@ const AdminDashboard = () => {
       queryClient.invalidateQueries({ queryKey: ["admin-issues"] });
       queryClient.invalidateQueries({ queryKey: ["issues"] });
       queryClient.invalidateQueries({ queryKey: ["issue"] });
-    }
-  });
-  const priorityMutation = useMutation({
-    mutationFn: ({ id, priority }) => api.updateAdminPriority(id, priority),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-issues"] });
-      queryClient.invalidateQueries({ queryKey: ["issues"] });
     }
   });
   const assignMutation = useMutation({
@@ -284,28 +278,7 @@ const AdminDashboard = () => {
                           </option>)}
                     </select>
 
-                    {
-    /* Priority Selector */
-  }
-                    <select
-    value={issue.priority}
-    onChange={(e) => priorityMutation.mutate({
-      id: issue.id,
-      priority: e.target.value
-    })}
-    style={{
-      padding: "6px 10px",
-      borderRadius: "var(--radius-md)",
-      border: "1px solid var(--border-default)",
-      backgroundColor: "var(--bg-surface)",
-      fontSize: "0.8125rem"
-    }}
-  >
-                      <option value="low">{t("priority.low")}</option>
-                      <option value="medium">{t("priority.medium")}</option>
-                      <option value="high">{t("priority.high")}</option>
-                      <option value="urgent">{t("priority.urgent")}</option>
-                    </select>
+                    <PriorityBadge priority={issue.priority} supporterCount={issue.supporter_count} />
 
                     {
     /* Change Status Action Button */

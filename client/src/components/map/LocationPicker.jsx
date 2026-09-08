@@ -4,6 +4,7 @@ import L from "leaflet";
 import { Navigation, Search, MapPin, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../services/api";
+import { ISTANBUL_MAP_BOUNDS, isWithinIstanbul } from "../../config/location";
 function MapClickHandler({
   onSelect
 }) {
@@ -56,6 +57,10 @@ const LocationPicker = ({
     const numericLon = Number(lon);
     if (!Number.isFinite(numericLat) || !Number.isFinite(numericLon) || Math.abs(numericLat) > 90 || Math.abs(numericLon) > 180) {
       setLocationError(t("location.invalidCoordinates"));
+      return;
+    }
+    if (!isWithinIstanbul(numericLat, numericLon)) {
+      setLocationError(t("location.outsideIstanbul"));
       return;
     }
     const version = ++selectionVersion.current;
@@ -250,6 +255,8 @@ const LocationPicker = ({
     center={[latitude, longitude]}
     zoom={15}
     zoomAnimation={false}
+    maxBounds={ISTANBUL_MAP_BOUNDS}
+    maxBoundsViscosity={1}
     style={{ width: "100%", height: "100%" }}
   >
           <TileLayer

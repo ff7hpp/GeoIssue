@@ -28,6 +28,22 @@ test.describe("Reporting Flow", () => {
     await expect(page.locator(".leaflet-marker-icon").first()).toBeVisible({ timeout: 15_000 });
     await expect(page.locator(".issue-count")).not.toContainText("0 Issues Found");
   });
+  test("Map status colors and supporter-based priority are visible", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".map-status-legend")).toContainText("Submitted / Under Review");
+    await expect(page.locator(".priority-badge").first()).toContainText(/supporters/i);
+
+    const statusColors = [
+      [".marker-accepted", "rgb(37, 99, 235)"],
+      [".marker-in_progress", "rgb(239, 68, 68)"],
+      [".marker-resolved", "rgb(22, 163, 74)"]
+    ];
+    for (const [selector, color] of statusColors) {
+      const marker = page.locator(selector).first();
+      await expect(marker).toBeVisible({ timeout: 15_000 });
+      expect(await marker.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(color);
+    }
+  });
   test("Database filters keep the issue list and map markers consistent", async ({ page }) => {
     await page.goto("/");
     const cards = page.locator(".issue-card");
@@ -38,7 +54,7 @@ test.describe("Reporting Flow", () => {
     await page.getByRole("combobox", { name: "All Statuses" }).selectOption("resolved");
     await expect(cards.first()).toContainText("Resolved");
     expect(await markers.count()).toBe(await cards.count());
-    await page.getByRole("searchbox", { name: "Search issues by title or keyword..." }).fill("Blocked drain on Cinnah Avenue");
+    await page.getByRole("searchbox", { name: "Search issues by title or keyword..." }).fill("Blocked drain near Uskudar ferry");
     await expect(cards).toHaveCount(1);
     await expect(markers).toHaveCount(1);
   });
@@ -87,10 +103,10 @@ test.describe("Reporting Flow", () => {
     }));
     await page.goto("/reports/new");
     await page.context().grantPermissions(["geolocation"], { origin: new URL(page.url()).origin });
-    await page.context().setGeolocation({ latitude: 39.912345, longitude: 32.812345, accuracy: 18 });
+    await page.context().setGeolocation({ latitude: 41.0082, longitude: 28.9784, accuracy: 18 });
     await page.getByRole("button", { name: "Use Current GPS" }).click();
     await expect(page.getByText("Estimated accuracy: ±18 m. Adjust the pin if needed.")).toBeVisible();
-    await expect(page.getByText("39.912345, 32.812345")).toBeVisible();
+    await expect(page.getByText("41.008200, 28.978400")).toBeVisible();
     await expect(page.getByText("Test location")).toBeVisible();
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page.getByRole("heading", { name: "2. Details" })).toBeVisible();

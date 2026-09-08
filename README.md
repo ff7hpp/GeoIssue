@@ -6,6 +6,11 @@ street-light failures, water leaks, and traffic issues.
 Users choose a location on the map, describe the problem, and follow its status.
 Reports are stored in PostgreSQL and served through a Node.js API.
 
+The active reporting area is Istanbul. Map pins show status: yellow for submitted
+or under review, blue for accepted, red for in progress, and green for resolved.
+Priority is calculated from supporters: Low (0-1), Medium (2-4), High (5-9), and
+Urgent (10+).
+
 ![GeoIssue report map](output/playwright/geoissue-report.png)
 
 ## Built with

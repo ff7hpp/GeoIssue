@@ -148,7 +148,7 @@ const MyReports = () => {
 
                   {report.issue && <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <StatusBadge status={report.issue.status} />
-                      {report.issue.priority && <PriorityBadge priority={report.issue.priority} />}
+                      {report.issue.priority && <PriorityBadge priority={report.issue.priority} supporterCount={report.issue.supporter_count} />}
                     </div>}
                 </div>
 

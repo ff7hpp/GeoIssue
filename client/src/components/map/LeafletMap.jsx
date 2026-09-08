@@ -6,6 +6,14 @@ import { PriorityBadge } from "../common/PriorityBadge";
 import { Users, FileText, ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { ISTANBUL_CENTER, ISTANBUL_MAP_BOUNDS } from "../../config/location";
+
+const STATUS_LEGEND = [
+  { className: "status-yellow", keys: ["submitted", "in_review"] },
+  { className: "status-blue", keys: ["accepted"] },
+  { className: "status-red", keys: ["in_progress"] },
+  { className: "status-green", keys: ["resolved"] }
+];
 function MapRecenter({ center, zoom }) {
   const map = useMap();
   useEffect(() => {
@@ -31,8 +39,7 @@ const LeafletMap = ({
   issues,
   selectedIssue,
   onSelectIssue,
-  center = [39.9255, 32.8662],
-  // Ankara default
+  center = ISTANBUL_CENTER,
   zoom = 13,
   height = "100%"
 }) => {
@@ -58,12 +65,20 @@ const LeafletMap = ({
   };
   const activeCenter = selectedIssue ? [Number(selectedIssue.latitude), Number(selectedIssue.longitude)] : center;
   return <div style={{ width: "100%", height, position: "relative", overflow: "hidden" }}>
+      <div className="map-status-legend" aria-label={t("explore.allStatuses")}>
+        {STATUS_LEGEND.map((item) => <span key={item.className}>
+            <i className={item.className} aria-hidden="true" />
+            {item.keys.map((key) => t(`status.${key}`)).join(" / ")}
+          </span>)}
+      </div>
       <MapContainer
     center={activeCenter}
     zoom={zoom}
     style={{ width: "100%", height: "100%" }}
     zoomControl={true}
     zoomAnimation={false}
+    maxBounds={ISTANBUL_MAP_BOUNDS}
+    maxBoundsViscosity={1}
   >
         <TileLayer
     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -105,7 +120,7 @@ const LeafletMap = ({
       }}
     >
                     <StatusBadge status={issue.status} />
-                    <PriorityBadge priority={issue.priority} />
+                    <PriorityBadge priority={issue.priority} supporterCount={issue.supporter_count} />
                   </div>
 
                   <h4

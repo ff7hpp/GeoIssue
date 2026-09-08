@@ -9,7 +9,7 @@ These instructions are the project source of truth for AI agents and future deve
 - The active source of truth is this repository. `D:\Download\PROJECTS\Obsidian\geoissue` contains a related reference/archive copy and must not be edited as the implementation unless the user explicitly asks for synchronization.
 - Current status: technical MVP/demo. The project is not production-ready; `FULL_STACK_READINESS.md` is the authoritative readiness and release-blocker list.
 - The UI is Arabic-first and right-to-left in its current implementation. Preserve Arabic labels and RTL behavior unless localization is explicitly being designed.
-- The primary geography is Turkey. Place search uses Nominatim with `countrycodes=tr` and Turkish/English results.
+- The primary geography is Istanbul. Place search is bounded to Istanbul through the server-side Nominatim proxy.
 
 ## Repository layout
 
@@ -98,7 +98,7 @@ Before running the app on a new laptop:
 - `PUT /api/issues/:id`, `PATCH /api/issues/:id/status`, and `DELETE /api/issues/:id` require auth and currently allow only the issue owner.
 - Valid categories are `Road`, `Water`, `Electricity`, `Traffic`, `Environment`, and `Other`.
 - Valid statuses are `Pending`, `In Progress`, and `Resolved`.
-- Issue coordinates must be valid latitude/longitude values; issue titles are limited to 160 characters and descriptions to 3000 characters.
+- New report coordinates must be inside the configured Istanbul bounds; issue titles are limited to 160 characters and descriptions to 3000 characters.
 - Public issue responses currently include `reporter` and `createdBy`; treat this as a known privacy risk and do not expand public personal-data exposure.
 - The server resolves the local demo identity and role; replace this middleware with production auth later if needed.
 - Neon PostgreSQL is optional. The repository layer must continue to support the memory fallback for demos unless the user explicitly removes it.

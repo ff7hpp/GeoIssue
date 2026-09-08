@@ -15,4 +15,14 @@ describe("Report image and description validation", () => {
   it("rejects whitespace-only descriptions", () => {
     expect(createReportSchema.safeParse({ category_id: "road", description: "      ", latitude: 39, longitude: 32 }).success).toBe(false);
   });
+  it("accepts Istanbul coordinates and rejects locations outside Istanbul", () => {
+    const report = {
+      category_id: "road",
+      description: "A valid issue description",
+      latitude: 41.0082,
+      longitude: 28.9784
+    };
+    expect(createReportSchema.safeParse(report).success).toBe(true);
+    expect(createReportSchema.safeParse({ ...report, latitude: 39.9334, longitude: 32.8597 }).success).toBe(false);
+  });
 });

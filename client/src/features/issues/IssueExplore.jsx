@@ -120,7 +120,7 @@ function IssueCard({ issue, selected, onSelect }) {
         <div className="issue-metadata">
           <span title="Reports"><FileText size={13} />{issue.report_count}</span>
           <span title="Supporters"><Users size={13} />{issue.supporter_count || 0}</span>
-          <PriorityBadge priority={issue.priority} />
+          <PriorityBadge priority={issue.priority} supporterCount={issue.supporter_count} />
         </div>
         <Link to={`/issues/${issue.id}`} onClick={(event) => event.stopPropagation()} className="btn-icon" aria-label="View full details">
           <ChevronRight size={16} />

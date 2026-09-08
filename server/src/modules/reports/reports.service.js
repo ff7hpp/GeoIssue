@@ -34,7 +34,7 @@ const reportsService = {
         latitude: data.latitude,
         longitude: data.longitude,
         status: "submitted",
-        priority: "medium"
+        priority: "low"
       });
       targetIssueId = newIssue.id;
       await issuesRepository.addStatusHistory({
