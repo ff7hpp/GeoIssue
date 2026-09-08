@@ -19,8 +19,13 @@ const firebaseConfig = {
 };
 const isConfiguredValue = (value) => typeof value === "string" && value.length > 0 && !value.startsWith("your_");
 const isFirebaseConfigured = Object.values(firebaseConfig).every(isConfiguredValue);
+// Firebase credentials in the browser are not enough on their own: the API must
+// also be configured with Firebase Admin credentials to verify ID tokens. Keep
+// each Firebase provider opt-in so local JWT authentication remains reliable.
 const isFirebaseEmailAuthEnabled = isFirebaseConfigured && import.meta.env.VITE_EMAIL_AUTH_PROVIDER === "firebase";
-const app = isFirebaseConfigured ? !getApps().length ? initializeApp(firebaseConfig) : getApp() : null;
+const isFirebaseGoogleAuthEnabled = isFirebaseConfigured && import.meta.env.VITE_GOOGLE_AUTH_PROVIDER === "firebase";
+const isFirebaseAuthEnabled = isFirebaseEmailAuthEnabled || isFirebaseGoogleAuthEnabled;
+const app = isFirebaseAuthEnabled ? !getApps().length ? initializeApp(firebaseConfig) : getApp() : null;
 const auth = app ? getAuth(app) : null;
 const googleProvider = new GoogleAuthProvider();
 export {
@@ -29,7 +34,9 @@ export {
   createUserWithEmailAndPassword,
   fbSignOut,
   firebaseConfig,
+  isFirebaseAuthEnabled,
   isFirebaseEmailAuthEnabled,
+  isFirebaseGoogleAuthEnabled,
   isFirebaseConfigured,
   googleProvider,
   onAuthStateChanged,

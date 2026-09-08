@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../../services/auth.context";
 import { errorMessage } from "../../services/errorMessage";
+import { isFirebaseGoogleAuthEnabled } from "../../services/firebase";
 import { useTranslation } from "react-i18next";
 import { X, ShieldAlert, UserCheck, Mail, Lock, User as UserIcon } from "lucide-react";
 const AuthModal = ({
@@ -122,10 +123,8 @@ const AuthModal = ({
             {error}
           </div>}
 
-        {
-    /* Google Sign In Button */
-  }
-        <button
+        {isFirebaseGoogleAuthEnabled && <>
+          <button
     type="button"
     onClick={handleGoogleSignIn}
     disabled={isSubmitting}
@@ -160,9 +159,9 @@ const AuthModal = ({
   />
           </svg>
           <span>Continue with Google</span>
-        </button>
+          </button>
 
-        <div
+          <div
     style={{
       display: "flex",
       alignItems: "center",
@@ -176,7 +175,8 @@ const AuthModal = ({
           <div style={{ flex: 1, height: "1px", backgroundColor: "var(--border-subtle)" }} />
           <span>or email</span>
           <div style={{ flex: 1, height: "1px", backgroundColor: "var(--border-subtle)" }} />
-        </div>
+          </div>
+        </>}
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
           {mode === "register" && <div>

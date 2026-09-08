@@ -10,8 +10,9 @@ import {
   updateProfile,
   fbSignOut,
   onAuthStateChanged,
+  isFirebaseAuthEnabled,
   isFirebaseEmailAuthEnabled,
-  isFirebaseConfigured
+  isFirebaseGoogleAuthEnabled
 } from "./firebase";
 const AuthContext = createContext(void 0);
 const firebaseFallbackCodes = /* @__PURE__ */ new Set([
@@ -38,7 +39,7 @@ const AuthProvider = ({
   useEffect(() => {
     registerAuthTokenProvider(async () => {
       const revision = authRevision.current;
-      if (isFirebaseConfigured && fbAuth?.currentUser) {
+      if (isFirebaseAuthEnabled && fbAuth?.currentUser) {
         try {
           const freshToken = await fbAuth.currentUser.getIdToken();
           if (revision !== authRevision.current) return null;
@@ -51,7 +52,7 @@ const AuthProvider = ({
     });
   }, []);
   useEffect(() => {
-    if (!isFirebaseConfigured) {
+    if (!isFirebaseAuthEnabled) {
       const savedToken = localStorage.getItem("geoissue_token");
       if (savedToken) {
         loadUserProfile(savedToken);
@@ -151,7 +152,7 @@ const AuthProvider = ({
       localStorage.removeItem("geoissue_token");
       setToken(null);
       setUser(null);
-      if (isFirebaseConfigured) await fbSignOut(fbAuth).catch(() => void 0);
+      if (isFirebaseAuthEnabled) await fbSignOut(fbAuth).catch(() => void 0);
       throw err;
     } finally {
       authOperation.current = false;
@@ -204,7 +205,7 @@ const AuthProvider = ({
       localStorage.removeItem("geoissue_token");
       setToken(null);
       setUser(null);
-      if (isFirebaseConfigured) await fbSignOut(fbAuth).catch(() => void 0);
+      if (isFirebaseAuthEnabled) await fbSignOut(fbAuth).catch(() => void 0);
       throw err;
     } finally {
       authOperation.current = false;
@@ -216,8 +217,10 @@ const AuthProvider = ({
     authOperation.current = true;
     setIsLoading(true);
     try {
-      if (!isFirebaseConfigured) {
-        throw new Error("Google sign-in requires configured Firebase client environment variables");
+      if (!isFirebaseGoogleAuthEnabled) {
+        const error = new Error("Google sign-in is not enabled for this environment");
+        error.code = "AUTH_PROVIDER_UNAVAILABLE";
+        throw error;
       }
       const result = await signInWithPopup(fbAuth, googleProvider);
       const idToken = await result.user.getIdToken();
@@ -232,7 +235,7 @@ const AuthProvider = ({
       localStorage.removeItem("geoissue_token");
       setToken(null);
       setUser(null);
-      if (isFirebaseConfigured) await fbSignOut(fbAuth).catch(() => void 0);
+      if (isFirebaseAuthEnabled) await fbSignOut(fbAuth).catch(() => void 0);
       throw err;
     } finally {
       authOperation.current = false;
@@ -244,7 +247,7 @@ const AuthProvider = ({
     authOperation.current = true;
     setIsLoading(true);
     try {
-      if (isFirebaseConfigured) await fbSignOut(fbAuth);
+      if (isFirebaseAuthEnabled) await fbSignOut(fbAuth);
       localStorage.setItem("geoissue_token", authToken);
       setToken(authToken);
       const syncedUser = await api.syncMe({
@@ -277,7 +280,7 @@ const AuthProvider = ({
     setToken(null);
     setUser(null);
     try {
-      if (isFirebaseConfigured) await fbSignOut(fbAuth);
+      if (isFirebaseAuthEnabled) await fbSignOut(fbAuth);
     } catch {
     } finally {
       authOperation.current = false;
