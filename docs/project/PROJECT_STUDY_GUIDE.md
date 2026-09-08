@@ -147,7 +147,7 @@ Follow these steps in order. Do not skip steps, as each builds on the mental mod
 * **Checkpoint:** Understand how pagination and filtering work on the public map.
 
 ### Step 14: Issue Detail, Support & Comments
-* **Files to read:** `client/src/features/issues/IssueDetail.jsx`, `server/src/modules/comments/comments.service.js`, `server/src/modules/support/support.routes.js`, `server/src/modules/support/support.controller.js`
+* **Files to read:** `client/src/features/issues/IssueDetail.jsx`, `server/src/modules/comments/comments.routes.js`, `server/src/modules/comments/comments.service.js`, `server/src/modules/support/support.routes.js`
 * **What they do:** The Detail page shows the canonical issue, its timeline, attached reports, and a comment thread. Users can click "Support" to upvote an issue.
 * **Connections:** `POST /api/issues/:id/support` and `DELETE /api/issues/:id/support` hit `supportRouter` -> `supportController.addSupport` and `supportController.removeSupport`. Comments hit `commentsRepository.create()`. If an admin posts a comment, `is_official` is set to true. 
 * **Key functions/types:** `addSupport()`, `removeSupport()`, `addComment()`.

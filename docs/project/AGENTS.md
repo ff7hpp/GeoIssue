@@ -37,8 +37,8 @@ server/src/middleware/auth.middleware.js  Authentication (Firebase + JWT + dev m
 server/src/middleware/validate.middleware.js  Zod request body validation
 server/src/middleware/error.middleware.js    Global error handler
 server/src/modules/                       Feature modules (auth, issues, reports, comments, etc.)
-server/src/modules/*/routes.js            Express route definitions per module
-server/src/modules/*/controller.js        Request handlers per module
+server/src/modules/*/routes.js            Express routes and handlers for compact modules
+server/src/modules/*/controller.js        Request handlers for larger modules
 server/src/modules/*/service.js           Business logic per module
 server/src/modules/*/repository.js        Database access per module
 server/src/shared/haversine.js           Haversine distance formula (50m clustering)

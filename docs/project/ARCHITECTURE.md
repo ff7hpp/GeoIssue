@@ -57,10 +57,10 @@ server/src/
 └── server.js            # نقطة البداية وتشغيل الخادم على المنفذ 4000
 ```
 
-## نمط التصميم (Controller-Service-Repository)
+## نمط التصميم
 
-لكل وحدة في `modules/`:
-1. **Routes (`*.routes.js`)**: تحديد مسارات الـ HTTP والـ Middlewares المناسبة (مثل `requireAuth`, `requireRole('admin')`, `validate(schema)`).
-2. **Controller (`*.controller.js`)**: استقبال الطلبات (HTTP Request)، استخراج البيانات، واستدعاء الخدمة، وإرجاع الرد (HTTP Response Envelope).
-3. **Service (`*.service.js`)**: منطق الأعمال (Business Logic)، مثل تطبيق خوارزمية Haversine، التحقق من الشروط، والتحكم بالبيانات.
-4. **Repository (`*.repository.js`)**: الاستعلامات المباشرة لقاعدة البيانات (PostgreSQL Queries أو الـ In-Memory fallback).
+كل وحدة تستخدم الطبقات التي تحتاجها فقط:
+1. **Routes (`*.routes.js`)**: تحديد مسارات الـ HTTP والـ Middlewares. الوحدات الصغيرة تضع معالجات الطلبات هنا مباشرة.
+2. **Controller (`*.controller.js`)**: معالجات HTTP للوحدات الأكبر عندما يحسن الفصل الوضوح.
+3. **Service (`*.service.js`)**: منطق الأعمال، مثل تطبيق Haversine، التحقق من الشروط، والتحكم بالبيانات.
+4. **Repository (`*.repository.js`)**: الاستعلامات المباشرة لقاعدة البيانات أو الـ In-Memory fallback.
