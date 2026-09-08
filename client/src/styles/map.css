@@ -24,10 +24,10 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: var(--bg-surface);
-  border: 2px solid var(--accent-primary);
-  box-shadow: var(--shadow-md);
-  color: var(--accent-primary);
+  background-color: var(--marker-color, var(--accent-primary));
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px var(--marker-color, var(--accent-primary)), var(--shadow-md);
+  color: white;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -37,12 +37,47 @@
   z-index: 1000 !important;
 }
 
-.custom-issue-marker.marker-submitted { border-color: var(--status-submitted); color: var(--status-submitted); }
-.custom-issue-marker.marker-in_review { border-color: var(--status-in_review); color: var(--status-in_review); }
-.custom-issue-marker.marker-accepted { border-color: var(--status-accepted); color: var(--status-accepted); }
-.custom-issue-marker.marker-in_progress { border-color: var(--status-in_progress); color: var(--status-in_progress); }
-.custom-issue-marker.marker-resolved { border-color: var(--status-resolved); color: var(--status-resolved); }
-.custom-issue-marker.marker-rejected { border-color: var(--status-rejected); color: var(--status-rejected); }
+.custom-issue-marker.marker-submitted,
+.custom-issue-marker.marker-in_review { --marker-color: #eab308; }
+.custom-issue-marker.marker-accepted { --marker-color: #2563eb; }
+.custom-issue-marker.marker-in_progress { --marker-color: #ef4444; }
+.custom-issue-marker.marker-resolved { --marker-color: #16a34a; }
+.custom-issue-marker.marker-rejected { --marker-color: #71717a; }
+
+.map-status-legend {
+  position: absolute;
+  inset-inline-start: 12px;
+  bottom: 24px;
+  z-index: 500;
+  display: grid;
+  gap: 5px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-surface-elevated) 92%, transparent);
+  box-shadow: var(--shadow-md);
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.map-status-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-status-legend i {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  border-radius: 50%;
+}
+
+.map-status-legend .status-yellow { background: #eab308; }
+.map-status-legend .status-blue { background: #2563eb; }
+.map-status-legend .status-red { background: #ef4444; }
+.map-status-legend .status-green { background: #16a34a; }
 
 .picker-pin-marker {
   display: flex;

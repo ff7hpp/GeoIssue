@@ -62,7 +62,7 @@ flowchart TD
 2. Run schema/migration: `npm --prefix server run migrate`.
 3. Load repeatable realistic fixtures: `npm --prefix server run seed:dev`.
 
-`seed:dev` is blocked in production and requires `DATABASE_URL`. It creates 36 issues and reports across six existing categories, six statuses, coordinates around Ankara, and three development residents. It is idempotent by fixture IDs.
+`seed:dev` is blocked in production and requires `DATABASE_URL`. It creates 30 issues and reports across six existing categories, six statuses, coordinates around Istanbul, and three development residents. It is idempotent by fixture IDs and moves legacy out-of-city records to Istanbul.
 
 ## Verification record — 2026-09-05
 

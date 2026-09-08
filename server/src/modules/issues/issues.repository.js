@@ -1,7 +1,17 @@
 import { isUsingMockDb, mockStore, query } from "../../db/pool.js";
 import { calculateHaversineDistance } from "../../shared/haversine.js";
 import { isIssueActive } from "../../shared/stateMachine.js";
+import { priorityFromSupporterCount } from "../../shared/priority.js";
 import crypto from "crypto";
+
+function withSupportPriority(issue) {
+  if (!issue) return issue;
+  return {
+    ...issue,
+    priority: priorityFromSupporterCount(issue.supporter_count)
+  };
+}
+
 const issuesRepository = {
   async findById(id) {
     if (isUsingMockDb) {
@@ -12,12 +22,12 @@ const issuesRepository = {
       for (const key of mockStore.issue_supporters) {
         if (key.startsWith(`${id}:`)) supportersCount++;
       }
-      return {
+      return withSupportPriority({
         ...issue,
         category,
         assignee: issue.assigned_to ? mockStore.users.get(issue.assigned_to) : null,
         supporter_count: supportersCount
-      };
+      });
     }
     const sql = `
       SELECT i.*,
@@ -30,7 +40,7 @@ const issuesRepository = {
       WHERE i.id = $1 AND i.deleted_at IS NULL
     `;
     const res = await query(sql, [id]);
-    return res.rows[0] || null;
+    return withSupportPriority(res.rows[0] || null);
   },
   async list(filters = {}) {
     const page = filters.page || 1;
@@ -42,12 +52,12 @@ const issuesRepository = {
         for (const key of mockStore.issue_supporters) {
           if (key.startsWith(`${issue.id}:`)) supportersCount++;
         }
-        return {
+        return withSupportPriority({
           ...issue,
           category,
           assignee: issue.assigned_to ? mockStore.users.get(issue.assigned_to) : null,
           supporter_count: supportersCount
-        };
+        });
       });
       if (filters.status) {
         all = all.filter((i) => i.status === filters.status);
@@ -114,7 +124,7 @@ const issuesRepository = {
       LIMIT $${idx++} OFFSET $${idx++}
     `;
     const res = await query(sql, values);
-    return { issues: res.rows, total };
+    return { issues: res.rows.map(withSupportPriority), total };
   },
   async findNearbyActiveCandidates(categoryId, lat, lon, radiusMeters) {
     let candidateIssues = [];

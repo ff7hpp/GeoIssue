@@ -9,6 +9,7 @@ import { uploadFreeImage, compressImageToDataUrl } from "../../services/imageUpl
 import { LocationPicker } from "../../components/map/LocationPicker";
 import { CategoryIcon } from "../../components/common/CategoryIcon";
 import { AuthModal } from "../auth/AuthModal";
+import { ISTANBUL_CENTER } from "../../config/location";
 import {
   MapPin,
   Tag,
@@ -41,8 +42,8 @@ const ReportWizard = () => {
   const [imageError, setImageError] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [latitude, setLatitude] = useState(39.9255);
-  const [longitude, setLongitude] = useState(32.8662);
+  const [latitude, setLatitude] = useState(ISTANBUL_CENTER[0]);
+  const [longitude, setLongitude] = useState(ISTANBUL_CENTER[1]);
   const [locationSelected, setLocationSelected] = useState(false);
   const [address, setAddress] = useState("");
   const [categoryId, setCategoryId] = useState("");

@@ -1,13 +1,20 @@
 import { config } from "../../config/env.js";
+import { ISTANBUL_BOUNDS, isWithinIstanbul } from "../../shared/istanbul.js";
 const geocodeService = {
   async search(query) {
     if (!query || query.trim().length < 2) {
       return [];
     }
     const trimmedQuery = query.trim();
+    const viewbox = [
+      ISTANBUL_BOUNDS.west,
+      ISTANBUL_BOUNDS.north,
+      ISTANBUL_BOUNDS.east,
+      ISTANBUL_BOUNDS.south
+    ].join(",");
     const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-      trimmedQuery
-    )}&format=json&addressdetails=1&countrycodes=tr&limit=5`;
+      `${trimmedQuery}, Istanbul`
+    )}&format=json&addressdetails=1&countrycodes=tr&viewbox=${viewbox}&bounded=1&limit=5`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), config.geocodingTimeout);
     try {
@@ -37,10 +44,7 @@ const geocodeService = {
           (item) =>
             Number.isFinite(item.lat) &&
             Number.isFinite(item.lon) &&
-            item.lat >= -90 &&
-            item.lat <= 90 &&
-            item.lon >= -180 &&
-            item.lon <= 180
+            isWithinIstanbul(item.lat, item.lon)
         );
     } catch (err) {
       if (err.name === "AbortError") {

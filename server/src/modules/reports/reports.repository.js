@@ -1,5 +1,23 @@
 import { isUsingMockDb, mockStore, query } from "../../db/pool.js";
+import { priorityFromSupporterCount } from "../../shared/priority.js";
 import crypto from "crypto";
+
+function withSupportPriority(issue) {
+  if (!issue) return issue;
+  let supporterCount = issue.supporter_count;
+  if (isUsingMockDb) {
+    supporterCount = 0;
+    for (const key of mockStore.issue_supporters) {
+      if (key.startsWith(`${issue.id}:`)) supporterCount++;
+    }
+  }
+  return {
+    ...issue,
+    supporter_count: Number(supporterCount) || 0,
+    priority: priorityFromSupporterCount(supporterCount)
+  };
+}
+
 const reportsRepository = {
   async findById(id) {
     if (isUsingMockDb) {
@@ -61,7 +79,7 @@ const reportsRepository = {
         return {
           ...r,
           category,
-          issue
+          issue: withSupportPriority(issue)
         };
       }).sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -81,7 +99,13 @@ const reportsRepository = {
     const sql = `
       SELECT r.*,
         json_build_object('id', c.id, 'name', c.name, 'slug', c.slug, 'icon', c.icon) as category,
-        json_build_object('id', i.id, 'title', i.title, 'status', i.status, 'priority', i.priority) as issue
+        json_build_object(
+          'id', i.id,
+          'title', i.title,
+          'status', i.status,
+          'priority', i.priority,
+          'supporter_count', (SELECT COUNT(*)::int FROM issue_supporters s WHERE s.issue_id = i.id)
+        ) as issue
       FROM reports r
       JOIN categories c ON r.category_id = c.id
       JOIN issues i ON r.issue_id = i.id
@@ -90,7 +114,13 @@ const reportsRepository = {
       LIMIT $2 OFFSET $3
     `;
     const res = await query(sql, [userId, limit, offset]);
-    return { reports: res.rows, total };
+    return {
+      reports: res.rows.map((report) => ({
+        ...report,
+        issue: withSupportPriority(report.issue)
+      })),
+      total
+    };
   },
   async listAll(page = 1, limit = 20) {
     if (isUsingMockDb) {
@@ -101,7 +131,7 @@ const reportsRepository = {
         return {
           ...r,
           category,
-          issue,
+          issue: withSupportPriority(issue),
           user: user ? { id: user.id, display_name: user.display_name } : void 0
         };
       }).sort(
@@ -116,7 +146,13 @@ const reportsRepository = {
     const sql = `
       SELECT r.*,
         json_build_object('id', c.id, 'name', c.name, 'slug', c.slug, 'icon', c.icon) as category,
-        json_build_object('id', i.id, 'title', i.title, 'status', i.status) as issue,
+        json_build_object(
+          'id', i.id,
+          'title', i.title,
+          'status', i.status,
+          'priority', i.priority,
+          'supporter_count', (SELECT COUNT(*)::int FROM issue_supporters s WHERE s.issue_id = i.id)
+        ) as issue,
         json_build_object('id', u.id, 'display_name', u.display_name) as user
       FROM reports r
       JOIN categories c ON r.category_id = c.id
@@ -127,7 +163,13 @@ const reportsRepository = {
       LIMIT $1 OFFSET $2
     `;
     const res = await query(sql, [limit, offset]);
-    return { reports: res.rows, total };
+    return {
+      reports: res.rows.map((report) => ({
+        ...report,
+        issue: withSupportPriority(report.issue)
+      })),
+      total
+    };
   },
   async create(data) {
     const now = (/* @__PURE__ */ new Date()).toISOString();

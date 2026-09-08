@@ -1,11 +1,16 @@
 import { z } from "zod";
 import { reportsService } from "./reports.service.js";
 import { imageReferenceSchema } from "../../shared/image.validation.js";
+import { ISTANBUL_BOUNDS } from "../../shared/istanbul.js";
 const createReportSchema = z.object({
   category_id: z.string().min(1, "Category is required"),
   description: z.string().trim().min(5, "Description must be at least 5 characters").max(2e3),
-  latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180),
+  latitude: z.number()
+    .min(ISTANBUL_BOUNDS.south, "Report location must be inside Istanbul")
+    .max(ISTANBUL_BOUNDS.north, "Report location must be inside Istanbul"),
+  longitude: z.number()
+    .min(ISTANBUL_BOUNDS.west, "Report location must be inside Istanbul")
+    .max(ISTANBUL_BOUNDS.east, "Report location must be inside Istanbul"),
   image_url: imageReferenceSchema,
   title: z.string().max(255).optional()
 });

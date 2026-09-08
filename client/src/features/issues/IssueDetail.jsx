@@ -187,7 +187,7 @@ const IssueDetail = () => {
 
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <StatusBadge status={issue.status} />
-            <PriorityBadge priority={issue.priority} />
+            <PriorityBadge priority={issue.priority} supporterCount={issue.supporter_count} />
           </div>
         </div>
 
