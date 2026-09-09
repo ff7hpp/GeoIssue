@@ -6,6 +6,9 @@ const nodeEnv = process.env.NODE_ENV || "development";
 const jwtSecret = process.env.JWT_SECRET;
 const databaseUrl = process.env.DATABASE_URL || "";
 const clientOrigin = process.env.CLIENT_ORIGIN || "http://localhost:5173,http://127.0.0.1:5173";
+if (nodeEnv === "test" && !databaseUrl.includes("/geoissue_test")) {
+  throw new Error("Tests require the isolated geoissue_test database");
+}
 if (nodeEnv === "production") {
   const missing = [
     !jwtSecret && "JWT_SECRET",
