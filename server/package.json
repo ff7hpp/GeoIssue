@@ -12,7 +12,8 @@
     "test": "vitest run",
     "migrate": "node src/db/migrations.js",
     "seed:dev": "node src/db/seed-development.js",
-    "admin:create": "node src/db/create-admin.js"
+    "admin:create": "node src/db/create-admin.js",
+    "account:set-password": "node src/db/set-user-password.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

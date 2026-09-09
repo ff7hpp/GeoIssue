@@ -37,7 +37,7 @@ Do not enable APIs, create registries/secrets/services, start the VM, create a p
 5. Create an Artifact Registry Docker repository and two Secret Manager secrets: `geoissue-database-url` and `geoissue-jwt-secret`.
 6. Build the API with `deploy/cloudbuild.api.yaml`.
 7. Deploy Cloud Run with public HTTPS, `NODE_ENV=production`, exact Vercel `CLIENT_ORIGIN`, minimum `0`, maximum `2`, and the two secrets pinned to versions.
-8. Run `npm run migrate --prefix server` against the cloud database, then create/update the administrator with `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `npm run admin:create --prefix server` from a trusted shell.
+8. Run `npm run migrate --prefix server` against the cloud database, then create/update the administrator with `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `npm run admin:create --prefix server` from a trusted shell. For any preserved Firebase-only account that has no password hash, use `ACCOUNT_EMAIL`, `ACCOUNT_PASSWORD`, and `npm run account:set-password --prefix server`; this preserves its role and report ownership.
 9. Import the Vercel project from branch `A`, set `VITE_API_URL=https://<cloud-run-url>/api`, and deploy.
 10. Update Cloud Run `CLIENT_ORIGIN` to the final Vercel origin and verify CORS.
 11. Run public health, auth/RBAC, report persistence, map, browser refresh, mobile layout, and physical-device GPS checks.
