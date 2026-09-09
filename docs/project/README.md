@@ -8,6 +8,7 @@ maintaining the project.
 - [Agent instructions](AGENTS.md)
 - [Application architecture](ARCHITECTURE.md)
 - [Full-stack readiness](FULL_STACK_READINESS.md)
+- [Temporary cloud testing plan](CLOUD_TESTING.md)
 - [Project study guide](PROJECT_STUDY_GUIDE.md)
 - [Architecture diagrams](DIAGRAMS.md)
 - [Current core flow and verification](CORE_FLOW_VERIFICATION.md)

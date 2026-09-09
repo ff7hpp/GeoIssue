@@ -6,7 +6,7 @@ digraph G {
 
 rankdir=LR; labelloc="t"; label="GeoIssue — ERD / Database Relationships"; fontsize=20;
 node [shape=record, style="filled", fillcolor="#FFFFFF", color="#D4D4D8", fontname="DejaVu Sans", fontsize=10];
-users [label="{users|id UUID PK\lfirebase_uid TEXT UNIQUE\lemail TEXT UNIQUE\ldisplay_name TEXT\lrole ENUM\llanguage TEXT\laccount_status ENUM\lcreated_at TIMESTAMPTZ\lupdated_at TIMESTAMPTZ\l}"];
+users [label="{users|id UUID PK\lauth_uid TEXT UNIQUE\lemail TEXT UNIQUE\lpassword_hash TEXT\ldisplay_name TEXT\lrole ENUM\llanguage TEXT\laccount_status ENUM\lcreated_at TIMESTAMPTZ\lupdated_at TIMESTAMPTZ\l}"];
 categories [label="{categories (PROPOSED)|id UUID PK\lname TEXT\lslug TEXT UNIQUE\licon TEXT NULL\lis_active BOOLEAN\lcreated_at TIMESTAMPTZ\l}"];
 issues [label="{issues|id UUID PK\lcategory_id UUID FK\ltitle TEXT\llatitude DECIMAL\llongitude DECIMAL\lstatus ENUM\lpriority ENUM\lreport_count INT\lcreated_at TIMESTAMPTZ\lupdated_at TIMESTAMPTZ\lresolved_at TIMESTAMPTZ NULL\l}"];
 reports [label="{reports|id UUID PK\lissue_id UUID FK\luser_id UUID FK\ldescription TEXT\llatitude DECIMAL\llongitude DECIMAL\limage_url TEXT NULL\lcreated_at TIMESTAMPTZ\lupdated_at TIMESTAMPTZ\l}"];

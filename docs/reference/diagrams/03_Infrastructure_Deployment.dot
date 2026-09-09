@@ -14,10 +14,9 @@ api [label="API Hosting
 Node.js / Express
 Provider TBD"];
 secrets [label="Environment Secrets
-Firebase Admin credentials • DB URL • storage keys"];
+JWT secret • DB URL • storage keys"];
 ci [label="GitHub Repository + CI
 Lint • typecheck • unit • API • Playwright E2E"];
-firebase [label="Firebase Authentication"];
 neon [label="Neon PostgreSQL
 Migrations • constraints • indexes • backups"];
 nominatim [label="Nominatim
@@ -28,7 +27,6 @@ logs [label="Application Logs / Monitoring
 Provider TBD", style="rounded,dashed,filled"];
 user -> dns -> frontend;
 frontend -> api [label="HTTPS /api"];
-api -> firebase;
 api -> neon;
 api -> nominatim;
 api -> storage;

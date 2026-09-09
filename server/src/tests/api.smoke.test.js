@@ -63,8 +63,23 @@ async function makeRequest(method, url, headers = {}, body) {
   });
 }
 describe("API Smoke & Security Tests", () => {
+  let userSession;
+  let adminSession;
+
   beforeAll(async () => {
     await initDb();
+    const suffix = `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+    userSession = await authService.register({
+      email: `api_user_${suffix}@geoissue.local`,
+      password: "StrongPassword123!",
+      display_name: "API Citizen"
+    });
+    adminSession = await authService.register({
+      email: `api_admin_${suffix}@geoissue.local`,
+      password: "StrongPassword123!",
+      display_name: "API Administrator"
+    });
+    await usersRepository.update(adminSession.user.id, { role: "admin" });
   });
   it("GET /api/health should return 200 with service info", async () => {
     const res = await makeRequest("GET", "/api/health");
@@ -108,7 +123,7 @@ describe("API Smoke & Security Tests", () => {
     const publicDetail = await makeRequest("GET", `/api/issues/${privateIssue.id}`);
     expect(publicDetail.status).toBe(404);
     const adminDetail = await makeRequest("GET", `/api/issues/${privateIssue.id}`, {
-      authorization: "Bearer dev-admin"
+      authorization: `Bearer ${adminSession.token}`
     });
     expect(adminDetail.status).toBe(200);
   });
@@ -206,29 +221,29 @@ describe("API Smoke & Security Tests", () => {
     const res = await makeRequest(
       "POST",
       "/api/me/sync",
-      { authorization: "Bearer dev-user" },
+      { authorization: `Bearer ${userSession.token}` },
       {
-        firebase_uid: "attacker-admin-uid",
+        auth_uid: "attacker-admin-uid",
         email: "attacker-admin@geoissue.org",
         display_name: "Updated Citizen"
       }
     );
     expect(res.status).toBe(200);
-    expect(res.body.data.firebase_uid).toBe("citizen_demo_uid_456");
-    expect(res.body.data.email).toBe("citizen@geoissue.org");
+    expect(res.body.data.auth_uid).toBeUndefined();
+    expect(res.body.data.email).toBe(userSession.user.email);
     expect(res.body.data.role).toBe("user");
     expect(res.body.data.display_name).toBe("Updated Citizen");
   });
   it("GET /api/admin/users with regular user token should return 403 FORBIDDEN", async () => {
     const res = await makeRequest("GET", "/api/admin/users", {
-      authorization: "Bearer dev-user"
+      authorization: `Bearer ${userSession.token}`
     });
     expect(res.status).toBe(403);
     expect(res.body.error.code).toBe("FORBIDDEN");
   });
   it("GET /api/admin/users with admin token should return 200 OK", async () => {
     const res = await makeRequest("GET", "/api/admin/users", {
-      authorization: "Bearer dev-admin"
+      authorization: `Bearer ${adminSession.token}`
     });
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.data)).toBe(true);

@@ -35,10 +35,8 @@ npm run dev
 Open `http://localhost:5173`.
 
 For local development, keep `VITE_API_URL=/api`; Vite proxies it to the server,
-avoiding browser CORS failures. Email/password authentication is local by default.
-Google sign-in stays hidden unless both Firebase client variables and Firebase
-Admin credentials on the server are configured, then
-`VITE_GOOGLE_AUTH_PROVIDER=firebase` can be set.
+avoiding browser CORS failures. Authentication uses email/password in PostgreSQL
+and signed JWTs from the Express API.
 
 Keep local `.env` files private. For architecture, API details, database notes,
 authentication, deployment, and the study guide, see

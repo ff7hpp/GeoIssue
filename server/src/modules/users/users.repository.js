@@ -1,23 +1,10 @@
 import { isUsingMockDb, mockStore, query } from "../../db/pool.js";
-import crypto from "crypto";
 const usersRepository = {
   async findById(id) {
     if (isUsingMockDb) {
       return mockStore.users.get(id) || null;
     }
     const res = await query("SELECT * FROM users WHERE id = $1", [id]);
-    return res.rows[0] || null;
-  },
-  async findByFirebaseUid(firebaseUid) {
-    if (isUsingMockDb) {
-      for (const u of mockStore.users.values()) {
-        if (u.firebase_uid === firebaseUid) return u;
-      }
-      return null;
-    }
-    const res = await query("SELECT * FROM users WHERE firebase_uid = $1", [
-      firebaseUid
-    ]);
     return res.rows[0] || null;
   },
   async findByEmail(email) {
@@ -31,51 +18,6 @@ const usersRepository = {
       email
     ]);
     return res.rows[0] || null;
-  },
-  async upsert(data) {
-    const now = (/* @__PURE__ */ new Date()).toISOString();
-    if (isUsingMockDb) {
-      const existing = await this.findByFirebaseUid(data.firebase_uid);
-      if (existing) {
-        existing.display_name = data.display_name !== void 0 ? data.display_name : existing.display_name;
-        existing.language = data.language || existing.language;
-        existing.updated_at = now;
-        mockStore.users.set(existing.id, existing);
-        return existing;
-      }
-      const newUser = {
-        id: crypto.randomUUID(),
-        firebase_uid: data.firebase_uid,
-        email: data.email,
-        display_name: data.display_name || null,
-        role: data.role || "user",
-        language: data.language || "en",
-        account_status: data.account_status || "active",
-        created_at: now,
-        updated_at: now
-      };
-      mockStore.users.set(newUser.id, newUser);
-      return newUser;
-    }
-    const sql = `
-      INSERT INTO users (firebase_uid, email, display_name, role, language, account_status)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      ON CONFLICT (firebase_uid)
-      DO UPDATE SET
-        display_name = COALESCE(EXCLUDED.display_name, users.display_name),
-        language = COALESCE(EXCLUDED.language, users.language),
-        updated_at = NOW()
-      RETURNING *;
-    `;
-    const res = await query(sql, [
-      data.firebase_uid,
-      data.email,
-      data.display_name || null,
-      data.role || "user",
-      data.language || "en",
-      data.account_status || "active"
-    ]);
-    return res.rows[0];
   },
   async update(id, data) {
     const now = (/* @__PURE__ */ new Date()).toISOString();

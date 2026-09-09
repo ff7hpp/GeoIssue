@@ -1,19 +1,19 @@
 sequenceDiagram
   actor U as User
   participant B as React Browser
-  participant F as Firebase Auth
   participant A as Express API
   participant G as Nominatim / Image Storage
   participant M as Matching Service
   participant D as Neon PostgreSQL
-  U->>B: Sign in / create report
-  B->>F: Authenticate
-  F-->>B: Firebase ID token
+  U->>B: Sign in
+  B->>A: POST /api/auth/login + email/password
+  A->>D: Load user password hash
+  A->>A: Verify password + sign JWT
+  A-->>B: User + JWT
   U->>B: Select location + category + description + optional image
   B->>A: POST /api/reports + Bearer token
-  A->>F: Verify ID token
-  F-->>A: Verified identity
-  A->>A: Validate input + authorize
+  A->>A: Verify JWT + validate input
+  A->>D: Load active user + authorize
   opt Geocoding or image handling required
     A->>G: Resolve place / store image
     G-->>A: Address / image URL

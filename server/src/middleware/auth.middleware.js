@@ -1,171 +1,61 @@
-import { getFirebaseAuth } from "../config/firebase.js";
-import { config } from "../config/env.js";
 import { AppError } from "../shared/errors.js";
 import { usersRepository } from "../modules/users/users.repository.js";
 import { verifyToken } from "../shared/auth.utils.js";
-function resolveDevelopmentIdentity(token) {
-  if (config.nodeEnv === "production") return null;
-  if (token === "dev-admin") {
-    return {
-      uid: "admin_demo_uid_123",
-      email: "admin@geoissue.org",
-      displayName: "Lead Admin",
-      role: "admin"
-    };
+
+function readBearerToken(req) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw AppError.unauthenticated("Authorization bearer token is missing");
   }
-  if (token === "dev-user") {
-    return {
-      uid: "citizen_demo_uid_456",
-      email: "citizen@geoissue.org",
-      displayName: "Tariq Al-Mansoor",
-      role: "user"
-    };
+
+  const token = authHeader.slice("Bearer ".length).trim();
+  if (!token) {
+    throw AppError.unauthenticated("Authorization token is empty");
   }
-  if (token.startsWith("mock:")) {
-    const uid = token.slice("mock:".length);
-    if (!/^[A-Za-z0-9_-]{1,100}$/.test(uid)) {
-      throw AppError.unauthenticated("Invalid mock authentication token");
-    }
-    return {
-      uid,
-      email: `${uid}@geoissue.org`,
-      displayName: null,
-      role: "user"
-    };
-  }
-  return null;
+  return token;
 }
-function looksLikeJwt(token) {
-  return token.split(".").length === 3;
-}
-function looksLikeLocalJwt(token) {
-  if (!looksLikeJwt(token)) return false;
-  try {
-    const header = JSON.parse(Buffer.from(token.split(".")[0], "base64url").toString("utf8"));
-    return header.alg === "HS256" && header.typ === "JWT";
-  } catch {
-    return false;
+
+async function resolveUserFromToken(token) {
+  const payload = verifyToken(token);
+  if (!payload) {
+    throw AppError.unauthenticated("Invalid authentication token");
   }
+
+  const user = await usersRepository.findById(payload.id);
+  if (!user) {
+    throw AppError.unauthenticated("User associated with token not found");
+  }
+  if (user.account_status === "suspended") {
+    throw AppError.forbidden("Your account is currently suspended.");
+  }
+  if (user.account_status !== "active") {
+    throw AppError.forbidden("Your account is not active.");
+  }
+  return user;
 }
+
 async function authenticate(req, res, next) {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw AppError.unauthenticated("Authorization bearer token is missing");
-    }
-    const token = authHeader.split("Bearer ")[1].trim();
-    if (!token) {
-      throw AppError.unauthenticated("Authorization token is empty");
-    }
-    const jwtPayload = verifyToken(token);
-    if (jwtPayload) {
-      const user2 = await usersRepository.findById(jwtPayload.id);
-      if (!user2) {
-        throw AppError.unauthenticated("User associated with token not found");
-      }
-      if (user2.account_status === "suspended") {
-        throw AppError.forbidden("Your account is currently suspended.");
-      }
-      req.user = user2;
-      return next();
-    }
-    if (looksLikeLocalJwt(token)) {
-      throw AppError.unauthenticated("Invalid authentication token");
-    }
-    const developmentIdentity = resolveDevelopmentIdentity(token);
-    let uid;
-    let email;
-    let displayName;
-    let role;
-    if (developmentIdentity) {
-      ({ uid, email, displayName, role } = developmentIdentity);
-    } else {
-      if (!looksLikeJwt(token)) {
-        throw AppError.unauthenticated("Invalid authentication token");
-      }
-      const firebaseAuth = getFirebaseAuth();
-      if (!firebaseAuth) {
-        throw AppError.unauthenticated("Invalid authentication token");
-      }
-      try {
-        const decodedToken = await firebaseAuth.verifyIdToken(token);
-        uid = decodedToken.uid;
-        email = decodedToken.email || `${uid}@geoissue.local`;
-        displayName = decodedToken.name || null;
-        role = "user";
-      } catch {
-        throw AppError.unauthenticated("Invalid authentication token");
-      }
-    }
-    req.firebaseUid = uid;
-    req.firebaseEmail = email;
-    let user = await usersRepository.findByFirebaseUid(uid);
-    if (!user) {
-      const emailOwner = await usersRepository.findByEmail(email);
-      if (emailOwner) {
-        throw AppError.conflict(
-          "An account with this email already uses a different sign-in method"
-        );
-      }
-      user = await usersRepository.upsert({
-        firebase_uid: uid,
-        email,
-        display_name: displayName || (email ? email.split("@")[0] : "Citizen"),
-        role,
-        language: "en",
-        account_status: "active"
-      });
-    }
-    if (user.account_status === "suspended") {
-      throw AppError.forbidden("Your account is currently suspended.");
-    }
-    req.user = user;
+    req.user = await resolveUserFromToken(readBearerToken(req));
     next();
   } catch (err) {
     next(err);
   }
 }
+
 async function optionalAuth(req, res, next) {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return next();
-  }
+  if (!authHeader) return next();
+
   try {
-    const token = authHeader.split("Bearer ")[1].trim();
-    if (!token) return next();
-    const jwtPayload = verifyToken(token);
-    if (jwtPayload) {
-      const user2 = await usersRepository.findById(jwtPayload.id);
-      if (user2 && user2.account_status !== "suspended") {
-        req.user = user2;
-      }
-      return next();
-    }
-    if (looksLikeLocalJwt(token)) return next();
-    const developmentIdentity = resolveDevelopmentIdentity(token);
-    let uid;
-    if (developmentIdentity) {
-      uid = developmentIdentity.uid;
-    } else {
-      if (!looksLikeJwt(token)) return next();
-      const firebaseAuth = getFirebaseAuth();
-      if (!firebaseAuth) return next();
-      try {
-        const decodedToken = await firebaseAuth.verifyIdToken(token);
-        uid = decodedToken.uid;
-      } catch {
-        return next();
-      }
-    }
-    const user = await usersRepository.findByFirebaseUid(uid);
-    if (user && user.account_status !== "suspended") {
-      req.user = user;
-    }
+    req.user = await resolveUserFromToken(readBearerToken(req));
     next();
-  } catch {
-    next();
+  } catch (err) {
+    if (err.code === "UNAUTHENTICATED") return next();
+    next(err);
   }
 }
+
 function requireRole(...roles) {
   return (req, res, next) => {
     if (!req.user) {
@@ -179,6 +69,7 @@ function requireRole(...roles) {
     next();
   };
 }
+
 export {
   authenticate,
   optionalAuth,

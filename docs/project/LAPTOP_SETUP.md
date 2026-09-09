@@ -31,7 +31,7 @@ Copy-Item server/.env.example server/.env
 Copy-Item client/.env.example client/.env
 ```
 
-ضع إعدادات Firebase المحلية في `client/.env` و`server/.env` عند الحاجة، ولا ترفع أي ملف `.env` إلى GitHub.
+ضع `DATABASE_URL` و`JWT_SECRET` في `server/.env`، واترك `VITE_API_URL=/api` في `client/.env`. لا ترفع أي ملف `.env` إلى GitHub.
 
 ## 3. تشغيل العرض المحلي
 
@@ -58,4 +58,4 @@ npm test --prefix server
 npm run build --prefix client
 ```
 
-إذا كنت ستعرض المشروع بدون إنترنت، شغّل التطبيق مرة واحدة مع اتصال إنترنت قبل العرض لتأكيد تحميل خرائط OpenStreetMap وFirebase.
+إذا كنت ستعرض المشروع بدون إنترنت، شغّل التطبيق مرة واحدة مع اتصال إنترنت قبل العرض لتأكيد تحميل خرائط OpenStreetMap.

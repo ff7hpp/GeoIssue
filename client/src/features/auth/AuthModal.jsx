@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { useAuth } from "../../services/auth.context";
 import { errorMessage } from "../../services/errorMessage";
-import { isFirebaseGoogleAuthEnabled } from "../../services/firebase";
 import { useTranslation } from "react-i18next";
-import { X, ShieldAlert, UserCheck, Mail, Lock, User as UserIcon } from "lucide-react";
+import { X, Mail, Lock, User as UserIcon } from "lucide-react";
 const AuthModal = ({
   isOpen,
   onClose,
   initialMode = "login"
 }) => {
-  const { signInWithEmail, registerWithEmail, signInWithGoogle, signInWithDemo } = useAuth();
+  const { signInWithEmail, registerWithEmail } = useAuth();
   const { t } = useTranslation();
   const [mode, setMode] = useState(initialMode);
   const [email, setEmail] = useState("");
@@ -34,30 +33,6 @@ const AuthModal = ({
       onClose();
     } catch (err) {
       setError(err?.code === "UNAUTHENTICATED" ? t("errors.credentials") : errorMessage(err));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  const handleGoogleSignIn = async () => {
-    setError(null);
-    setIsSubmitting(true);
-    try {
-      await signInWithGoogle();
-      onClose();
-    } catch (err) {
-      setError(errorMessage(err));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  const handleDemoSignIn = async (role) => {
-    setError(null);
-    setIsSubmitting(true);
-    try {
-      await signInWithDemo(role);
-      onClose();
-    } catch (err) {
-      setError(errorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -122,61 +97,6 @@ const AuthModal = ({
   >
             {error}
           </div>}
-
-        {isFirebaseGoogleAuthEnabled && <>
-          <button
-    type="button"
-    onClick={handleGoogleSignIn}
-    disabled={isSubmitting}
-    className="btn btn-secondary"
-    style={{
-      width: "100%",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "10px",
-      padding: "11px",
-      marginBottom: "var(--space-4)",
-      fontWeight: 500
-    }}
-  >
-          <svg width="18" height="18" viewBox="0 0 24 24">
-            <path
-    fill="#4285F4"
-    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
-  />
-            <path
-    fill="#34A853"
-    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
-  />
-            <path
-    fill="#FBBC05"
-    d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
-  />
-            <path
-    fill="#EA4335"
-    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-  />
-          </svg>
-          <span>Continue with Google</span>
-          </button>
-
-          <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "12px",
-      margin: "var(--space-4) 0",
-      color: "var(--text-tertiary)",
-      fontSize: "0.75rem",
-      textTransform: "uppercase"
-    }}
-  >
-          <div style={{ flex: 1, height: "1px", backgroundColor: "var(--border-subtle)" }} />
-          <span>or email</span>
-          <div style={{ flex: 1, height: "1px", backgroundColor: "var(--border-subtle)" }} />
-          </div>
-        </>}
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
           {mode === "register" && <div>
@@ -256,7 +176,7 @@ const AuthModal = ({
             <div style={{ position: "relative" }}>
               <input
     type="password"
-    minLength={mode === "register" ? 6 : void 0}
+    minLength={mode === "register" ? 10 : void 0}
     autoComplete={mode === "register" ? "new-password" : "current-password"}
     aria-label={t("auth.password")}
     required
@@ -294,54 +214,6 @@ const AuthModal = ({
             {isSubmitting ? t("common.loading") : mode === "login" ? t("auth.signInButton") : t("auth.signUpButton")}
           </button>
         </form>
-
-        {
-    /* Quick 1-Click Demo Accounts Section */
-  }
-        <div
-    style={{
-      marginTop: "var(--space-5)",
-      padding: "12px",
-      backgroundColor: "var(--bg-surface-subtle)",
-      borderRadius: "var(--radius-md)",
-      border: "1px solid var(--border-default)"
-    }}
-  >
-          <div
-    style={{
-      fontSize: "0.75rem",
-      fontWeight: 600,
-      color: "var(--text-secondary)",
-      textTransform: "uppercase",
-      letterSpacing: "0.05em",
-      marginBottom: "8px"
-    }}
-  >
-            {t("auth.demoAccounts")}
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-            <button
-    type="button"
-    onClick={() => handleDemoSignIn("user")}
-    className="btn btn-secondary"
-    style={{ fontSize: "0.8125rem", padding: "8px 10px" }}
-    disabled={isSubmitting}
-  >
-              <UserCheck size={16} />
-              <span>{t("auth.demoUser")}</span>
-            </button>
-            <button
-    type="button"
-    onClick={() => handleDemoSignIn("admin")}
-    className="btn btn-secondary"
-    style={{ fontSize: "0.8125rem", padding: "8px 10px" }}
-    disabled={isSubmitting}
-  >
-              <ShieldAlert size={16} />
-              <span>{t("auth.demoAdmin")}</span>
-            </button>
-          </div>
-        </div>
 
         <div style={{ marginTop: "var(--space-4)", textAlign: "center", fontSize: "0.875rem" }}>
           {mode === "login" ? <span>

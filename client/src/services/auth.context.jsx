@@ -1,324 +1,113 @@
-import { createContext, useContext, useState, useEffect, useRef } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { api, registerAuthTokenProvider } from "./api";
-import {
-  auth as fbAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signInWithPopup,
-  googleProvider,
-  updateProfile,
-  fbSignOut,
-  onAuthStateChanged,
-  isFirebaseAuthEnabled,
-  isFirebaseEmailAuthEnabled,
-  isFirebaseGoogleAuthEnabled
-} from "./firebase";
-const AuthContext = createContext(void 0);
-const firebaseFallbackCodes = /* @__PURE__ */ new Set([
-  "auth/invalid-credential",
-  "auth/user-not-found",
-  "auth/operation-not-allowed",
-  "auth/configuration-not-found",
-  "auth/network-request-failed"
-]);
-function canUseNativeAuthFallback(error) {
-  return typeof error === "object" && error !== null && "code" in error && firebaseFallbackCodes.has(String(error.code));
-}
-const AuthProvider = ({
-  children
-}) => {
+
+const AuthContext = createContext(undefined);
+const TOKEN_STORAGE_KEY = "geoissue_token";
+
+const AuthProvider = ({ children }) => {
   const queryClient = useQueryClient();
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(
-    localStorage.getItem("geoissue_token")
-  );
+  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_STORAGE_KEY));
   const [isLoading, setIsLoading] = useState(true);
-  const authOperation = useRef(false);
   const authRevision = useRef(0);
-  useEffect(() => {
-    registerAuthTokenProvider(async () => {
-      const revision = authRevision.current;
-      if (isFirebaseAuthEnabled && fbAuth?.currentUser) {
-        try {
-          const freshToken = await fbAuth.currentUser.getIdToken();
-          if (revision !== authRevision.current) return null;
-          localStorage.setItem("geoissue_token", freshToken);
-          return freshToken;
-        } catch {
-        }
-      }
-      return localStorage.getItem("geoissue_token");
-    });
-  }, []);
-  useEffect(() => {
-    if (!isFirebaseAuthEnabled) {
-      const savedToken = localStorage.getItem("geoissue_token");
-      if (savedToken) {
-        loadUserProfile(savedToken);
-      } else {
-        setUser(null);
-        setIsLoading(false);
-      }
-      return;
-    }
-    const unsubscribe = onAuthStateChanged(fbAuth, async (fbUser) => {
-      if (authOperation.current) return;
-      const revision = authRevision.current;
-      if (fbUser) {
-        try {
-          const idToken = await fbUser.getIdToken();
-          if (revision !== authRevision.current) return;
-          localStorage.setItem("geoissue_token", idToken);
-          setToken(idToken);
-          const syncedUser = await api.syncMe({
-            display_name: fbUser.displayName || "Citizen"
-          });
-          if (revision === authRevision.current) setUser(syncedUser);
-        } catch (err) {
-          if (revision !== authRevision.current) return;
-          console.warn("Firebase auth sync warning:", err);
-          localStorage.removeItem("geoissue_token");
-          setToken(null);
-          setUser(null);
-          await fbSignOut(fbAuth).catch(() => void 0);
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        const savedToken = localStorage.getItem("geoissue_token");
-        if (savedToken && !savedToken.startsWith("eyJ")) {
-          loadUserProfile(savedToken);
-        } else if (!savedToken) {
-          setUser(null);
-          setIsLoading(false);
-        } else {
-          loadUserProfile(savedToken);
-        }
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-  async function loadUserProfile(authToken) {
-    const revision = authRevision.current;
-    try {
-      const profile = await api.getMe();
-      if (revision === authRevision.current) setUser(profile);
-    } catch (err) {
-      if (revision !== authRevision.current) return;
-      console.warn("Failed to load user profile with current token:", err);
-      localStorage.removeItem("geoissue_token");
-      setToken(null);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-  const signInWithEmail = async (email, password) => {
-    authRevision.current++;
-    authOperation.current = true;
-    setIsLoading(true);
-    try {
-      if (!isFirebaseEmailAuthEnabled) {
-        const result = await api.login({ email, password });
-        localStorage.setItem("geoissue_token", result.token);
-        setToken(result.token);
-        setUser(result.user);
-        return;
-      }
-      try {
-        const userCredential = await signInWithEmailAndPassword(fbAuth, email, password);
-        const idToken = await userCredential.user.getIdToken();
-        localStorage.setItem("geoissue_token", idToken);
-        setToken(idToken);
-        const synced = await api.syncMe({
-          display_name: userCredential.user.displayName || email.split("@")[0]
-        });
-        setUser(synced);
-        return;
-      } catch (fbErr) {
-        if (canUseNativeAuthFallback(fbErr)) {
-          await fbSignOut(fbAuth).catch(() => void 0);
-          const result = await api.login({ email, password });
-          localStorage.setItem("geoissue_token", result.token);
-          setToken(result.token);
-          setUser(result.user);
-          return;
-        }
-        throw fbErr;
-      }
-    } catch (err) {
-      console.warn("Email sign-in failed:", err);
-      localStorage.removeItem("geoissue_token");
-      setToken(null);
-      setUser(null);
-      if (isFirebaseAuthEnabled) await fbSignOut(fbAuth).catch(() => void 0);
-      throw err;
-    } finally {
-      authOperation.current = false;
-      setIsLoading(false);
-    }
-  };
-  const registerWithEmail = async (email, password, displayName, language = "en") => {
-    authRevision.current++;
-    authOperation.current = true;
-    setIsLoading(true);
-    try {
-      if (!isFirebaseEmailAuthEnabled) {
-        const result = await api.register({
-          email,
-          password,
-          display_name: displayName,
-          language
-        });
-        localStorage.setItem("geoissue_token", result.token);
-        setToken(result.token);
-        setUser(result.user);
-        return;
-      }
-      let userCredential;
-      try {
-        userCredential = await createUserWithEmailAndPassword(fbAuth, email, password);
-      } catch (fbErr) {
-        if (!canUseNativeAuthFallback(fbErr)) throw fbErr;
-        const result = await api.register({
-          email,
-          password,
-          display_name: displayName,
-          language
-        });
-        localStorage.setItem("geoissue_token", result.token);
-        setToken(result.token);
-        setUser(result.user);
-        return;
-      }
-      if (displayName) {
-        await updateProfile(userCredential.user, { displayName });
-      }
-      const idToken = await userCredential.user.getIdToken();
-      localStorage.setItem("geoissue_token", idToken);
-      setToken(idToken);
-      const synced = await api.syncMe({ display_name: displayName });
-      setUser(synced);
-    } catch (err) {
-      console.warn("Registration failed:", err);
-      localStorage.removeItem("geoissue_token");
-      setToken(null);
-      setUser(null);
-      if (isFirebaseAuthEnabled) await fbSignOut(fbAuth).catch(() => void 0);
-      throw err;
-    } finally {
-      authOperation.current = false;
-      setIsLoading(false);
-    }
-  };
-  const signInWithGoogle = async () => {
-    authRevision.current++;
-    authOperation.current = true;
-    setIsLoading(true);
-    try {
-      if (!isFirebaseGoogleAuthEnabled) {
-        const error = new Error("Google sign-in is not enabled for this environment");
-        error.code = "AUTH_PROVIDER_UNAVAILABLE";
-        throw error;
-      }
-      const result = await signInWithPopup(fbAuth, googleProvider);
-      const idToken = await result.user.getIdToken();
-      localStorage.setItem("geoissue_token", idToken);
-      setToken(idToken);
-      const synced = await api.syncMe({
-        display_name: result.user.displayName || "Citizen"
-      });
-      setUser(synced);
-    } catch (err) {
-      console.warn("Google sign-in failed:", err);
-      localStorage.removeItem("geoissue_token");
-      setToken(null);
-      setUser(null);
-      if (isFirebaseAuthEnabled) await fbSignOut(fbAuth).catch(() => void 0);
-      throw err;
-    } finally {
-      authOperation.current = false;
-      setIsLoading(false);
-    }
-  };
-  const signInWithCustomToken = async (authToken, email, displayName) => {
-    authRevision.current++;
-    authOperation.current = true;
-    setIsLoading(true);
-    try {
-      if (isFirebaseAuthEnabled) await fbSignOut(fbAuth);
-      localStorage.setItem("geoissue_token", authToken);
-      setToken(authToken);
-      const syncedUser = await api.syncMe({
-        display_name: displayName || email.split("@")[0]
-      });
-      setUser(syncedUser);
-    } catch (err) {
-      console.warn("Sign-in failed:", err);
-      localStorage.removeItem("geoissue_token");
-      setToken(null);
-      setUser(null);
-      throw err;
-    } finally {
-      authOperation.current = false;
-      setIsLoading(false);
-    }
-  };
-  const signInWithDemo = async (role2) => {
-    const demoToken = role2 === "admin" ? "dev-admin" : "dev-user";
-    const demoEmail = role2 === "admin" ? "admin@geoissue.org" : "citizen@geoissue.org";
-    const demoName = role2 === "admin" ? "Lead Admin" : "Tariq Al-Mansoor";
-    await signInWithCustomToken(demoToken, demoEmail, demoName);
-  };
-  const signOut = async () => {
-    authRevision.current++;
-    authOperation.current = true;
-    await queryClient.cancelQueries();
-    queryClient.clear();
-    localStorage.removeItem("geoissue_token");
+
+  const clearSession = () => {
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
     setToken(null);
     setUser(null);
+  };
+
+  const applySession = (session) => {
+    localStorage.setItem(TOKEN_STORAGE_KEY, session.token);
+    setToken(session.token);
+    setUser(session.user);
+  };
+
+  useEffect(() => {
+    registerAuthTokenProvider(() => localStorage.getItem(TOKEN_STORAGE_KEY));
+  }, []);
+
+  useEffect(() => {
+    const savedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+    const revision = authRevision.current;
+
+    if (!savedToken) {
+      setIsLoading(false);
+      return;
+    }
+
+    api.getMe()
+      .then((profile) => {
+        if (revision === authRevision.current) setUser(profile);
+      })
+      .catch(() => {
+        if (revision === authRevision.current) clearSession();
+      })
+      .finally(() => {
+        if (revision === authRevision.current) setIsLoading(false);
+      });
+  }, []);
+
+  const runAuthRequest = async (request) => {
+    const revision = ++authRevision.current;
+    setIsLoading(true);
     try {
-      if (isFirebaseAuthEnabled) await fbSignOut(fbAuth);
-    } catch {
+      const session = await request();
+      if (revision === authRevision.current) applySession(session);
+    } catch (error) {
+      if (revision === authRevision.current) clearSession();
+      throw error;
     } finally {
-      authOperation.current = false;
-      localStorage.removeItem("geoissue_token");
-      setToken(null);
-      setUser(null);
+      if (revision === authRevision.current) setIsLoading(false);
     }
   };
-  const updateUserContext = (updatedUser) => {
-    setUser(updatedUser);
+
+  const signInWithEmail = (email, password) => runAuthRequest(
+    () => api.login({ email, password })
+  );
+
+  const registerWithEmail = (email, password, displayName, language = "en") => runAuthRequest(
+    () => api.register({
+      email,
+      password,
+      display_name: displayName,
+      language
+    })
+  );
+
+  const signOut = async () => {
+    authRevision.current += 1;
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    clearSession();
+    setIsLoading(false);
   };
-  const role = user ? user.role : "visitor";
-  return <AuthContext.Provider
-    value={{
-      user,
-      token,
-      role,
-      isLoading,
-      signInWithEmail,
-      registerWithEmail,
-      signInWithGoogle,
-      signInWithDemo,
-      signInWithCustomToken,
-      signOut,
-      updateUserContext
-    }}
-  >
+
+  const role = user?.role || "visitor";
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        role,
+        isLoading,
+        signInWithEmail,
+        registerWithEmail,
+        signOut,
+        updateUserContext: setUser
+      }}
+    >
       {children}
-    </AuthContext.Provider>;
+    </AuthContext.Provider>
+  );
 };
+
 const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };
-export {
-  AuthProvider,
-  useAuth
-};
+
+export { AuthProvider, useAuth };

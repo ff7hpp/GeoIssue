@@ -35,7 +35,7 @@ GeoIssue/
 │
 ├── server/                      # Express + JavaScript Modular Monolith Backend
 │   ├── src/
-│   │   ├── config/              # env.js and firebase.js
+│   │   ├── config/              # env.js
 │   │   ├── db/                  # pool.js (connection) and schema.sql
 │   │   ├── middleware/          # auth.middleware.js, validate.middleware.js
 │   │   ├── modules/             # Feature modules (issues, reports, auth, comments, etc.)
@@ -58,7 +58,7 @@ Follow these steps in order. Do not skip steps, as each builds on the mental mod
 
 ### Step 1: Environment & Config
 * **Files to read:** `server/.env.example`, `server/src/config/env.js`, `client/.env.example`
-* **What they do:** Define the environment variables needed to boot the server (Port, JWT Secret, DB URL, Firebase config). `env.js` parses these and provides safe defaults.
+* **What they do:** Define the environment variables needed to boot the server (port, JWT secret, database URL, and allowed client origins). `env.js` parses these and fails closed in production.
 * **Connections:** `env.js` is imported by `server.js` and `pool.js` to configure connections.
 * **Key functions/types:** `config` object.
 * **Checkpoint:** You should understand that if `DATABASE_URL` is empty, the app still runs using in-memory mock data.
@@ -72,7 +72,7 @@ Follow these steps in order. Do not skip steps, as each builds on the mental mod
 
 ### Step 3: Server Startup & Pipeline
 * **Files to read:** `server/src/server.js`, `server/src/app.js`
-* **What they do:** `server.js` is the entry point. It calls `initDb()`, `initFirebase()`, and `app.listen()`. `app.js` sets up the Express middleware pipeline (CORS, JSON parsing) and mounts all modular routes (`/api/auth`, `/api/reports`, etc.).
+* **What they do:** `server.js` is the entry point. It calls `initDb()` and `app.listen()`. `app.js` sets up the Express middleware pipeline (CORS, security headers, rate limits, JSON parsing) and mounts all modular routes (`/api/auth`, `/api/reports`, etc.).
 * **Connections:** Links the network layer to the domain modules.
 * **Key functions/types:** `bootstrap()` in `server.js`, `app.use()` mounts in `app.js`.
 * **Checkpoint:** You should understand how an HTTP request enters the backend and gets routed to a specific feature module.
@@ -93,7 +93,7 @@ Follow these steps in order. Do not skip steps, as each builds on the mental mod
 
 ### Step 6: Authentication Flow & Dev Tokens
 * **Files to read:** `client/src/services/auth.context.jsx`, `server/src/middleware/auth.middleware.js`, `server/src/shared/auth.utils.js`
-* **What they do:** `auth.context.jsx` manages the logged-in user state. `auth.middleware.js` intercepts requests to verify tokens (supporting native JWT, Firebase Admin tokens, and local dev mocks). `auth.utils.js` hashes passwords and signs JWTs.
+* **What they do:** `auth.context.jsx` manages the logged-in user and persisted JWT. `auth.middleware.js` verifies the JWT, reloads the active database user, and enforces roles. `auth.utils.js` hashes passwords with scrypt, upgrades legacy PBKDF2 hashes, and signs JWTs.
 * **Connections:** Frontend `api.js` gets the token from `auth.context.jsx` and sends it to the backend.
 * **Key functions/types:** `authenticate()`, `verifyToken()`, `useAuth()`.
 * **Checkpoint:** Understand the fallback dev tokens: `dev-admin` (admin@geoissue.org), `dev-user` (citizen@geoissue.org), and `mock:*`.
@@ -173,7 +173,7 @@ Follow these steps in order. Do not skip steps, as each builds on the mental mod
 * **Checkpoint:** Understand how categories link Issues to standard municipal departments.
 
 ### Step 18: Tests & Backend Deployment
-* **Files to read:** `server/src/tests/`, `server/package.json`, `firebase.json`
-* **What they do:** The backend has Vitest tests covering haversine math, state machines, permissions, and cryptography. The deployment process validates JavaScript with `npm run build` and runs the server directly from `server/src/` with `NODE_ENV=production`. `firebase.json` dictates how the static Vite output in `client/dist/` is hosted.
+* **Files to read:** `server/src/tests/`, `client/e2e/`, `server/package.json`, `vercel.json`, `deploy/`
+* **What they do:** Vitest covers haversine math, state machines, permissions, API security, and cryptography. Playwright covers browser flows. Vercel builds the static Vite frontend, while the API runs from the production Docker image.
 * **Connections:** `npm run test` executes the suite.
-* **Checkpoint:** Understand that any change to business logic (like distances or roles) requires verifying `npm --prefix server test` passes, and the backend deploys independent of the Firebase static hosting.
+* **Checkpoint:** Understand that any change to business logic (like distances or roles) requires verifying `npm --prefix server test` passes, and the frontend and backend deploy independently.

@@ -19,9 +19,8 @@
 
 ```text
 server/src/
-├── config/              # إعدادات البيئة و Firebase
-│   ├── env.js          # قراءة المتغيرات البيئية والتأكد من صحتها
-│   └── firebase.js     # تهيئة Firebase Admin SDK
+├── config/              # إعدادات البيئة
+│   └── env.js          # قراءة المتغيرات البيئية والتأكد من صحتها
 │
 ├── db/                  # طبقة قاعدة البيانات (PostgreSQL / Neon)
 │   ├── pool.js         # الاتصال بقاعدة البيانات + In-Memory Mock Store للتطوير المحلي
@@ -29,7 +28,7 @@ server/src/
 │   └── migrations.js   # مشغل ترحيل المخطط لقاعدة البيانات الحية
 │
 ├── middleware/          # البرمجيات الوسيطة
-│   ├── auth.middleware.js     # فك رموز JWT من Firebase وتحديد الأدوار + مستخدم تجريبي محلي
+│   ├── auth.middleware.js     # التحقق من JWT وتحميل المستخدم وتطبيق الأدوار
 │   ├── validate.middleware.js # التحقق من صحة المدخلات باستخدام Zod
 │   └── error.middleware.js    # معالج الأخطاء المركزي الموحد
 │

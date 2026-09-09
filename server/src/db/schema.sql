@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- 1. USERS TABLE
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    firebase_uid VARCHAR(128) UNIQUE NOT NULL,
+    auth_uid VARCHAR(128) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255),
     display_name VARCHAR(255),
@@ -48,6 +48,20 @@ CREATE TABLE IF NOT EXISTS issues (
     deleted_at TIMESTAMPTZ,
     assigned_to UUID REFERENCES users(id) ON DELETE SET NULL
 );
+
+-- Preserve existing identities while removing the legacy Firebase-specific name.
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'firebase_uid'
+    ) AND NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'auth_uid'
+    ) THEN
+        ALTER TABLE users RENAME COLUMN firebase_uid TO auth_uid;
+    END IF;
+END $$;
 
 ALTER TABLE issues ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
 ALTER TABLE issues ADD COLUMN IF NOT EXISTS assigned_to UUID REFERENCES users(id) ON DELETE SET NULL;
@@ -119,8 +133,8 @@ INSERT INTO categories (id, name, slug, icon, is_active) VALUES
     ('c1000000-0000-0000-0000-000000000006', 'Public Parks & Trees', 'parks-trees', 'Trees', true)
 ON CONFLICT (slug) DO NOTHING;
 
--- SEED DEMO USERS
-INSERT INTO users (id, firebase_uid, email, display_name, role, language, account_status) VALUES
+-- SEED NON-LOGIN DEMO AUTHORS
+INSERT INTO users (id, auth_uid, email, display_name, role, language, account_status) VALUES
     ('a1000000-0000-0000-0000-000000000001', 'demo-resident', 'resident@geoissue.local', 'Demo Resident', 'user', 'en', 'active'),
     ('a1000000-0000-0000-0000-000000000002', 'demo-admin', 'admin@geoissue.local', 'Demo Administrator', 'admin', 'en', 'active')
-ON CONFLICT (firebase_uid) DO NOTHING;
+ON CONFLICT (auth_uid) DO NOTHING;

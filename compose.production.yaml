@@ -25,7 +25,6 @@ services:
       DATABASE_URL: postgresql://geoissue:${POSTGRES_PASSWORD}@postgres:5432/geoissue
       CLIENT_ORIGIN: ${PUBLIC_ORIGIN:?Set PUBLIC_ORIGIN in deploy/.env.production}
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in deploy/.env.production}
-      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-geoissue-4bd94}
       MATCH_RADIUS_METERS: ${MATCH_RADIUS_METERS:-50}
     depends_on:
       postgres:

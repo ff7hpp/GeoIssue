@@ -3,7 +3,6 @@ flowchart LR
   User[Registered User] -->|Report, support, track| GeoIssue
   Reviewer[Reviewer] -->|Review and update issues| GeoIssue
   Admin[Admin] -->|Manage users/roles/categories/audit| GeoIssue
-  GeoIssue <--> Firebase[Firebase Authentication]
   GeoIssue --> OSM[Leaflet / OpenStreetMap]
   GeoIssue <--> Nominatim[Nominatim Geocoding]
   GeoIssue <--> Neon[Neon PostgreSQL]

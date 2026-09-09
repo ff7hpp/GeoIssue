@@ -8,8 +8,8 @@ rankdir=TB; labelloc="t"; label="GeoIssue — Container / Application Architectu
 subgraph cluster_client { label="Client"; color="#E4E4E7"; style="rounded";
   ui [label="React + Vite + JavaScript
 Routes, components, map, forms, dashboards"];
-  authsdk [label="Firebase Client SDK
-Sign in / register / token acquisition"];
+  authsdk [label="JWT Auth State
+Sign in / register / session restoration"];
 }
 subgraph cluster_api { label="Backend API"; color="#E4E4E7"; style="rounded";
   routes [label="Express Routes"];
@@ -21,15 +21,14 @@ Reports • Issues • Matching • Support • Reviewer/Admin"];
   repos [label="Repositories / Data Access"];
   routes -> middleware -> controllers -> services -> repos;
 }
-firebase [label="Firebase Admin / Auth"];
 neon [label="Neon PostgreSQL"];
 nominatim [label="Nominatim"];
 storage [label="Object/Image Storage
 TBD provider", style="rounded,dashed,filled"];
 ui -> routes [label="HTTPS REST / JSON"];
 ui -> authsdk;
-authsdk -> firebase [label="identity"];
-middleware -> firebase [label="verify ID token"];
+authsdk -> routes [label="email/password + Bearer JWT"];
+middleware -> repos [label="load active user"];
 repos -> neon [dir=both];
 services -> nominatim [dir=both, label="server-side geocoding"];
 services -> storage [dir=both, label="image upload/url"];

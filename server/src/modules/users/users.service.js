@@ -2,7 +2,7 @@ import { usersRepository } from "./users.repository.js";
 import { reportsRepository } from "../reports/reports.repository.js";
 import { AppError } from "../../shared/errors.js";
 function withoutPasswordHash(user) {
-  const { password_hash: _, ...safeUser } = user;
+  const { password_hash: _, auth_uid: __, ...safeUser } = user;
   return safeUser;
 }
 const usersService = {

@@ -22,11 +22,11 @@ const authRepository = {
   async create(data) {
     const now = (/* @__PURE__ */ new Date()).toISOString();
     const normalizedEmail = data.email.toLowerCase().trim();
-    const firebaseUid = `local_${crypto.randomUUID()}`;
+    const authUid = `local_${crypto.randomUUID()}`;
     if (isUsingMockDb) {
       const user = {
         id: crypto.randomUUID(),
-        firebase_uid: firebaseUid,
+        auth_uid: authUid,
         email: normalizedEmail,
         password_hash: data.password_hash,
         display_name: data.display_name,
@@ -41,12 +41,12 @@ const authRepository = {
       return user;
     }
     const sql = `
-      INSERT INTO users (firebase_uid, email, password_hash, display_name, role, language, account_status)
+      INSERT INTO users (auth_uid, email, password_hash, display_name, role, language, account_status)
       VALUES ($1, $2, $3, $4, $5, $6, 'active')
       RETURNING *;
     `;
     const res = await query(sql, [
-      firebaseUid,
+      authUid,
       normalizedEmail,
       data.password_hash,
       data.display_name,

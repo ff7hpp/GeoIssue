@@ -2,12 +2,13 @@
 
 ## Scope and verdict
 
-- Review date: 2026-09-07
-- Verified target: local Windows/WSL2 internship demonstration
-- Verdict: **READY for a local demonstration; NOT READY for public production**
-- Runtime: React/Vite, Express, Docker PostgreSQL 16, Leaflet/OpenStreetMap, Nominatim, local JWT auth with optional Firebase
+- Review date: 2026-09-09
+- Branch: `A`
+- Local verdict: **VERIFIED for PostgreSQL-backed testing**
+- Cloud verdict: **BLOCKED pending cost approval and deployment credentials/session**
+- Runtime: React/Vite, Express, PostgreSQL 16, Leaflet/OpenStreetMap, Nominatim, email/password + JWT
 
-## Verified role model
+## Permission model
 
 | Action | Guest | User | Admin |
 |---|---:|---:|---:|
@@ -18,33 +19,33 @@
 | Change issue status/priority/assignee | No | No | Yes |
 | Manage users/categories | No | No | Yes |
 
-Authorization is enforced by the API. Hiding a frontend control is not the security boundary.
+Authorization is enforced by the API. Frontend visibility is not the security boundary.
 
-## Current evidence
+## Evidence
 
 | Area | State | Evidence |
 |---|---|---|
-| Frontend/backend startup | VERIFIED | Vite client and Express API started locally; `/api/health` reported `database: postgresql` |
-| Database | VERIFIED | Docker PostgreSQL on host port 15432; current health and direct SQL queries passed; no migration or seed was run during this verification |
-| Persistent fixtures | VERIFIED | Pre/post checksums matched; exactly 30 fixture reports and 30 mapped issues remain; backup saved before QA writes |
-| Public visibility | VERIFIED | Public API returned only `accepted`, `in_progress`, and `resolved`; 15/30 fixtures public; admin API returned 30/30 |
-| Registration/login/logout/session | VERIFIED | Live local registration/login/logout passed; browser session survived reload; email auth remains usable when Firebase is unavailable |
-| Authorization | VERIFIED | Guest admin access returned 401, user admin access returned 403, cross-user report edit returned 403, owner edit/delete passed |
-| Lifecycle | VERIFIED | Live admin transitions `submitted -> in_review -> accepted` persisted; transition unit tests passed |
-| Geolocation | VERIFIED with simulation | Browser Geolocation API coordinates and reported ±18 m accuracy rendered; strict coordinate validation and manual pin fallback are present |
-| Physical-device location | NOT TESTED | Requires the user's device, location services, browser permission, and HTTPS when accessed by LAN IP |
-| Map/database integration | VERIFIED | Browser loaded real API issue cards and Leaflet markers; no hardcoded issue marker data |
-| Automated checks | VERIFIED | Server: 39/39 against isolated in-memory test storage; Chromium: 15/15; production build passed |
-| Google sign-in | BLOCKED | Web configuration exists, but a real Google account flow, authorized origins, and Firebase Admin credential path were not available for verification |
-| Dependency audit | PARTIAL | Client: 0 known vulnerabilities; server: 11 moderate, 0 high, 0 critical |
+| Build | VERIFIED | Server syntax check and Vite production build passed |
+| Automated backend tests | VERIFIED | 48/48 Vitest tests passed against PostgreSQL |
+| Database | VERIFIED | `/api/health` reported `database: postgresql` |
+| Migration safety | VERIFIED | User/report/issue counts matched before and after `firebase_uid -> auth_uid` rename |
+| Backup/restore | VERIFIED | Fresh dump restored into an isolated PostgreSQL 16 container; counts matched |
+| Registration/login/logout/session | VERIFIED | Real browser registration, reload restoration, logout, and re-login passed |
+| Password storage | VERIFIED | New scrypt hashes and legacy PBKDF2 upgrade test passed; plaintext is not stored |
+| User persistence | VERIFIED | Browser-created user logged in through a second API process |
+| Report persistence | VERIFIED | Browser-created report appeared in My Reports after logout/login and through a second API process |
+| Backend authorization | VERIFIED | Missing token 401, regular user admin access 403, admin endpoint tests passed |
+| Geolocation implementation | VERIFIED with simulation | High-accuracy request, accuracy radius, errors, and manual pin fallback are covered |
+| Physical-device GPS | NOT VERIFIED | Requires the target phone/laptop, permission, location services, and deployed HTTPS |
+| Public cloud URLs | BLOCKED | No cloud resource was started or created before cost approval |
+| Dependencies | PARTIAL | Client 0 advisories; server 5 moderate advisories; no forced upgrade applied |
 
-## Production blockers
+## Remaining limitations
 
-- Configure and exercise a real Google account, authorized origins, and Firebase Admin credentials before claiming Google sign-in support.
-- Replace local demo identity tokens with a production-safe demo/account policy; production already disables them.
-- Add TLS, stable origin configuration, structured logs, monitoring, backup/restore, and rollback evidence.
-- Resolve or accept the 11 moderate server dependency advisories after testing compatible Firebase/Google dependency upgrades.
-- Split the client JavaScript bundle (about 756 kB minified, 208 kB gzip) if performance targets require it.
-- Perform physical mobile GPS and permission-denied/unavailable/timeout checks; simulation cannot prove device hardware accuracy.
+- JWT is stored in `localStorage`; this is acceptable for the short test environment but raises impact if an XSS defect exists.
+- Existing legacy users without password hashes remain preserved but cannot use password login until an administrator securely assigns a password.
+- Cloud Run/managed database cold starts can delay the first request.
+- Physical GPS accuracy depends on the device and environment; the application cannot guarantee a specific accuracy.
+- The Vite bundle still emits a chunk-size warning.
 
-No critical or high-severity defect is known in the verified local demonstration path. This statement does not certify production readiness.
+See [CLOUD_TESTING.md](CLOUD_TESTING.md) for the cost gate, deployment plan, rollback, and shutdown checklist.

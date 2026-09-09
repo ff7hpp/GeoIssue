@@ -7,23 +7,22 @@ This document describes the code and local development flow as implemented. It d
 ```mermaid
 flowchart TD
   U[User] --> M[Auth modal]
-  M --> F{Firebase email, Google, or native account?}
-  F -->|Firebase| FT[Firebase ID token]
-  F -->|Native| NJ[GeoIssue signed JWT]
-  FT --> H[Authorization Bearer token]
-  NJ --> H
-  H --> A[Express authenticate middleware]
-  A --> V{Valid Firebase token or valid JWT?}
+  M --> C[Email and password]
+  C --> API[Express auth API]
+  API --> DB[(PostgreSQL users)]
+  DB --> H[GeoIssue signed JWT]
+  H --> B[Authorization Bearer token]
+  B --> A[Express authenticate middleware]
+  A --> V{Valid JWT and active database user?}
   V -->|No| E[Safe user-facing error]
-  V -->|Yes| DB[(Users table)]
-  DB --> S[Authenticated user state]
+  V -->|Yes| S[Authenticated user state]
   S --> P[Protected reports, support, profile, admin routes]
 ```
 
-- Firebase ID tokens require `FIREBASE_PROJECT_ID` on the API. The client uses the Firebase web configuration.
-- Native email/password accounts use a PBKDF2 password hash and a seven-day signed JWT.
-- The token is stored in `localStorage`, refreshed from Firebase when applicable, sent as `Authorization: Bearer <token>`, and cleared with React Query data on logout.
+- Email/password accounts use a versioned scrypt password hash and a seven-day signed JWT. Valid legacy PBKDF2 hashes are upgraded after successful login.
+- The token is stored in `localStorage`, sent as `Authorization: Bearer <token>`, and cleared with React Query data on logout.
 - Auth state restores with `/api/auth/me`; the admin route waits for auth restoration before deciding access.
+- The API reloads the current database user for every authenticated request, so role/status changes take effect without trusting JWT role claims.
 
 ## Report, image, and issue flow
 
@@ -64,16 +63,17 @@ flowchart TD
 
 `seed:dev` is blocked in production and requires `DATABASE_URL`. It creates 30 issues and reports across six existing categories, six statuses, coordinates around Istanbul, and three development residents. It is idempotent by fixture IDs and moves legacy out-of-city records to Istanbul.
 
-## Verification record — 2026-09-05
+## Verification record — 2026-09-09
 
 | Area | Evidence | Result |
 |---|---|---|
-| Firebase/new native auth, refresh, logout, re-login | Browser flow and protected `/api/auth/me` | PASS |
-| PostgreSQL data | health reported PostgreSQL; migration and `seed:dev` completed | PASS |
-| Explore/map | 39 API issues and 39 Leaflet markers in browser | PASS |
+| PostgreSQL email auth, refresh, logout, re-login | Real browser flow and protected `/api/auth/me` | PASS |
+| PostgreSQL data | health reported PostgreSQL; identity-column migration preserved row counts | PASS |
+| Backup/restore | Fresh custom-format dump restored into isolated PostgreSQL 16 container with matching counts | PASS |
+| Explore/map | Real API issue cards and Leaflet markers loaded in browser | PASS |
 | GPS | Simulated high-accuracy result, denied, unavailable, timeout, and manual selection | PASS |
 | Image persistence | JPEG data URL submitted with HTTP 201, displayed after refresh, confirmed in PostgreSQL | PASS |
 | Responsive layout | 128 checks across 16 widths and 8 screens; no overflow after fixes | PASS |
-| Build/tests | server build; 36 Vitest tests; client build; 7 Playwright tests | PASS |
+| Build/tests | server/client production build; 48 Vitest tests | PASS |
 
-The later automated regression run fell back to memory data because the local Docker PostgreSQL container was stopped. That run still passed; use the three database commands above before a new PostgreSQL-backed session.
+Cloud URLs and physical-device GPS remain unverified until the cost-gated deployment is approved and created.

@@ -110,7 +110,7 @@ function seedMockData() {
   defaultCategories.forEach((cat) => mockStore.categories.set(cat.id, cat));
   const adminUser = {
     id: "u1000000-0000-0000-0000-000000000001",
-    firebase_uid: "admin_demo_uid_123",
+    auth_uid: "admin_demo_uid_123",
     email: "admin@geoissue.org",
     display_name: "Lead Admin",
     role: "admin",
@@ -122,7 +122,7 @@ function seedMockData() {
   mockStore.users.set(adminUser.id, adminUser);
   const citizenUser = {
     id: "u1000000-0000-0000-0000-000000000002",
-    firebase_uid: "citizen_demo_uid_456",
+    auth_uid: "citizen_demo_uid_456",
     email: "citizen@geoissue.org",
     display_name: "Tariq Al-Mansoor",
     role: "user",

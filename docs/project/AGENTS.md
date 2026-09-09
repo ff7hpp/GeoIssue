@@ -14,14 +14,13 @@ These instructions are the project source of truth for AI agents and future deve
 ## Repository layout
 
 ```text
-client/                                   React 19 + Vite + JavaScript frontend
+client/                                   React 18 + Vite + JavaScript frontend
 client/src/app/router.jsx                 React Router route definitions
 client/src/components/                    Shared UI components (map, badges, layout)
 client/src/features/                      Page-level feature modules (issues, reports, admin, auth)
 client/src/locales/                       i18n translation files (ar, en, tr) and i18n config
 client/src/services/api.js               Frontend API client (all fetch calls to the backend)
-client/src/services/auth.context.jsx     Hybrid Firebase + JWT auth state provider
-client/src/services/firebase.js          Firebase SDK initialization (Auth only, free tier)
+client/src/services/auth.context.jsx     PostgreSQL email/password + JWT auth state provider
 client/src/services/imageUpload.js       Client-side canvas image compression (no paid storage)
 client/src/styles/                        CSS design tokens and component styles
 
@@ -29,11 +28,10 @@ server/                                   Express 4 + JavaScript modular monolit
 server/src/app.js                         Express application setup and route registration
 server/src/server.js                      Server bootstrap and database initialization
 server/src/config/env.js                 Environment variable validation
-server/src/config/firebase.js            Firebase Admin SDK initialization
 server/src/db/pool.js                     PostgreSQL pool and in-memory fallback store
 server/src/db/schema.sql                 Database schema (tables, indexes, constraints)
 server/src/db/migrations.js             Migration runner script
-server/src/middleware/auth.middleware.js  Authentication (Firebase + JWT + dev mock) and RBAC
+server/src/middleware/auth.middleware.js  JWT authentication, active-user checks, and RBAC
 server/src/middleware/validate.middleware.js  Zod request body validation
 server/src/middleware/error.middleware.js    Global error handler
 server/src/modules/                       Feature modules (auth, issues, reports, comments, etc.)

@@ -1,30 +1,68 @@
 import crypto from "crypto";
 import { config } from "../config/env.js";
 const JWT_SECRET = config.jwtSecret;
-async function hashPassword(password) {
+const SCRYPT_COST = 16384;
+const SCRYPT_BLOCK_SIZE = 8;
+const SCRYPT_PARALLELIZATION = 1;
+const KEY_LENGTH = 64;
+
+function deriveScryptKey(password, salt, cost, blockSize, parallelization) {
   return new Promise((resolve, reject) => {
-    const salt = crypto.randomBytes(16).toString("hex");
-    crypto.pbkdf2(password, salt, 1e4, 64, "sha512", (err, derivedKey) => {
-      if (err) return reject(err);
-      resolve(`${salt}:${derivedKey.toString("hex")}`);
-    });
+    crypto.scrypt(
+      password,
+      salt,
+      KEY_LENGTH,
+      { N: cost, r: blockSize, p: parallelization, maxmem: 64 * 1024 * 1024 },
+      (err, derivedKey) => err ? reject(err) : resolve(derivedKey)
+    );
   });
 }
+
+async function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const derivedKey = await deriveScryptKey(
+    password,
+    salt,
+    SCRYPT_COST,
+    SCRYPT_BLOCK_SIZE,
+    SCRYPT_PARALLELIZATION
+  );
+  return `scrypt$${SCRYPT_COST}$${SCRYPT_BLOCK_SIZE}$${SCRYPT_PARALLELIZATION}$${salt}$${derivedKey.toString("hex")}`;
+}
 async function verifyPassword(password, storedHash) {
-  return new Promise((resolve, reject) => {
+  try {
+    if (storedHash.startsWith("scrypt$")) {
+      const [algorithm, cost, blockSize, parallelization, salt, key] = storedHash.split("$");
+      if (algorithm !== "scrypt" || !salt || !key) return false;
+      const derivedKey = await deriveScryptKey(
+        password,
+        salt,
+        Number(cost),
+        Number(blockSize),
+        Number(parallelization)
+      );
+      const keyBuffer = Buffer.from(key, "hex");
+      return keyBuffer.length === derivedKey.length && crypto.timingSafeEqual(keyBuffer, derivedKey);
+    }
+
+    // Backward compatibility for existing PBKDF2 hashes. A successful login upgrades them.
     const [salt, key] = storedHash.split(":");
-    if (!salt || !key) return resolve(false);
-    crypto.pbkdf2(password, salt, 1e4, 64, "sha512", (err, derivedKey) => {
-      if (err) return reject(err);
-      try {
-        const keyBuffer = Buffer.from(key, "hex");
-        const match = crypto.timingSafeEqual(keyBuffer, derivedKey);
-        resolve(match);
-      } catch {
-        resolve(false);
-      }
+    if (!salt || !key) return false;
+    const derivedKey = await new Promise((resolve, reject) => {
+      crypto.pbkdf2(password, salt, 1e4, KEY_LENGTH, "sha512", (err, value) => {
+        if (err) reject(err);
+        else resolve(value);
+      });
     });
-  });
+    const keyBuffer = Buffer.from(key, "hex");
+    return keyBuffer.length === derivedKey.length && crypto.timingSafeEqual(keyBuffer, derivedKey);
+  } catch {
+    return false;
+  }
+}
+
+function needsPasswordRehash(storedHash) {
+  return !storedHash.startsWith(`scrypt$${SCRYPT_COST}$${SCRYPT_BLOCK_SIZE}$${SCRYPT_PARALLELIZATION}$`);
 }
 function generateToken(payload, expiresInSeconds = 7 * 24 * 60 * 60) {
   const header = { alg: "HS256", typ: "JWT" };
@@ -60,6 +98,7 @@ function verifyToken(token) {
 export {
   generateToken,
   hashPassword,
+  needsPasswordRehash,
   verifyPassword,
   verifyToken
 };

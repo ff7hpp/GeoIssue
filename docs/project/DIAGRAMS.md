@@ -10,6 +10,8 @@ Each diagram is provided as:
 - `.mmd` — editable Mermaid source (GitHub can render Mermaid in Markdown).
 - `.dot` — Graphviz source used to produce the SVG/PNG files.
 
+The `.mmd` and `.dot` sources reflect the current PostgreSQL/JWT authentication flow. The rendered SVG/PNG exports remain the original handoff snapshots until Graphviz is available and they are regenerated.
+
 ## Diagrams
 
 1. **01_System_Context** — Actors and external systems around GeoIssue.
@@ -34,7 +36,7 @@ The following are directly supported by the uploaded handoff:
 - Core flow: map → report → validate identity/input → find nearby similar issue → attach or create → review → process → close.
 - Frontend: React + Vite + JavaScript.
 - Backend: Node.js + Express + JavaScript.
-- Auth: Firebase Authentication + Firebase Admin verification.
+- Auth: PostgreSQL email/password + signed JWT verification.
 - Database: Neon PostgreSQL.
 - Map: Leaflet + OpenStreetMap.
 - Geocoding: Nominatim via backend.

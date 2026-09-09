@@ -4,7 +4,7 @@ import { AppError } from "../shared/errors.js";
 describe("Server Role Permission Middleware", () => {
   const visitorUser = {
     id: "u-1",
-    firebase_uid: "f-1",
+    auth_uid: "local-1",
     email: "visitor@example.com",
     display_name: "Visitor",
     role: "visitor",
@@ -15,7 +15,7 @@ describe("Server Role Permission Middleware", () => {
   };
   const regularUser = {
     id: "u-2",
-    firebase_uid: "f-2",
+    auth_uid: "local-2",
     email: "user@example.com",
     display_name: "Citizen",
     role: "user",
@@ -26,7 +26,7 @@ describe("Server Role Permission Middleware", () => {
   };
   const adminUser = {
     id: "u-3",
-    firebase_uid: "f-3",
+    auth_uid: "local-3",
     email: "admin@example.com",
     display_name: "Admin",
     role: "admin",

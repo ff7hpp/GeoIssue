@@ -15,7 +15,7 @@ async function runMigrations() {
   });
   try {
     await client.connect();
-    console.log("Connected to Neon PostgreSQL database.");
+    console.log("Connected to PostgreSQL database.");
     console.log("Running database schema migrations...");
     const currentDir = path.dirname(fileURLToPath(import.meta.url));
     const schemaPath = path.join(currentDir, "schema.sql");

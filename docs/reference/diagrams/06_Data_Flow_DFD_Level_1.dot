@@ -10,8 +10,6 @@ user [label="External Entity
 User / Visitor"];
 reviewer [label="External Entity
 Reviewer / Admin"];
-firebase [label="External System
-Firebase Auth"];
 nominatim [label="External System
 Nominatim"];
 storage [label="External System
@@ -27,8 +25,7 @@ node [shape=cylinder, fillcolor="#FFFFFF"];
 db [label="D1 Neon PostgreSQL
 users • issues • reports • supporters • history • audit"];
 user -> p1 [label="credentials / token"];
-p1 -> firebase [dir=both, label="identity"];
-p1 -> db [label="sync app user"];
+p1 -> db [dir=both, label="verify password / load user"];
 user -> p2 [label="filters / issue id"]; p2 -> db [dir=both, label="public-safe issue data"]; p2 -> user [label="map/list/details"];
 user -> p3 [label="report data + location + optional image"]; p3 -> p1 [label="verify identity"];
 p3 -> nominatim [dir=both, label="geocode/reverse geocode"];

@@ -60,16 +60,16 @@ try {
   const residents = [];
   for (let index = 0; index < 3; index++) {
     const user = await client.query(
-      `INSERT INTO users (firebase_uid, email, display_name, role)
+      `INSERT INTO users (auth_uid, email, display_name, role)
        VALUES ($1, $2, $3, 'user')
-       ON CONFLICT (firebase_uid) DO NOTHING
+       ON CONFLICT (auth_uid) DO NOTHING
        RETURNING id`,
       [`seed-fixture-resident-${index + 1}`, `seed-fixture-resident-${index + 1}@example.invalid`, `Fixture Resident ${index + 1}`]
     );
     if (user.rows[0]) {
       residents.push(user.rows[0].id);
     } else {
-      const existing = await client.query("SELECT id FROM users WHERE firebase_uid = $1", [`seed-fixture-resident-${index + 1}`]);
+      const existing = await client.query("SELECT id FROM users WHERE auth_uid = $1", [`seed-fixture-resident-${index + 1}`]);
       residents.push(existing.rows[0].id);
     }
   }

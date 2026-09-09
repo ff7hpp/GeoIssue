@@ -1,7 +1,7 @@
 flowchart TB
   subgraph Client
     UI[React + Vite + JavaScript]
-    AuthSDK[Firebase Client SDK]
+    AuthState[JWT Auth State]
   end
   subgraph API[Node.js + Express + JavaScript]
     Routes --> Middleware[Auth / Validation / Authorization / Rate Limit / Error Handling]
@@ -9,8 +9,8 @@ flowchart TB
     Services --> Repositories[Repositories / Data Access]
   end
   UI -->|HTTPS REST/JSON| Routes
-  UI --> AuthSDK --> Firebase[Firebase Auth]
-  Middleware -->|Verify ID token| Firebase
+  UI --> AuthState -->|Email/password + Bearer JWT| Routes
+  Middleware -->|Load active user| Repositories
   Repositories <--> Neon[Neon PostgreSQL]
   Services <--> Nominatim[Nominatim]
   Services <--> Storage[Object/Image Storage — TBD]

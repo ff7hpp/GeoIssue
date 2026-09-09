@@ -1,5 +1,10 @@
 import { authRepository } from "./auth.repository.js";
-import { hashPassword, verifyPassword, generateToken } from "../../shared/auth.utils.js";
+import {
+  generateToken,
+  hashPassword,
+  needsPasswordRehash,
+  verifyPassword
+} from "../../shared/auth.utils.js";
 import { AppError } from "../../shared/errors.js";
 const authService = {
   async register(data) {
@@ -20,30 +25,36 @@ const authService = {
       email: user.email,
       role: user.role
     });
-    const { password_hash: _, ...safeUser } = user;
+    const { password_hash: _, auth_uid: __, ...safeUser } = user;
     return { user: safeUser, token };
   },
   async login(data) {
     const user = await authRepository.findByEmail(data.email);
-    if (!user) {
-      throw AppError.unauthenticated("Invalid email or password");
-    }
-    if (user.account_status === "suspended") {
-      throw AppError.forbidden("Your account has been suspended. Please contact support.");
-    }
-    if (!user.password_hash) {
+    if (!user || !user.password_hash) {
+      await hashPassword(data.password);
       throw AppError.unauthenticated("Invalid email or password");
     }
     const isValid = await verifyPassword(data.password, user.password_hash);
     if (!isValid) {
       throw AppError.unauthenticated("Invalid email or password");
     }
+    if (user.account_status === "suspended") {
+      throw AppError.forbidden("Your account has been suspended. Please contact support.");
+    }
+    if (user.account_status !== "active") {
+      throw AppError.forbidden("Your account is not active. Please contact support.");
+    }
+    if (needsPasswordRehash(user.password_hash)) {
+      await authRepository.updateProfile(user.id, {
+        password_hash: await hashPassword(data.password)
+      });
+    }
     const token = generateToken({
       id: user.id,
       email: user.email,
       role: user.role
     });
-    const { password_hash: _, ...safeUser } = user;
+    const { password_hash: _, auth_uid: __, ...safeUser } = user;
     return { user: safeUser, token };
   },
   async getMe(userId) {
@@ -51,7 +62,7 @@ const authService = {
     if (!user) {
       throw AppError.notFound("User not found");
     }
-    const { password_hash: _, ...safeUser } = user;
+    const { password_hash: _, auth_uid: __, ...safeUser } = user;
     return safeUser;
   },
   async updateProfile(userId, data) {
@@ -81,7 +92,7 @@ const authService = {
     if (!updated) {
       throw AppError.internal("Failed to update profile");
     }
-    const { password_hash: _, ...safeUser } = updated;
+    const { password_hash: _, auth_uid: __, ...safeUser } = updated;
     return safeUser;
   }
 };

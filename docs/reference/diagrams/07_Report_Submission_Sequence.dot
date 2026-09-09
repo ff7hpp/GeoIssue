@@ -6,8 +6,8 @@ digraph G {
 
 rankdir=TB; labelloc="t"; label="GeoIssue — Report Submission Sequence"; fontsize=20;
 node [shape=box];
-actors [label="Browser → Firebase → Express API → Validation/Auth → Matching Service → Neon → Storage/Nominatim", fillcolor="#F4F4F5"];
-s1 [label="1. User signs in; browser receives Firebase ID token"];
+actors [label="Browser → Express API → Validation/Auth → Matching Service → PostgreSQL → Storage/Nominatim", fillcolor="#F4F4F5"];
+s1 [label="1. User signs in; API verifies password and returns a signed JWT"];
 s2 [label="2. User chooses location and fills report form"];
 s3 [label="3. Browser calls POST /api/reports with Bearer token"];
 s4 [label="4. API verifies token and server-side authorization"];

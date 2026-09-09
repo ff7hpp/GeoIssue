@@ -15,8 +15,6 @@ Review issues, change status and priority"];
 admin [label="Admin
 Manage users, roles, categories and audit logs"];
 geo [label="GeoIssue Platform", shape=box, penwidth=2, fillcolor="#F4F4F5"];
-firebase [label="Firebase Authentication
-Email/password identity"];
 map [label="OpenStreetMap / Leaflet
 Map tiles and client map UI"];
 nominatim [label="Nominatim
@@ -29,7 +27,6 @@ visitor -> geo [label="view"];
 user -> geo [label="use"];
 reviewer -> geo [label="review"];
 admin -> geo [label="administer"];
-geo -> firebase [dir=both, label="authenticate / verify token"];
 geo -> map [label="render map"];
 geo -> nominatim [dir=both, label="geocode"];
 geo -> neon [dir=both, label="read/write"];

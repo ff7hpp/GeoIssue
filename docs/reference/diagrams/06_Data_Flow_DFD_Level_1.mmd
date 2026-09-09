@@ -1,6 +1,5 @@
 flowchart LR
   User[User / Visitor] --> P1((1. Authentication & Identity))
-  P1 <--> Firebase[Firebase Auth]
   P1 --> DB[(Neon PostgreSQL)]
   User --> P2((2. Public Issue Query))
   P2 <--> DB
