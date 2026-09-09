@@ -3,7 +3,9 @@ steps:
     args:
       - build
       - --file
-      - deploy/Dockerfile.api
+      - Dockerfile
+      - --target
+      - api
       - --tag
       - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/geoissue-api:$BUILD_ID
       - .
